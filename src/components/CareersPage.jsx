@@ -1,273 +1,347 @@
 import { useState } from 'react';
-import { Briefcase, MapPin, Clock, Check, Send, CheckCircle2, Loader2, X } from 'lucide-react';
+import { 
+  Code, Smartphone, Palette, Cloud, Send, 
+  CheckCircle2, MapPin, X, AlertCircle 
+} from 'lucide-react';
+import { api } from '../services/api';
+import { useCms } from '../context/CmsContext';
 
 export default function CareersPage() {
-  const [selectedDept, setSelectedDept] = useState('all');
-  const [activeJobId, setActiveJobId] = useState(null);
-  const [appliedJob, setAppliedJob] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(false);
-  
-  const [appForm, setAppForm] = useState({ name: '', email: '', phone: '', linkedin: '', resume: null });
+  const { careers: dynamicCareers } = useCms();
 
-  const jobs = [
+  const [isResumeModalOpen, setIsResumeModalOpen] = useState(false);
+  const [resumeForm, setResumeForm] = useState({
+    fullName: '',
+    email: '',
+    phone: '',
+    expertise: 'Full-Stack Web Development',
+    linkedinOrPortfolio: '',
+    message: ''
+  });
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const defaultFocusAreas = [
     {
-      id: 1,
-      title: 'Lead AI Research Engineer',
-      dept: 'engineering',
-      location: 'Singapore (Hybrid)',
-      type: 'Full-Time',
-      experience: '6+ Years',
-      salary: '₹35L - ₹50L P.A.',
-      summary: 'Lead developer sprints focused on multi-agent cognitive loops, private LLM fine-tuning, and scalable RAG indexing databases.',
-      requirements: [
-        'Strong background in PyTorch, HuggingFace tools, and LangChain/LlamaIndex frameworks.',
-        'Experience deploying custom transformer models inside security-hardened container networks.',
-        'MS or PhD in Computer Science, Machine Learning, or related field.'
-      ]
+      title: 'Full-Stack Web Development',
+      icon: Code,
+      desc: 'Building responsive web platforms, modern frontend applications, and clean backend API services using React, Node.js, and modern ecosystems.'
     },
     {
-      id: 2,
-      title: 'Senior DevSecOps Orchestrator',
-      dept: 'security',
-      location: 'Seattle, USA (Hybrid)',
-      type: 'Full-Time',
-      experience: '5+ Years',
-      salary: '₹28L - ₹40L P.A.',
-      summary: 'Design and deploy automated security verification networks and infrastructure-as-code scripts for multi-cloud deployments.',
-      requirements: [
-        'Deep command of Terraform, Docker, Kubernetes, and GitLab CI/CD systems.',
-        'Experience aligning cloud deployments with ISO 27001, SOC 2, or HIPAA compliance metrics.',
-        'Active certification in AWS Security or Certified Kubernetes Administrator (CKA).'
-      ]
+      title: 'Mobile App Development',
+      icon: Smartphone,
+      desc: 'Crafting performant cross-platform and native mobile applications for Android and iOS using Flutter or React Native.'
     },
     {
-      id: 3,
-      title: 'Enterprise Solutions Architect',
-      dept: 'solutions',
-      location: 'London, UK (Hybrid)',
-      type: 'Full-Time',
-      experience: '7+ Years',
-      salary: '₹40L - ₹60L P.A.',
-      summary: 'Direct client-facing consulting, mapping complex corporate software structures, and drafting technical architecture outlines.',
-      requirements: [
-        'Proven track record leading massive migration or API unification schedules for enterprise clients.',
-        'Strong architecture design credentials (AWS Certified Solutions Architect Professional or equivalent).',
-        'Exceptional stakeholder presentation and technical writing capabilities.'
-      ]
+      title: 'UI/UX & Interface Design',
+      icon: Palette,
+      desc: 'Designing intuitive user experiences, wireframes, high-fidelity mockups, and modular design systems using Figma.'
+    },
+    {
+      title: 'Backend & Cloud Engineering',
+      icon: Cloud,
+      desc: 'Architecting relational and NoSQL databases, RESTful web services, automated deployment pipelines, and cloud hosting setups.'
     }
   ];
 
-  const handleApplyClick = (job) => {
-    setAppliedJob(job);
-    setSubmitSuccess(false);
-  };
+  const focusAreas = dynamicCareers && dynamicCareers.length > 0 
+    ? dynamicCareers.map(c => ({
+        id: c.id,
+        title: c.title,
+        icon: c.title.toLowerCase().includes('mobile') ? Smartphone : c.title.toLowerCase().includes('design') ? Palette : c.title.toLowerCase().includes('cloud') ? Cloud : Code,
+        desc: c.description,
+        location: c.location || 'India (Remote / Hybrid)',
+        type: c.type || 'Full-Time',
+        requirements: c.requirements
+      }))
+    : defaultFocusAreas;
+
+  const cultureValues = [
+    {
+      title: 'Clean Engineering Focus',
+      desc: 'We value code readability, automated testing, and thoughtful software architecture over rushed shortcuts.'
+    },
+    {
+      title: 'Direct Ownership',
+      desc: 'Engineers and designers have a meaningful voice in project decisions and direct impact on real business outcomes.'
+    },
+    {
+      title: 'Continuous Learning',
+      desc: 'Work with modern frameworks, solve diverse engineering challenges, and expand your technical skill set.'
+    },
+    {
+      title: 'Respectful Collaboration',
+      desc: 'A collaborative, transparent work culture with healthy communication and respect for work-life balance.'
+    }
+  ];
 
   const handleFormChange = (e) => {
-    setAppForm({ ...appForm, [e.target.name]: e.target.value });
+    setResumeForm({ ...resumeForm, [e.target.name]: e.target.value });
+    if (errorMessage) setErrorMessage(null);
   };
 
-  const handleApplySubmit = (e) => {
+  const handleSubmitResume = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      await api.submitCareerApplication({
+        fullName: resumeForm.fullName,
+        email: resumeForm.email,
+        phone: resumeForm.phone,
+        role: resumeForm.expertise,
+        experience: 'Online Application',
+        portfolioUrl: resumeForm.linkedinOrPortfolio,
+        notes: resumeForm.message
+      });
+      setSubmitted(true);
+    } catch (err) {
+      console.error('Career application submission error:', err);
+      setErrorMessage(err.message || 'Submission failed. Please check your details and try again.');
+    } finally {
       setIsSubmitting(false);
-      setSubmitSuccess(true);
-    }, 1500);
+    }
   };
 
-  const filteredJobs = selectedDept === 'all' 
-    ? jobs 
-    : jobs.filter(j => j.dept === selectedDept);
+  const handleCloseModal = () => {
+    setIsResumeModalOpen(false);
+    setSubmitted(false);
+    setResumeForm({
+      fullName: '',
+      email: '',
+      phone: '',
+      expertise: 'Full-Stack Web Development',
+      linkedinOrPortfolio: '',
+      message: ''
+    });
+  };
 
   return (
-    <div className="careers-page-wrapper">
-      <div className="grid-overlay"></div>
+    <div className="careers-root">
       
-      {/* Hero Recruitment Banner */}
-      <div className="careers-hero container">
-        <div className="badge">Careers at OmNetaTech</div>
-        <h1 className="careers-hero-title">
-          Build the Infrastructure of <br />
-          <span className="text-gradient">Tomorrow</span>
-        </h1>
-        <p className="careers-hero-sub">
-          We are seeking systems thinkers, security specialists, and machine learning researchers. Join a team dedicated to engineering high-availability corporate architectures and next-gen AI pipelines.
-        </p>
-      </div>
-
-      {/* Open Openings Portal */}
-      <section className="open-positions container">
-        <div className="positions-header">
-          <h2 className="pos-title">Open Positions</h2>
-          
-          {/* Department Filter buttons */}
-          <div className="dept-tabs">
-            <button className={`dept-btn ${selectedDept === 'all' ? 'active' : ''}`} onClick={() => setSelectedDept('all')}>All Roles</button>
-            <button className={`dept-btn ${selectedDept === 'engineering' ? 'active' : ''}`} onClick={() => setSelectedDept('engineering')}>AI Engineering</button>
-            <button className={`dept-btn ${selectedDept === 'security' ? 'active' : ''}`} onClick={() => setSelectedDept('security')}>Cybersecurity</button>
-            <button className={`dept-btn ${selectedDept === 'solutions' ? 'active' : ''}`} onClick={() => setSelectedDept('solutions')}>Solutions & Architecture</button>
+      {/* Hero */}
+      <section className="careers-hero-section section-white">
+        <div className="container careers-hero-inner">
+          <div className="badge">Join Our Team</div>
+          <h1 className="careers-hero-title">Career Opportunities</h1>
+          <p className="careers-hero-lead">
+            We're always interested in connecting with talented developers, designers and technology professionals.
+          </p>
+          <div className="careers-cta-row">
+            <button 
+              className="btn-primary-blue"
+              onClick={() => setIsResumeModalOpen(true)}
+            >
+              <span>Send Your Resume</span>
+              <Send size={16} />
+            </button>
+            <a href="mailto:omnetatech@gmail.com" className="btn-secondary-outline">
+              <span>Email omnetatech@gmail.com</span>
+            </a>
           </div>
-        </div>
-
-        {/* Jobs Card Grid */}
-        <div className="jobs-list">
-          {filteredJobs.map((job) => (
-            <div key={job.id} className="job-card shadow-md">
-              <div className="job-header">
-                <div className="job-info-left">
-                  <h3 className="job-title-h3">{job.title}</h3>
-                  <div className="job-tags">
-                    <span className="job-tag-item"><MapPin size={12} /> {job.location}</span>
-                    <span className="job-tag-item"><Clock size={12} /> {job.type}</span>
-                    <span className="job-tag-item"><Briefcase size={12} /> {job.experience}</span>
-                  </div>
-                </div>
-                <div className="job-salary">{job.salary}</div>
-              </div>
-
-              <p className="job-summary-p">{job.summary}</p>
-
-              {/* Show requirements if details opened */}
-              {activeJobId === job.id && (
-                <div className="job-requirements-drawer">
-                  <h4 className="req-title">Core Candidate Parameters:</h4>
-                  <ul className="req-list">
-                    {job.requirements.map((req, idx) => (
-                      <li key={idx} className="req-item">
-                        <Check size={14} className="req-check-icon" />
-                        <span>{req}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              <div className="job-actions-row">
-                <button 
-                  className="btn-details-toggle"
-                  onClick={() => setActiveJobId(activeJobId === job.id ? null : job.id)}
-                >
-                  {activeJobId === job.id ? 'Hide Specifications' : 'View Specifications'}
-                </button>
-                <button className="btn-apply-job" onClick={() => handleApplyClick(job)}>
-                  Apply Online
-                </button>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
-      {/* Jobs Application Modal Form */}
-      {appliedJob && (
-        <div className="modal-backdrop" onClick={() => setAppliedJob(null)}>
-          <div className="modal-content shadow-premium" onClick={(e) => e.stopPropagation()}>
-            <div className="modal-header">
-              <div className="modal-header-badge">Online Candidate Portal</div>
-              <h3 className="modal-title">Application: {appliedJob.title}</h3>
-              <button className="btn-close-modal" onClick={() => setAppliedJob(null)}>
+      {/* Talent Areas */}
+      <section className="section section-light">
+        <div className="container">
+          <div className="section-header">
+            <div className="badge">Areas of Interest</div>
+            <h2 className="section-title">Roles & Technical Domains</h2>
+            <p className="section-subtitle">
+              Whether you are an experienced software engineer, mobile developer, or UI/UX designer based in India, we would love to hear from you.
+            </p>
+          </div>
+
+          <div className="focus-areas-grid">
+            {focusAreas.map((area, idx) => {
+              const Icon = area.icon;
+              return (
+                <div key={idx} className="focus-area-card shadow-sm">
+                  <div className="focus-icon-box">
+                    <Icon size={22} />
+                  </div>
+                  <h3 className="focus-area-title">{area.title}</h3>
+                  <p className="focus-area-desc">{area.desc}</p>
+                  <div className="focus-location-pill">
+                    <MapPin size={13} />
+                    <span>India (Remote / Hybrid)</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* Why Work With OmNetaTech */}
+      <section className="section section-white">
+        <div className="container">
+          <div className="section-header">
+            <div className="badge">Our Culture</div>
+            <h2 className="section-title">Why Build Your Career at OmNetaTech?</h2>
+            <p className="section-subtitle">
+              We provide an environment where engineers and designers do meaningful work, learn modern methodologies, and build lasting software.
+            </p>
+          </div>
+
+          <div className="culture-values-grid">
+            {cultureValues.map((v, i) => (
+              <div key={i} className="culture-card shadow-sm">
+                <div className="culture-num">0{i + 1}</div>
+                <h3 className="culture-title">{v.title}</h3>
+                <p className="culture-desc">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Resume Modal */}
+      {isResumeModalOpen && (
+        <div className="resume-modal-backdrop" onClick={handleCloseModal}>
+          <div className="resume-modal-body shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="resume-modal-header">
+              <div>
+                <div className="badge">Candidate Contact</div>
+                <h3 className="modal-title">Send Your Resume</h3>
+              </div>
+              <button className="modal-close-btn" onClick={handleCloseModal} aria-label="Close modal">
                 <X size={20} />
               </button>
             </div>
 
-            {!submitSuccess ? (
-              <form className="modal-step-body" onSubmit={handleApplySubmit}>
-                <div className="form-grid">
-                  <div className="form-field">
-                    <label className="field-label">Full Name *</label>
+            {!submitted ? (
+              <form onSubmit={handleSubmitResume} className="modal-form-content">
+                <p className="modal-intro">
+                  Share your contact details and background. You can also email your resume directly to <a href="mailto:omnetatech@gmail.com" className="text-link">omnetatech@gmail.com</a>.
+                </p>
+
+                {errorMessage && (
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '10px 14px',
+                    marginBottom: '16px',
+                    backgroundColor: '#FEF2F2',
+                    border: '1px solid #F87171',
+                    borderRadius: '6px',
+                    color: '#991B1B',
+                    fontSize: '0.85rem'
+                  }}>
+                    <AlertCircle size={16} style={{ flexShrink: 0 }} />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
+                <div className="form-two-cols">
+                  <div className="form-group">
+                    <label className="form-label">Full Name *</label>
                     <input 
                       type="text" 
-                      name="name" 
-                      required 
-                      className="form-input-text" 
-                      placeholder="E.g. Elena Moreau"
-                      value={appForm.name}
+                      name="fullName"
+                      required
+                      placeholder="Your full name"
+                      className="form-input"
+                      value={resumeForm.fullName}
                       onChange={handleFormChange}
                     />
                   </div>
 
-                  <div className="form-field">
-                    <label className="field-label">Email Address *</label>
+                  <div className="form-group">
+                    <label className="form-label">Email Address *</label>
                     <input 
                       type="email" 
-                      name="email" 
-                      required 
-                      className="form-input-text" 
-                      placeholder="E.g. e.moreau@domain.com"
-                      value={appForm.email}
-                      onChange={handleFormChange}
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label className="field-label">Contact Phone *</label>
-                    <input 
-                      type="text" 
-                      name="phone" 
-                      required 
-                      className="form-input-text" 
-                      placeholder="+65 9123 4567"
-                      value={appForm.phone}
-                      onChange={handleFormChange}
-                    />
-                  </div>
-
-                  <div className="form-field">
-                    <label className="field-label">LinkedIn URL *</label>
-                    <input 
-                      type="url" 
-                      name="linkedin" 
-                      required 
-                      className="form-input-text" 
-                      placeholder="https://linkedin.com/in/username"
-                      value={appForm.linkedin}
-                      onChange={handleFormChange}
-                    />
-                  </div>
-
-                  <div className="form-field full-width">
-                    <label className="field-label">Resume Link / Portfolio *</label>
-                    <input 
-                      type="text" 
-                      name="resume" 
-                      required 
-                      className="form-input-text" 
-                      placeholder="E.g. Link to hosted PDF or Google Drive file"
-                      value={appForm.resume || ''}
+                      name="email"
+                      required
+                      placeholder="name@example.com"
+                      className="form-input"
+                      value={resumeForm.email}
                       onChange={handleFormChange}
                     />
                   </div>
                 </div>
 
-                <div className="form-actions-row">
-                  <button type="button" className="btn-back-step" onClick={() => setAppliedJob(null)}>
+                <div className="form-two-cols">
+                  <div className="form-group">
+                    <label className="form-label">Phone Number *</label>
+                    <input 
+                      type="tel" 
+                      name="phone"
+                      required
+                      placeholder="+91 98765 43210"
+                      className="form-input"
+                      value={resumeForm.phone}
+                      onChange={handleFormChange}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="form-label">Primary Expertise *</label>
+                    <select 
+                      name="expertise"
+                      className="form-select"
+                      value={resumeForm.expertise}
+                      onChange={handleFormChange}
+                    >
+                      <option value="Full-Stack Web Development">Full-Stack Web Development</option>
+                      <option value="Frontend / React Development">Frontend / React Development</option>
+                      <option value="Mobile App Development">Mobile App Development</option>
+                      <option value="UI/UX & Product Design">UI/UX & Product Design</option>
+                      <option value="Backend & Cloud Engineering">Backend & Cloud Engineering</option>
+                      <option value="QA & Testing">QA & Testing</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">LinkedIn Profile or Portfolio Link *</label>
+                  <input 
+                    type="url" 
+                    name="linkedinOrPortfolio"
+                    required
+                    placeholder="https://linkedin.com/in/username or portfolio link"
+                    className="form-input"
+                    value={resumeForm.linkedinOrPortfolio}
+                    onChange={handleFormChange}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label">Message / Cover Note</label>
+                  <textarea 
+                    name="message"
+                    rows="3"
+                    placeholder="Briefly tell us about your experience and the kind of work you enjoy doing..."
+                    className="form-textarea"
+                    value={resumeForm.message}
+                    onChange={handleFormChange}
+                  ></textarea>
+                </div>
+
+                <div className="modal-actions-bar">
+                  <button type="button" className="btn-secondary-outline" onClick={handleCloseModal}>
                     Cancel
                   </button>
-                  <button type="submit" className="btn-submit-form" disabled={isSubmitting}>
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        <span>Uploading Files...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>Submit Application</span>
-                        <Send size={14} />
-                      </>
-                    )}
+                  <button type="submit" className="btn-primary-blue" disabled={isSubmitting}>
+                    <span>{isSubmitting ? 'Submitting...' : 'Submit Details'}</span>
+                    <Send size={15} />
                   </button>
                 </div>
               </form>
             ) : (
-              <div className="modal-step-body success-body">
-                <CheckCircle2 size={64} className="success-icon-svg" />
-                <h4 className="success-heading">Application Recieved</h4>
+              <div className="modal-success-content animate-fade-in">
+                <CheckCircle2 size={52} className="success-icon" />
+                <h4 className="success-title">Thank You, {resumeForm.fullName}!</h4>
                 <p className="success-desc">
-                  Thank you, <strong>{appForm.name}</strong>. Your portfolio and candidacy file for <strong>{appliedJob.title}</strong> has been secured in our recruiters registry. Our HR team will reach out via <strong>{appForm.email}</strong> within 3 business days.
+                  Your details have been received. You may also forward an updated PDF copy of your CV directly to <a href="mailto:omnetatech@gmail.com" className="text-link">omnetatech@gmail.com</a>. We will be in touch when suitable opportunities match your background.
                 </p>
-                <button className="btn-success-close" onClick={() => setAppliedJob(null)}>
-                  Close Portal
+                <button className="btn-primary-blue" onClick={handleCloseModal}>
+                  Close
                 </button>
               </div>
             )}
@@ -276,237 +350,312 @@ export default function CareersPage() {
       )}
 
       <style>{`
-        .careers-page-wrapper {
-          position: relative;
-          background-color: var(--color-navy-dark);
-          color: var(--color-white-pure);
-          padding-top: 120px;
-          padding-bottom: 80px;
-          overflow: hidden;
+        .careers-root {
+          background-color: var(--color-bg);
         }
 
-        .careers-hero {
+        .careers-hero-section {
+          padding: 80px 0 60px 0;
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .careers-hero-inner {
           text-align: center;
-          max-width: 800px;
-          margin-bottom: 80px;
+          max-width: 760px;
           display: flex;
           flex-direction: column;
           align-items: center;
         }
 
         .careers-hero-title {
-          font-size: clamp(2.5rem, 5vw, 4rem);
+          font-size: clamp(2.3rem, 4vw, 3.4rem);
+          color: var(--color-primary-navy);
           font-weight: 800;
-          line-height: 1.15;
-          letter-spacing: -1px;
           margin-top: 16px;
-          margin-bottom: 24px;
-        }
-
-        .careers-hero-sub {
-          font-size: 1.15rem;
-          color: var(--color-gray-medium);
-          line-height: 1.6;
-        }
-
-        /* Positions Section */
-        .open-positions {
-          margin-bottom: 60px;
-        }
-
-        .positions-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          padding-bottom: 24px;
-          margin-bottom: 40px;
-        }
-
-        .pos-title {
-          font-size: 1.75rem;
-          font-weight: 700;
-        }
-
-        .dept-tabs {
-          display: flex;
-          gap: 10px;
-        }
-
-        .dept-btn {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          color: var(--color-gray-dark);
-          padding: 8px 16px;
-          border-radius: var(--border-radius-sm);
-          font-family: var(--font-primary);
-          font-size: 0.85rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: var(--transition-fast);
-        }
-
-        .dept-btn:hover, .dept-btn.active {
-          color: var(--color-cyan);
-          border-color: var(--color-cyan);
-          background: rgba(0, 191, 255, 0.08);
-        }
-
-        /* Jobs Listing cards */
-        .jobs-list {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .job-card {
-          background: rgba(13, 34, 60, 0.35);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: var(--border-radius-md);
-          padding: 32px;
-          transition: all 0.3s ease;
-        }
-
-        .job-card:hover {
-          border-color: rgba(0, 191, 255, 0.2);
-          background: rgba(13, 34, 60, 0.45);
-        }
-
-        .job-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: flex-start;
           margin-bottom: 16px;
         }
 
-        .job-title-h3 {
-          font-size: 1.35rem;
-          color: var(--color-white-pure);
-          font-weight: 700;
-          margin-bottom: 8px;
+        .careers-hero-lead {
+          font-size: clamp(1.05rem, 1.25vw, 1.15rem);
+          color: var(--color-text-secondary);
+          line-height: 1.65;
+          margin-bottom: 30px;
         }
 
-        .job-tags {
+        .careers-cta-row {
           display: flex;
-          flex-wrap: wrap;
+          align-items: center;
           gap: 16px;
+          flex-wrap: wrap;
+          justify-content: center;
         }
 
-        .job-tag-item {
+        /* Focus Areas Grid */
+        .focus-areas-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+
+        .focus-area-card {
+          background: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 30px 24px;
           display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          transition: all var(--transition-fast);
+        }
+
+        .focus-area-card:hover {
+          border-color: var(--color-primary-blue);
+          box-shadow: var(--shadow-hover);
+          transform: translateY(-3px);
+        }
+
+        .focus-icon-box {
+          width: 44px;
+          height: 44px;
+          border-radius: var(--radius-sm);
+          background: var(--color-light-blue);
+          color: var(--color-primary-blue);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin-bottom: 18px;
+        }
+
+        .focus-area-title {
+          font-size: 1.15rem;
+          color: var(--color-primary-navy);
+          font-weight: 700;
+          margin-bottom: 10px;
+          line-height: 1.35;
+        }
+
+        .focus-area-desc {
+          font-size: 0.86rem;
+          color: var(--color-text-secondary);
+          line-height: 1.6;
+          margin-bottom: 18px;
+          flex-grow: 1;
+        }
+
+        .focus-location-pill {
+          display: inline-flex;
           align-items: center;
           gap: 6px;
           font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: var(--color-gray-dark);
+          font-size: 0.74rem;
+          color: var(--color-primary-navy);
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          padding: 4px 10px;
+          border-radius: var(--radius-full);
+          font-weight: 600;
         }
 
-        .job-salary {
+        /* Culture Values */
+        .culture-values-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 24px;
+        }
+
+        .culture-card {
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 28px 24px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .culture-num {
           font-family: var(--font-mono);
-          font-weight: 700;
-          color: var(--color-cyan);
-          font-size: 1rem;
-        }
-
-        .job-summary-p {
-          font-size: 0.9rem;
-          color: var(--color-gray-medium);
-          line-height: 1.6;
-          margin-bottom: 24px;
-        }
-
-        /* Requirements Drawer */
-        .job-requirements-drawer {
-          background: rgba(7, 20, 38, 0.4);
-          border-radius: var(--border-radius-sm);
-          padding: 20px;
-          margin-bottom: 24px;
-          border-left: 3px solid var(--color-cyan);
-        }
-
-        .req-title {
-          font-family: var(--font-title);
-          font-size: 0.9rem;
-          font-weight: 700;
-          color: var(--color-white-pure);
+          font-size: 1.25rem;
+          font-weight: 800;
+          color: var(--color-primary-blue);
           margin-bottom: 12px;
         }
 
-        .req-list {
-          list-style: none;
+        .culture-title {
+          font-size: 1.15rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+          margin-bottom: 8px;
+        }
+
+        .culture-desc {
+          font-size: 0.86rem;
+          color: var(--color-text-secondary);
+          line-height: 1.6;
+        }
+
+        /* Modal */
+        .resume-modal-backdrop {
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background: rgba(11, 31, 58, 0.5);
+          backdrop-filter: blur(4px);
           display: flex;
-          flex-direction: column;
-          gap: 8px;
+          align-items: center;
+          justify-content: center;
+          padding: 24px;
+          z-index: 2100;
         }
 
-        .req-item {
-          display: flex;
-          align-items: flex-start;
-          gap: 10px;
-          font-size: 0.85rem;
-          color: var(--color-gray-medium);
-          line-height: 1.5;
+        .resume-modal-body {
+          background: var(--color-white);
+          border-radius: var(--radius-lg);
+          max-width: 620px;
+          width: 100%;
+          border: 1px solid var(--color-border);
+          overflow: hidden;
+          animation: fadeIn 0.25s ease-out;
         }
 
-        .req-check-icon {
-          color: var(--color-cyan);
-          margin-top: 3px;
-          flex-shrink: 0;
-        }
-
-        /* Actions row */
-        .job-actions-row {
+        .resume-modal-header {
           display: flex;
           justify-content: space-between;
+          align-items: flex-start;
+          padding: 24px 28px;
+          background: #F8FAFC;
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-title {
+          font-size: 1.45rem;
+          font-weight: 800;
+          color: var(--color-primary-navy);
+          margin-top: 4px;
+        }
+
+        .modal-close-btn {
+          background: none;
+          border: none;
+          color: var(--color-text-secondary);
+          cursor: pointer;
+        }
+
+        .modal-form-content {
+          padding: 28px;
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+
+        .modal-intro {
+          font-size: 0.88rem;
+          color: var(--color-text-secondary);
+          line-height: 1.55;
+          margin-bottom: 8px;
+        }
+
+        .text-link {
+          color: var(--color-primary-blue);
+          font-weight: 600;
+          text-decoration: underline;
+        }
+
+        .form-two-cols {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .form-label {
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: var(--color-primary-navy);
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+          padding: 10px 14px;
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm);
+          font-family: inherit;
+          font-size: 0.88rem;
+          color: var(--color-text);
+          outline: none;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+          background: var(--color-white);
+          border-color: var(--color-primary-blue);
+        }
+
+        .form-textarea {
+          resize: vertical;
+        }
+
+        .modal-actions-bar {
+          display: flex;
+          justify-content: flex-end;
+          gap: 12px;
+          margin-top: 10px;
+        }
+
+        .modal-success-content {
+          padding: 44px 28px;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
           align-items: center;
         }
 
-        .btn-details-toggle {
-          background: none;
-          border: none;
-          color: var(--color-gray-dark);
-          font-size: 0.85rem;
-          font-weight: 600;
-          cursor: pointer;
+        .success-icon {
+          color: var(--color-success);
+          margin-bottom: 16px;
         }
 
-        .btn-details-toggle:hover {
-          color: var(--color-white-pure);
+        .success-title {
+          font-size: 1.45rem;
+          font-weight: 800;
+          color: var(--color-primary-navy);
+          margin-bottom: 10px;
         }
 
-        .btn-apply-job {
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-purple) 100%);
-          border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.85rem;
-          padding: 10px 24px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          transition: var(--transition-fast);
+        .success-desc {
+          font-size: 0.92rem;
+          color: var(--color-text-secondary);
+          line-height: 1.6;
+          max-width: 480px;
+          margin-bottom: 24px;
         }
 
-        .btn-apply-job:hover {
-          box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
-          transform: translateY(-2px);
-        }
-
-        @media (max-width: 991px) {
-          .positions-header {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 20px;
+        @media (max-width: 1024px) {
+          .focus-areas-grid,
+          .culture-values-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
-          .dept-tabs {
-            flex-wrap: wrap;
+        }
+
+        @media (max-width: 640px) {
+          .focus-areas-grid,
+          .culture-values-grid {
+            grid-template-columns: 1fr;
           }
-          .job-header {
-            flex-direction: column;
-            gap: 12px;
+          .form-two-cols {
+            grid-template-columns: 1fr;
           }
-          .job-salary {
-            align-self: flex-start;
+          .modal-form-content {
+            padding: 20px;
           }
         }
       `}</style>

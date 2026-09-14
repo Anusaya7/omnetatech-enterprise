@@ -1,376 +1,452 @@
 import { useState } from 'react';
-import { Cpu, Server, Shield, Activity, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { 
+  Code, Globe, Smartphone, Palette, Cloud, Bot, 
+  Compass, ArrowRight, CheckCircle2, ChevronRight,
+  Database, Cpu, Layers, ShoppingCart, Terminal, Server
+} from 'lucide-react';
+import { useCms } from '../context/CmsContext';
 
-export default function ServicesSection() {
+const iconMap = {
+  Code, Globe, Smartphone, Palette, Cloud, Bot, Compass,
+  Database, Cpu, Layers, ShoppingCart, Terminal, Server
+};
+
+export default function ServicesSection({ onSelectService }) {
+  const { services: dynamicServices } = useCms();
   const [activeDetail, setActiveDetail] = useState(null);
 
-  const services = [
+  const defaultServices = [
     {
-      id: 'ai',
-      title: 'Artificial Intelligence',
-      icon: Cpu,
-      badge: 'Cognitive Computing',
-      desc: 'Harness the power of machine learning and large language models to automate complex cognitive processes and gain unprecedented insights.',
-      items: ['AI Agents', 'Generative AI', 'LLM Development', 'RAG Systems'],
-      color: 'var(--color-royal)',
-      details: 'Our AI solutions focus on agentic frameworks and Retrieval-Augmented Generation (RAG) that allow internal business data to safely fuel private LLMs. We build secure intelligence platforms compliant with global audit protocols.'
+      id: 'software-dev',
+      title: 'Software Development',
+      icon: Code,
+      category: 'Core Engineering',
+      desc: 'Engineered backend systems, custom web software, and secure APIs designed to handle complex business operations efficiently.',
+      points: [
+        'Custom Web Applications',
+        'Business Software Solutions',
+        'API Development & Integration',
+        'Backend Systems & Microservices',
+        'Database Architecture & Optimization'
+      ],
+      details: 'We build custom business software tailored to your specific organizational workflows. Our development focus emphasizes clean architecture, database efficiency, secure endpoints, and maintainability for long-term scalability.'
     },
     {
-      id: 'cloud',
-      title: 'Cloud Infrastructure',
-      icon: Server,
-      badge: 'Modern Architecture',
-      desc: 'Migrate, optimize, and manage scalable multi-cloud architectures. We ensure highly resilient, secure deployments for enterprise scale.',
-      items: ['AWS Integration', 'Azure Deployment', 'Google Cloud', 'DevOps & GitOps'],
-      color: 'var(--color-cyan)',
-      details: 'We specialize in zero-downtime migrations, hybrid cloud setup, infrastructure-as-code (Terraform), and Kubernetes orchestration. Our DevOps pipelines reduce deployment cycle times by up to 60%.'
+      id: 'web-dev',
+      title: 'Web Development',
+      icon: Globe,
+      category: 'Digital Presence',
+      desc: 'Modern, high-speed, and responsive business websites crafted to establish trust and convert visitors into active inquiries.',
+      points: [
+        'Business & Corporate Websites',
+        'Responsive Web Applications',
+        'Custom E-commerce Solutions',
+        'Content Management Platforms',
+        'Website Maintenance & Speed Optimization'
+      ],
+      details: 'From corporate brand websites to dynamic client portals, we build fast, SEO-friendly, and mobile-responsive web platforms using modern web standards that represent your brand with technical authority.'
     },
     {
-      id: 'sec',
-      title: 'Cyber Security',
-      icon: Shield,
-      badge: 'Zero Trust Security',
-      desc: 'Protect your enterprise assets with absolute defense protocols, advanced penetration tests, and real-time active threat mitigation.',
-      items: ['Threat Detection', 'Security Audits', 'Compliance Reporting', 'Continuous Monitoring'],
-      color: 'var(--color-purple)',
-      details: 'Implementing Zero Trust network access (ZTNA), SIEM logging, endpoint defense, and regulatory alignment (SOC 2, ISO 27001, HIPAA, GDPR). Our secure operations centers offer 24/7 scanning.'
+      id: 'mobile-dev',
+      title: 'Mobile App Development',
+      icon: Smartphone,
+      category: 'Application Engineering',
+      desc: 'Intuitive native and cross-platform mobile apps for Android and iOS that provide smooth performance and delightful user experience.',
+      points: [
+        'Android Applications',
+        'iOS Applications',
+        'Cross-Platform Development (Flutter/React Native)',
+        'Mobile API Integration',
+        'App Maintenance & Store Publishing'
+      ],
+      details: 'We design and develop mobile applications that deliver consistent experiences across diverse devices. We handle state management, offline-first caching, push notifications, and secure backend synchronization.'
     },
     {
-      id: 'auto',
-      title: 'Enterprise Automation',
-      icon: Activity,
-      badge: 'Process Acceleration',
-      desc: 'Connect legacy structures with modern workflows. Eliminate operational bottlenecks through robotic process automation (RPA) and custom ERP/CRM integrations.',
-      items: ['Workflow Automation', 'ERP Integration', 'CRM Solutions', 'Process Optimization'],
-      color: '#4F46E5',
-      details: 'Maximize resource efficiency through RPA pipelines, seamless Salesforce/SAP data syncs, and intelligent invoice/document processing bots that save thousands of manual hours annually.'
+      id: 'ui-ux',
+      title: 'UI/UX Design',
+      icon: Palette,
+      category: 'Product Design',
+      desc: 'User-centered interfaces that balance visual elegance, brand consistency, and frictionless user journeys across screens.',
+      points: [
+        'Website & Portal UI Design',
+        'Application & Dashboard UI',
+        'User Experience & Wireframing',
+        'Responsive Layout Systems',
+        'Design Systems & Component Libraries'
+      ],
+      details: 'Great software starts with clear design. We map out user personas, wireframes, interactive prototypes, and production design systems to ensure users complete their goals without confusion.'
+    },
+    {
+      id: 'cloud-devops',
+      title: 'Cloud & DevOps',
+      icon: Cloud,
+      category: 'Infrastructure',
+      desc: 'Reliable cloud environments, automated deployment pipelines, and proactive server configuration for maximum uptime.',
+      points: [
+        'Cloud Deployment & Hosting',
+        'CI/CD Automated Pipelines',
+        'Server Configuration & Management',
+        'Performance & Load Optimization',
+        'Backup & Disaster Recovery Planning'
+      ],
+      details: 'We help businesses set up, manage, and scale cloud environments across standard cloud providers. Our automated pipelines reduce manual deployment errors and ensure your applications run reliably.'
+    },
+    {
+      id: 'automation-ai',
+      title: 'Automation & AI',
+      icon: Bot,
+      category: 'Process Intelligence',
+      desc: 'Practical automation workflows and intelligent tools that eliminate repetitive tasks and accelerate business turnaround.',
+      points: [
+        'Business Process Automation',
+        'AI-Powered Practical Features',
+        'Workflow & Notification Automation',
+        'Third-Party API Automation',
+        'Intelligent Business Tools'
+      ],
+      details: 'We integrate practical AI capabilities and workflow automations into existing operations—such as document processing, data extraction, and CRM updates—saving valuable team hours and reducing operational friction.'
+    },
+    {
+      id: 'it-consulting',
+      title: 'IT Consulting',
+      icon: Compass,
+      category: 'Technology Advisory',
+      desc: 'Strategic guidance on technology selection, technical feasibility, architecture planning, and digital modernization roadmaps.',
+      points: [
+        'Technology Stack Consulting',
+        'System Architecture Planning',
+        'Product Development Strategy',
+        'Code & Infrastructure Technical Audits',
+        'Digital Transformation Roadmaps'
+      ],
+      details: 'Whether you are planning a new software product or revamping legacy systems, our consulting services help you make informed architectural decisions, avoid costly technical debt, and plan realistic timelines.'
     }
   ];
 
+  const services = dynamicServices && dynamicServices.length > 0
+    ? dynamicServices.map(s => ({
+        id: s.slug || s.id,
+        title: s.title,
+        icon: iconMap[s.icon] || Code,
+        category: s.category || 'Technology Services',
+        desc: s.shortDescription || s.description || '',
+        points: Array.isArray(s.features) ? s.features : [],
+        details: s.description || s.shortDescription || ''
+      }))
+    : defaultServices;
+
+  const handleConsultService = (svcTitle) => {
+    setActiveDetail(null);
+    if (onSelectService) {
+      onSelectService(svcTitle);
+    } else {
+      const contactEl = document.getElementById('contact');
+      if (contactEl) {
+        contactEl.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  };
+
   return (
-    <section id="services" className="services-section">
+    <section id="services" className="services-root section section-light">
       <div className="container">
         
         {/* Section Header */}
-        <div className="services-header">
-          <div className="badge">Services & Competencies</div>
-          <h2 className="services-title">
-            Enterprise Technology Portfolio
-          </h2>
-          <p className="services-sub">
-            Leading engineering practices tailored to accelerate enterprise transformation. Our solutions scale seamlessly, ensuring continuous operation, ironclad security, and AI-driven growth.
+        <div className="section-header">
+          <div className="badge">Our Capabilities</div>
+          <h2 className="section-title">Technology Services Designed for Growth</h2>
+          <p className="section-subtitle">
+            From custom software development to cloud infrastructure and workflow automation, OmNetaTech provides end-to-end technology services tailored to your operational requirements.
           </p>
         </div>
 
-        {/* Services Card Grid */}
+        {/* Services Grid */}
         <div className="services-grid">
           {services.map((svc) => {
-            const IconComponent = svc.icon;
+            const Icon = svc.icon;
+            const isExpanded = activeDetail === svc.id;
+
             return (
               <div 
                 key={svc.id} 
-                className="service-card shadow-md"
-                onClick={() => setActiveDetail(activeDetail === svc.id ? null : svc.id)}
+                className={`service-card ${isExpanded ? 'card-active-border' : ''}`}
               >
-                <div className="card-top-accent" style={{ backgroundColor: svc.color }}></div>
-                
-                <div className="service-icon-box" style={{ background: `rgba(15, 82, 186, 0.05)`, color: svc.color }}>
-                  <IconComponent size={28} />
+                <div className="service-top-meta">
+                  <div className="service-icon-container">
+                    <Icon size={22} />
+                  </div>
+                  <span className="service-category-tag">{svc.category}</span>
                 </div>
 
-                <div className="service-card-meta">
-                  <span className="service-badge-cat" style={{ color: svc.color }}>{svc.badge}</span>
-                  <h3 className="service-card-title">{svc.title}</h3>
-                </div>
-
+                <h3 className="service-card-title">{svc.title}</h3>
                 <p className="service-card-desc">{svc.desc}</p>
 
-                <ul className="service-items-list">
-                  {svc.items.map((item, idx) => (
-                    <li key={idx} className="service-item-bullet">
-                      <CheckCircle2 size={14} className="bullet-check-icon" style={{ color: svc.color }} />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+                {/* Service Bullet Points */}
+                <div className="service-points-area">
+                  <div className="points-label">Key Capabilities:</div>
+                  <ul className="service-points-list">
+                    {svc.points.map((pt, idx) => (
+                      <li key={idx} className="service-point-item">
+                        <CheckCircle2 size={14} className="point-icon" />
+                        <span>{pt}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-                <button 
-                  className="btn-card-action" 
-                  style={{ color: svc.color }}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveDetail(activeDetail === svc.id ? null : svc.id);
-                  }}
-                >
-                  <span>{activeDetail === svc.id ? 'Close Details' : 'Deep Dive'}</span>
-                  <ArrowRight size={14} className={`arrow-transition ${activeDetail === svc.id ? 'rotate-90' : ''}`} />
-                </button>
+                {/* Card Action */}
+                <div className="service-card-footer">
+                  <button 
+                    className="service-learn-more-btn"
+                    onClick={() => setActiveDetail(isExpanded ? null : svc.id)}
+                    aria-expanded={isExpanded}
+                  >
+                    <span>{isExpanded ? 'Hide Details' : 'Learn More'}</span>
+                    <ChevronRight size={15} className={`chevron-transition ${isExpanded ? 'rotate-90' : ''}`} />
+                  </button>
+                  
+                  <button 
+                    className="service-enquire-link"
+                    onClick={() => handleConsultService(svc.title)}
+                  >
+                    Discuss Needs →
+                  </button>
+                </div>
+
+                {/* Inline Accordion Details */}
+                {isExpanded && (
+                  <div className="service-detail-drawer animate-fade-in">
+                    <div className="detail-drawer-content">
+                      <p>{svc.details}</p>
+                      <button 
+                        className="btn-primary-blue drawer-cta-btn"
+                        onClick={() => handleConsultService(svc.title)}
+                      >
+                        <span>Request Consultation for {svc.title}</span>
+                        <ArrowRight size={14} />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             );
           })}
         </div>
 
-        {/* Dynamic Detail Drawer (Shows additional text when card is clicked) */}
-        {activeDetail && (
-          <div className="detail-drawer shadow-premium">
-            <div className="drawer-inner">
-              <div className="drawer-accent" style={{ backgroundColor: services.find(s => s.id === activeDetail).color }}></div>
-              <div className="drawer-body">
-                <h4 className="drawer-title">
-                  {services.find(s => s.id === activeDetail).title} - Architecture & Methodology
-                </h4>
-                <p className="drawer-text">
-                  {services.find(s => s.id === activeDetail).details}
-                </p>
-                <div className="drawer-cta-row">
-                  <span className="drawer-sla">ISO 9001 & 27001 Certified Delivery</span>
-                  <a href="#contact" className="btn-drawer-quote">Request Technical Architecture Outline</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       <style>{`
-        .services-section {
-          background-color: var(--color-white);
-          color: #1E293B; /* Sleek slate dark text for readability on white background */
-          padding: 100px 24px;
-        }
-
-        .services-header {
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto 64px auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .services-title {
-          font-size: clamp(2rem, 3.5vw, 2.75rem);
-          color: var(--color-navy-dark);
-          margin-top: 16px;
-          margin-bottom: 20px;
-          font-weight: 800;
-        }
-
-        .services-sub {
-          font-size: 1.05rem;
-          color: #475569;
-          line-height: 1.6;
+        .services-root {
+          background-color: var(--color-bg);
+          border-bottom: 1px solid var(--color-border);
         }
 
         .services-grid {
           display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 24px;
-          margin-bottom: 40px;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 28px;
         }
 
-        /* Card Styling - Premium white design as specified */
+        /* Modern Corporate Service Card */
         .service-card {
-          background: var(--color-white-pure);
-          border-radius: var(--border-radius-md);
-          padding: 32px 24px;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          border: 1px solid rgba(7, 20, 38, 0.05);
+          background-color: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 28px 26px;
           display: flex;
           flex-direction: column;
-          cursor: pointer;
+          box-shadow: var(--shadow-sm);
+          transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                      border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+                      box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+          position: relative;
         }
 
         .service-card:hover {
-          transform: translateY(-8px);
-          box-shadow: 0 20px 35px rgba(7, 20, 38, 0.12);
+          transform: translateY(-4px);
+          border-color: #CBD5E1;
+          box-shadow: 0 12px 28px rgba(11, 31, 58, 0.08);
         }
 
-        .card-top-accent {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          height: 4px;
+        .card-active-border {
+          border-color: var(--color-primary-blue) !important;
+          box-shadow: 0 12px 28px rgba(23, 105, 224, 0.12) !important;
         }
 
-        .service-icon-box {
-          width: 54px;
-          height: 54px;
-          border-radius: var(--border-radius-sm);
+        .service-top-meta {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .service-icon-container {
+          width: 42px;
+          height: 42px;
+          border-radius: var(--radius-sm);
+          background-color: var(--color-light-blue);
+          color: var(--color-primary-blue);
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-bottom: 24px;
+          transition: background-color 0.25s ease, color 0.25s ease;
         }
 
-        .service-card-meta {
-          margin-bottom: 14px;
+        .service-card:hover .service-icon-container {
+          background-color: var(--color-primary-blue);
+          color: var(--color-white);
         }
 
-        .service-badge-cat {
+        .service-category-tag {
           font-family: var(--font-mono);
-          font-size: 0.7rem;
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: var(--color-text-secondary);
+          background: #F1F5F9;
+          padding: 4px 10px;
+          border-radius: var(--radius-full);
           text-transform: uppercase;
-          font-weight: 700;
-          letter-spacing: 1px;
+          letter-spacing: 0.04em;
         }
 
         .service-card-title {
           font-size: 1.25rem;
-          color: var(--color-navy-dark);
-          margin-top: 4px;
+          color: var(--color-primary-navy);
           font-weight: 700;
+          margin-bottom: 10px;
+          line-height: 1.3;
         }
 
         .service-card-desc {
-          font-size: 0.85rem;
-          color: #64748B;
-          line-height: 1.5;
+          font-size: 0.88rem;
+          color: var(--color-text-secondary);
+          line-height: 1.6;
           margin-bottom: 20px;
-          flex-grow: 1;
         }
 
-        .service-items-list {
+        /* Bullet Points */
+        .service-points-area {
+          margin-top: auto;
+          padding-top: 16px;
+          border-top: 1px solid var(--color-border);
+          margin-bottom: 18px;
+        }
+
+        .points-label {
+          font-size: 0.74rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          margin-bottom: 8px;
+        }
+
+        .service-points-list {
           list-style: none;
           display: flex;
           flex-direction: column;
-          gap: 8px;
-          border-top: 1px solid rgba(0, 0, 0, 0.05);
-          padding-top: 16px;
-          margin-bottom: 24px;
+          gap: 7px;
         }
 
-        .service-item-bullet {
+        .service-point-item {
           display: flex;
-          align-items: center;
-          gap: 10px;
-          font-size: 0.85rem;
-          color: #334155;
-          font-weight: 500;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 0.84rem;
+          color: #2D3748;
+          line-height: 1.45;
         }
 
-        .bullet-check-icon {
+        .point-icon {
+          color: var(--color-primary-blue);
+          margin-top: 2px;
           flex-shrink: 0;
         }
 
-        .btn-card-action {
-          background: none;
-          border: none;
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.85rem;
-          cursor: pointer;
+        /* Footer inside card */
+        .service-card-footer {
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 6px;
-          align-self: flex-start;
-          padding: 4px 0;
+          padding-top: 14px;
+          border-top: 1px solid var(--color-border);
+          font-size: 0.84rem;
         }
 
-        .arrow-transition {
+        .service-learn-more-btn {
+          background: none;
+          border: none;
+          color: var(--color-primary-blue);
+          font-weight: 600;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          cursor: pointer;
+          padding: 4px 0;
+          transition: gap 0.2s ease;
+        }
+
+        .service-learn-more-btn:hover {
+          gap: 8px;
+        }
+
+        .chevron-transition {
           transition: transform var(--transition-fast);
         }
-        
+
         .rotate-90 {
           transform: rotate(90deg);
         }
 
-        /* Detail Drawer Animation */
-        .detail-drawer {
-          background: var(--color-navy);
-          border: 1px solid rgba(0, 191, 255, 0.15);
-          border-radius: var(--border-radius-md);
-          overflow: hidden;
-          margin-top: 24px;
-          color: var(--color-white-pure);
-          animation: slideDown 0.3s ease-out;
-        }
-
-        .drawer-inner {
-          display: flex;
-        }
-
-        .drawer-accent {
-          width: 6px;
-          flex-shrink: 0;
-        }
-
-        .drawer-body {
-          padding: 24px 32px;
-          flex-grow: 1;
-        }
-
-        .drawer-title {
-          font-family: var(--font-title);
-          font-size: 1.15rem;
-          font-weight: 700;
-          margin-bottom: 8px;
-        }
-
-        .drawer-text {
-          font-size: 0.95rem;
-          color: var(--color-gray-medium);
-          line-height: 1.6;
-          margin-bottom: 16px;
-        }
-
-        .drawer-cta-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-          padding-top: 16px;
-        }
-
-        .drawer-sla {
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: var(--color-cyan);
-        }
-
-        .btn-drawer-quote {
-          background: rgba(255, 255, 255, 0.05);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          color: var(--color-white-pure);
-          padding: 8px 18px;
-          font-size: 0.8rem;
-          border-radius: var(--border-radius-sm);
+        .service-enquire-link {
+          background: none;
+          border: none;
+          color: var(--color-primary-blue);
           font-weight: 600;
+          cursor: pointer;
+          padding: 4px 0;
+          transition: transform var(--transition-fast);
         }
 
-        .btn-drawer-quote:hover {
-          border-color: var(--color-cyan);
-          background: rgba(0, 191, 255, 0.1);
+        .service-enquire-link:hover {
+          transform: translateX(3px);
+          text-decoration: underline;
         }
 
-        @keyframes slideDown {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        /* Drawer Details */
+        .service-detail-drawer {
+          margin-top: 16px;
+          padding: 16px;
+          background: #F8FAFD;
+          border-radius: var(--radius-sm);
+          border: 1px solid rgba(23, 105, 224, 0.15);
         }
 
-        @media (max-width: 1199px) {
+        .detail-drawer-content p {
+          font-size: 0.84rem;
+          color: var(--color-text);
+          line-height: 1.6;
+          margin-bottom: 14px;
+        }
+
+        .drawer-cta-btn {
+          width: 100%;
+          padding: 9px 14px;
+          font-size: 0.82rem;
+        }
+
+        @media (max-width: 1100px) {
           .services-grid {
             grid-template-columns: repeat(2, 1fr);
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 720px) {
           .services-grid {
             grid-template-columns: 1fr;
           }
-          .drawer-cta-row {
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 12px;
+          .service-card {
+            padding: 24px;
           }
         }
       `}</style>

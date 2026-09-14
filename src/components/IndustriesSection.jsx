@@ -1,127 +1,107 @@
-import { useState } from 'react';
-import { Landmark, HeartPulse, ShoppingBag, Factory, GraduationCap, Truck, ArrowRight } from 'lucide-react';
+import { 
+  HeartPulse, GraduationCap, Landmark, ShoppingBag, 
+  Factory, Building2, Truck, Briefcase, Rocket, ArrowRight,
+  Code, Globe, Smartphone, Palette, Cloud, Bot, Compass, Database, Cpu, Layers
+} from 'lucide-react';
+import { useCms } from '../context/CmsContext';
 
-export default function IndustriesSection() {
-  const [hoveredIndustry, setHoveredIndustry] = useState(null);
+const iconMap = {
+  HeartPulse, GraduationCap, Landmark, ShoppingBag, 
+  Factory, Building2, Truck, Briefcase, Rocket,
+  Code, Globe, Smartphone, Palette, Cloud, Bot, Compass, Database, Cpu, Layers
+};
 
-  const industries = [
+export default function IndustriesSection({ openConsultationModal }) {
+  const { industries: dynamicIndustries } = useCms();
+
+  const defaultIndustries = [
     {
-      id: 'banking',
-      title: 'Banking & Finance',
-      icon: Landmark,
-      metric: '₹1 Lakh Crore+ Secured',
-      description: 'Developing high-throughput payment architectures, automated audits, and regulatory compliance engines backed by secure AI algorithms.',
-      solutions: ['Fraud Detection Engines', 'High-Frequency Processing', 'Regulatory Compliance Checkers'],
-      gradient: 'linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%)'
-    },
-    {
-      id: 'healthcare',
-      title: 'Digital Healthcare',
+      title: 'Healthcare',
       icon: HeartPulse,
-      metric: '15M+ Patient Records Managed',
-      description: 'HIPAA-compliant software platforms, predictive diagnostics, secure IoT medical device synchronization, and decentralized billing systems.',
-      solutions: ['EHR Interoperability Systems', 'AI Diagnostics Handlers', 'IoMT Secure Networks'],
-      gradient: 'linear-gradient(135deg, #065F46 0%, #10B981 100%)'
+      desc: 'Technology solutions for Healthcare clinics, practices, and health businesses: patient inquiry portals, digital booking systems, and responsive health service websites.'
     },
     {
-      id: 'retail',
-      title: 'Enterprise Retail',
-      icon: ShoppingBag,
-      metric: '40% Inventory Overhead Reduction',
-      description: 'AI-driven supply forecasting, multi-channel customer lifecycle optimization, and next-generation automated ERP systems.',
-      solutions: ['Predictive Demand Planners', 'Unified Cart Platforms', 'Omnichannel Customer Portals'],
-      gradient: 'linear-gradient(135deg, #7C2D12 0%, #F97316 100%)'
-    },
-    {
-      id: 'manufacturing',
-      title: 'Industrial Manufacturing',
-      icon: Factory,
-      metric: '30% Reduction in Downtime',
-      description: 'Industry 4.0 automation, connected IoT telemetry, predictive maintenance machinery models, and warehouse robotics scheduling.',
-      solutions: ['IoT Telemetry Gateways', 'Predictive Alert Engines', 'Digital Twin Visualizers'],
-      gradient: 'linear-gradient(135deg, #312E81 0%, #6366F1 100%)'
-    },
-    {
-      id: 'education',
-      title: 'Higher Education',
+      title: 'Education',
       icon: GraduationCap,
-      metric: '2.5M Students Connected',
-      description: 'Scalable LMS architectures, automated student performance modeling, and immersive digital classrooms supporting global research databases.',
-      solutions: ['LMS Core Integration', 'Automated Enrollment Systems', 'Predictive Retention Analytics'],
-      gradient: 'linear-gradient(135deg, #581C87 0%, #8B5CF6 100%)'
+      desc: 'Technology solutions for Education institutions and training academies: student learning portals, course registration workflows, and educational content hubs.'
     },
     {
-      id: 'logistics',
-      title: 'Logistics & Supply Chain',
+      title: 'Finance',
+      icon: Landmark,
+      desc: 'Technology solutions for Finance firms and advisory services: client onboarding forms, invoice and billing integrations, and secure account access portals.'
+    },
+    {
+      title: 'Retail & E-commerce',
+      icon: ShoppingBag,
+      desc: 'Technology solutions for Retail & E-commerce businesses: modern online storefronts, catalog management tools, and seamless payment gateway integrations.'
+    },
+    {
+      title: 'Manufacturing',
+      icon: Factory,
+      desc: 'Technology solutions for Manufacturing units: internal operational trackers, supply scheduling dashboards, and distributor communication portals.'
+    },
+    {
+      title: 'Real Estate',
+      icon: Building2,
+      desc: 'Technology solutions for Real Estate agencies and developers: property showcases, dynamic lead inquiry forms, and virtual project presentation websites.'
+    },
+    {
+      title: 'Logistics',
       icon: Truck,
-      metric: '99.8% On-Time Delivery Rates',
-      description: 'Global route pathfinders, fleet management automation, carbon footprint tracking models, and blockchain-based customs clearing.',
-      solutions: ['Route Optimization Algorithms', 'Fleet Telematics Platforms', 'Customs Clearing Ledgers'],
-      gradient: 'linear-gradient(135deg, #0F172A 0%, #475569 100%)'
+      desc: 'Technology solutions for Logistics & transport providers: delivery status lookups, customer booking tools, and automated dispatch notification systems.'
+    },
+    {
+      title: 'Professional Services',
+      icon: Briefcase,
+      desc: 'Technology solutions for Legal, accounting, and consulting firms: authoritative corporate websites, appointment schedulers, and client intake workflows.'
+    },
+    {
+      title: 'Startups & SMEs',
+      icon: Rocket,
+      desc: 'Technology solutions for Startups & growing Indian businesses: agile MVP development, scalable web applications, and fast time-to-market software delivery.'
     }
   ];
 
+  const industries = dynamicIndustries && dynamicIndustries.length > 0
+    ? dynamicIndustries.map(i => ({
+        id: i.slug || i.id,
+        title: i.title,
+        icon: iconMap[i.icon] || Building2,
+        desc: i.desc || ''
+      }))
+    : defaultIndustries;
+
   return (
-    <section id="industries" className="industries-section">
-      <div className="grid-overlay"></div>
+    <section id="industries" className="industries-root section section-white">
       <div className="container">
         
-        {/* Section Heading */}
-        <div className="industries-header">
+        {/* Header */}
+        <div className="section-header">
           <div className="badge">Sector Focus</div>
-          <h2 className="industries-title">Tailored Industry Solutions</h2>
-          <p className="industries-sub">
-            Helping sector leaders modernize operations, maintain absolute compliance, and out-compete their markets through customized technology strategies.
+          <h2 className="section-title">Industry-Specific Technology Solutions</h2>
+          <p className="section-subtitle">
+            Every sector has unique operational patterns and customer expectations. We engineer software and web solutions customized for your industry's specific workflow requirements.
           </p>
         </div>
 
-        {/* Industry Card Grid */}
+        {/* 3x3 Grid */}
         <div className="industries-grid">
-          {industries.map((ind) => {
-            const IconComponent = ind.icon;
-            const isHovered = hoveredIndustry === ind.id;
+          {industries.map((ind, idx) => {
+            const Icon = ind.icon;
             return (
-              <div 
-                key={ind.id} 
-                className={`industry-card ${isHovered ? 'hovered' : ''}`}
-                onMouseEnter={() => setHoveredIndustry(ind.id)}
-                onMouseLeave={() => setHoveredIndustry(null)}
-                style={{
-                  '--card-gradient': ind.gradient
-                }}
-              >
-                {/* Background color overlay */}
-                <div className="industry-bg-gradient"></div>
-
-                <div className="industry-content">
-                  <div className="industry-top-row">
-                    <div className="industry-icon-wrapper">
-                      <IconComponent size={24} />
-                    </div>
-                    <span className="industry-metric-badge">{ind.metric}</span>
-                  </div>
-
-                  <h3 className="industry-card-title">{ind.title}</h3>
-                  <p className="industry-card-desc">{ind.description}</p>
-
-                  {/* Solutions sliding list */}
-                  <div className="industry-solutions-wrapper">
-                    <div className="solutions-heading">Key Modernizations:</div>
-                    <ul className="solutions-list">
-                      {ind.solutions.map((sol, index) => (
-                        <li key={index} className="solution-item">
-                          <span className="bullet-cyan">■</span>
-                          <span>{sol}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="industry-card-footer">
-                    <span className="footer-explore-text">Explore Solutions Architecture</span>
-                    <ArrowRight size={16} className="footer-arrow-icon" />
-                  </div>
+              <div key={idx} className="industry-card shadow-sm">
+                <div className="ind-icon-box">
+                  <Icon size={22} />
                 </div>
+                <h3 className="ind-card-title">{ind.title}</h3>
+                <p className="ind-card-desc">{ind.desc}</p>
+                <button 
+                  className="ind-explore-link"
+                  onClick={openConsultationModal}
+                >
+                  <span>Explore Solutions</span>
+                  <ArrowRight size={14} />
+                </button>
               </div>
             );
           })}
@@ -130,212 +110,85 @@ export default function IndustriesSection() {
       </div>
 
       <style>{`
-        .industries-section {
-          background-color: var(--color-navy);
-          padding: 100px 24px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .industries-header {
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto 64px auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
-          position: relative;
-          z-index: 10;
-        }
-
-        .industries-title {
-          font-size: clamp(2rem, 3.5vw, 2.75rem);
-          color: var(--color-white-pure);
-          margin-top: 16px;
-          margin-bottom: 20px;
-          font-weight: 800;
-        }
-
-        .industries-sub {
-          font-size: 1.05rem;
-          color: var(--color-gray-medium);
-          line-height: 1.6;
+        .industries-root {
+          background-color: var(--color-white);
+          border-bottom: 1px solid var(--color-border);
         }
 
         .industries-grid {
           display: grid;
           grid-template-columns: repeat(3, 1fr);
-          gap: 32px;
-          position: relative;
-          z-index: 10;
+          gap: 24px;
         }
 
-        /* Industry Card design */
         .industry-card {
-          background: rgba(13, 34, 60, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: var(--border-radius-lg);
-          padding: 36px;
-          position: relative;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-          cursor: pointer;
-          min-height: 380px;
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 28px 24px;
           display: flex;
           flex-direction: column;
-        }
-
-        .industry-bg-gradient {
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: var(--card-gradient);
-          opacity: 0.03;
-          transition: opacity 0.4s ease;
-          z-index: 1;
+          align-items: flex-start;
+          transition: all var(--transition-fast);
         }
 
         .industry-card:hover {
-          transform: translateY(-8px);
-          border-color: var(--color-cyan);
-          box-shadow: var(--shadow-premium);
+          background: var(--color-white);
+          border-color: var(--color-primary-blue);
+          box-shadow: var(--shadow-hover);
+          transform: translateY(-3px);
         }
 
-        .industry-card:hover .industry-bg-gradient {
-          opacity: 0.15;
-        }
-
-        .industry-content {
-          position: relative;
-          z-index: 2;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          flex-grow: 1;
-        }
-
-        .industry-top-row {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 28px;
-        }
-
-        .industry-icon-wrapper {
-          width: 48px;
-          height: 48px;
-          border-radius: var(--border-radius-sm);
-          background: rgba(0, 191, 255, 0.1);
-          color: var(--color-cyan);
+        .ind-icon-box {
+          width: 44px;
+          height: 44px;
+          border-radius: var(--radius-sm);
+          background: var(--color-light-blue);
+          color: var(--color-primary-blue);
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: var(--transition-fast);
+          margin-bottom: 18px;
+          transition: all var(--transition-fast);
         }
 
-        .industry-card:hover .industry-icon-wrapper {
-          background: var(--color-cyan);
-          color: var(--color-navy-dark);
-          box-shadow: 0 0 15px var(--color-cyan);
+        .industry-card:hover .ind-icon-box {
+          background: var(--color-primary-blue);
+          color: var(--color-white);
         }
 
-        .industry-metric-badge {
-          font-family: var(--font-mono);
-          font-size: 0.7rem;
-          background: rgba(255, 255, 255, 0.05);
-          color: var(--color-white-pure);
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          padding: 4px 10px;
-          border-radius: 50px;
-          font-weight: 500;
-        }
-
-        .industry-card-title {
-          font-size: 1.5rem;
-          color: var(--color-white-pure);
+        .ind-card-title {
+          font-size: 1.2rem;
           font-weight: 700;
-          margin-bottom: 12px;
+          color: var(--color-primary-navy);
+          margin-bottom: 10px;
         }
 
-        .industry-card-desc {
-          font-size: 0.9rem;
-          color: var(--color-gray-medium);
+        .ind-card-desc {
+          font-size: 0.86rem;
+          color: var(--color-text-secondary);
           line-height: 1.6;
-          margin-bottom: 24px;
-          transition: opacity 0.3s ease;
+          margin-bottom: 18px;
+          flex-grow: 1;
         }
 
-        /* Solutions list inside card */
-        .industry-solutions-wrapper {
-          margin-top: auto;
-          opacity: 0;
-          height: 0;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .industry-card.hovered .industry-solutions-wrapper {
-          opacity: 1;
-          height: 110px;
-          margin-bottom: 20px;
-        }
-
-        .solutions-heading {
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: var(--color-cyan);
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 8px;
-        }
-
-        .solutions-list {
-          list-style: none;
-          display: flex;
-          flex-direction: column;
+        .ind-explore-link {
+          background: none;
+          border: none;
+          display: inline-flex;
+          align-items: center;
           gap: 6px;
-        }
-
-        .solution-item {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: 0.85rem;
-          color: var(--color-white-pure);
-        }
-
-        .bullet-cyan {
-          color: var(--color-cyan);
-          font-size: 0.6rem;
-        }
-
-        /* Footer inside card */
-        .industry-card-footer {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-          padding-top: 16px;
-          margin-top: auto;
-          color: var(--color-gray-dark);
-          font-size: 0.8rem;
+          font-size: 0.84rem;
           font-weight: 600;
-          transition: var(--transition-fast);
-        }
-
-        .industry-card:hover .industry-card-footer {
-          color: var(--color-cyan);
-          border-color: rgba(0, 191, 255, 0.2);
-        }
-
-        .footer-arrow-icon {
+          color: var(--color-primary-blue);
+          cursor: pointer;
+          padding: 0;
           transition: transform var(--transition-fast);
         }
 
-        .industry-card:hover .footer-arrow-icon {
-          transform: translateX(4px);
+        .ind-explore-link:hover {
+          transform: translateX(3px);
+          text-decoration: underline;
         }
 
         @media (max-width: 1024px) {
@@ -344,12 +197,12 @@ export default function IndustriesSection() {
           }
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .industries-grid {
             grid-template-columns: 1fr;
           }
-          .industry-card.hovered .industry-solutions-wrapper {
-            height: auto;
+          .industry-card {
+            padding: 22px;
           }
         }
       `}</style>

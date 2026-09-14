@@ -1,9 +1,22 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { apiMiddleware } from './server/api.js'
+
+function apiPlugin() {
+  return {
+    name: 'omnetatech-api-plugin',
+    configureServer(server) {
+      server.middlewares.use(apiMiddleware)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(apiMiddleware)
+    }
+  }
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), apiPlugin()],
   build: {
     outDir: 'dist',
     sourcemap: false,

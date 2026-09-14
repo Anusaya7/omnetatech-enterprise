@@ -1,547 +1,537 @@
-import { Shield, Sparkles, Terminal, Activity, CloudLightning, Database, Cpu } from 'lucide-react';
+import { ArrowRight, CheckCircle, Code2, Cloud, Database, Shield, Layers, Smartphone, Sparkles } from 'lucide-react';
+import { useCms } from '../context/CmsContext';
 
 export default function Hero({ openConsultationModal, scrollToServices }) {
-  return (
-    <section className="hero-container">
-      <div className="grid-overlay"></div>
-      <div className="world-map-bg"></div>
-      
-      {/* Background Lighting Orbs */}
-      <div className="glow-orb" style={{ top: '10%', right: '10%', transform: 'translate(30%, -30%)' }}></div>
-      <div className="glow-orb" style={{ bottom: '20%', left: '5%', transform: 'translate(-30%, 30%)', background: 'radial-gradient(circle, rgba(109, 93, 252, 0.1) 0%, rgba(7, 20, 38, 0) 70%)' }}></div>
+  const { content } = useCms();
+  const hero = content?.hero || {};
 
-      <div className="hero-content container">
-        {/* Left Side: Copy and Actions */}
-        <div className="hero-text-side">
-          <div className="hero-badge badge">
-            <Sparkles size={14} className="badge-sparkle" />
-            <span>Enterprise AI & Digital Transformation</span>
+  const capabilities = [
+    { title: 'Business-Focused Solutions', desc: 'Engineered for real operational ROI' },
+    { title: 'Scalable Technology', desc: 'Built to grow seamlessly with your userbase' },
+    { title: 'Modern Development Practices', desc: 'Clean, maintainable & tested codebases' },
+    { title: 'Reliable Support', desc: 'Committed technical partnership & maintenance' }
+  ];
+
+  return (
+    <section className="hero-section">
+      <div className="hero-pattern"></div>
+      
+      <div className="container hero-container">
+        {/* Left Column: Copy & CTAs */}
+        <div className="hero-content">
+          <div className="badge hero-badge">
+            <Sparkles size={14} />
+            <span>{hero.badgeText || 'Indian Technology Services Company'}</span>
           </div>
 
-          <h1 className="hero-headline">
-            Engineering Tomorrow <br />
-            <span className="text-gradient font-bold">Through AI</span>
+          <h1 className="hero-title">
+            Building Digital Solutions That Move Your <span className="hero-title-highlight">{hero.highlight || 'Business Forward'}</span>
           </h1>
 
-          <p className="hero-subheading">
-            Empowering enterprises with intelligent automation, cloud modernization, cybersecurity, and scalable digital transformation solutions designed for the future.
+          <p className="hero-description">
+            {hero.subheading || 'OmNetaTech delivers practical, scalable and reliable technology solutions that help businesses improve operations, automate processes and build better digital experiences.'}
           </p>
 
-          <div className="hero-actions">
-            <button className="btn-primary" onClick={openConsultationModal}>
-              Start Your Project
+          <div className="hero-cta-group">
+            <button className="btn-primary-blue hero-btn" onClick={openConsultationModal}>
+              <span>{hero.primaryCta || 'Get a Free Consultation'}</span>
+              <ArrowRight size={16} />
             </button>
-            <button className="btn-secondary" onClick={scrollToServices}>
-              Explore Services
+            <button className="btn-secondary-outline hero-btn" onClick={scrollToServices}>
+              <span>{hero.secondaryCta || 'Explore Our Services'}</span>
             </button>
           </div>
 
-          {/* Trust Indicators */}
-          <div className="trust-indicators">
-            <div className="trust-item">
-              <span className="check-mark">✓</span>
-              <span className="trust-text">99.9% Uptime SLA</span>
-            </div>
-            <div className="trust-item">
-              <span className="check-mark">✓</span>
-              <span className="trust-text">Enterprise Security</span>
-            </div>
-            <div className="trust-item">
-              <span className="check-mark">✓</span>
-              <span className="trust-text">ISO-Compliant Processes</span>
-            </div>
-            <div className="trust-item">
-              <span className="check-mark">✓</span>
-              <span className="trust-text">Global Delivery Model</span>
-            </div>
+          {/* Small Trust Statement */}
+          <div className="hero-trust-statement">
+            <CheckCircle size={16} className="trust-check-icon" />
+            <span>{hero.trustStatement || 'Technology solutions designed around your business goals.'}</span>
           </div>
         </div>
 
-        {/* Right Side: Interactive Technology Ecosystem */}
-        <div className="hero-visual-side">
-          <div className="visual-wrapper animate-float">
-            {/* Outer Rotating Technology Globe */}
-            <div className="tech-globe-circle"></div>
-            <div className="tech-globe-circle-inner"></div>
-
-            {/* Neural Connections & Cloud Node Network */}
-            <svg className="neural-lines" viewBox="0 0 400 400">
-              {/* Connection Lines */}
-              <line x1="200" y1="200" x2="80" y2="120" stroke="rgba(0, 191, 255, 0.2)" strokeWidth="1.5" />
-              <line x1="200" y1="200" x2="320" y2="120" stroke="rgba(0, 191, 255, 0.2)" strokeWidth="1.5" />
-              <line x1="200" y1="200" x2="280" y2="280" stroke="rgba(109, 93, 252, 0.2)" strokeWidth="1.5" />
-              <line x1="200" y1="200" x2="120" y2="280" stroke="rgba(109, 93, 252, 0.2)" strokeWidth="1.5" />
-              
-              <line x1="80" y1="120" x2="320" y2="120" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" strokeDasharray="4 4" />
-              <line x1="120" y1="280" x2="280" y2="280" stroke="rgba(255, 255, 255, 0.05)" strokeWidth="1" strokeDasharray="4 4" />
-              
-              {/* Moving Pulses along lines */}
-              <circle r="4" fill="#00BFFF">
-                <animateMotion 
-                  path="M 200,200 L 80,120" 
-                  dur="3s" 
-                  repeatCount="indefinite" 
-                />
-              </circle>
-              <circle r="4" fill="#6D5DFC">
-                <animateMotion 
-                  path="M 200,200 L 320,120" 
-                  dur="4s" 
-                  repeatCount="indefinite" 
-                />
-              </circle>
-              <circle r="4" fill="#00BFFF">
-                <animateMotion 
-                  path="M 200,200 L 280,280" 
-                  dur="3.5s" 
-                  repeatCount="indefinite" 
-                />
-              </circle>
-            </svg>
-
-            {/* Floating Analytics Dashboard Panel */}
-            <div className="floating-card glass-panel card-analytics">
-              <div className="card-header">
-                <Activity size={12} className="card-icon-blue" />
-                <span>AI Core Load</span>
-                <span className="card-status-dot"></span>
+        {/* Right Column: Modern Software Architecture Visual */}
+        <div className="hero-visual">
+          <div className="architecture-card shadow-lg">
+            {/* Header bar */}
+            <div className="arch-header">
+              <div className="window-dots">
+                <span className="dot dot-red"></span>
+                <span className="dot dot-yellow"></span>
+                <span className="dot dot-green"></span>
               </div>
-              <div className="card-body-chart">
-                <div className="bar" style={{ height: '30%' }}></div>
-                <div className="bar active" style={{ height: '65%' }}></div>
-                <div className="bar" style={{ height: '45%' }}></div>
-                <div className="bar active" style={{ height: '80%' }}></div>
-                <div className="bar" style={{ height: '55%' }}></div>
-              </div>
-              <div className="card-metric">94.8 TFLOPS</div>
+              <div className="arch-title-tag">Solution Architecture Stack</div>
             </div>
 
-            {/* Floating Security System Panel */}
-            <div className="floating-card glass-panel card-security">
-              <div className="card-header">
-                <Shield size={12} className="card-icon-purple" />
-                <span>Threat Detection</span>
+            {/* Visual Layers Diagram: Frontend -> API -> Backend -> Database / Cloud */}
+            <div className="arch-body">
+              {/* Tier 1: Frontend */}
+              <div className="arch-layer layer-frontend">
+                <div className="layer-header">
+                  <div className="layer-icon-box">
+                    <Layers size={14} className="layer-icon" />
+                  </div>
+                  <span className="layer-name">Frontend Applications</span>
+                </div>
+                <div className="layer-chips">
+                  <span className="chip"><Smartphone size={11} /> Responsive Web</span>
+                  <span className="chip"><Smartphone size={11} /> Mobile Apps</span>
+                  <span className="chip"><Code2 size={11} /> Business Portals</span>
+                </div>
               </div>
-              <div className="card-log">
-                <div className="log-line text-cyan">&gt;_ Decrypting handshake...</div>
-                <div className="log-line text-green">&gt;_ Status: 100% SECURE</div>
+
+              {/* Connecting Step: API */}
+              <div className="arch-connector">
+                <div className="connector-line"></div>
+                <div className="connector-badge">
+                  <span>↓</span>
+                  <span>API Integration Layer (REST / GraphQL)</span>
+                  <span>↓</span>
+                </div>
+                <div className="connector-line"></div>
+              </div>
+
+              {/* Tier 2: Backend */}
+              <div className="arch-layer layer-backend">
+                <div className="layer-header">
+                  <div className="layer-icon-box">
+                    <Code2 size={14} className="layer-icon" />
+                  </div>
+                  <span className="layer-name">Backend & Business Logic</span>
+                </div>
+                <div className="layer-chips">
+                  <span className="chip">Modular Microservices</span>
+                  <span className="chip">Automated Workflows</span>
+                  <span className="chip">Custom Logic</span>
+                </div>
+              </div>
+
+              {/* Connecting Step: Data Bus */}
+              <div className="arch-connector">
+                <div className="connector-line"></div>
+                <div className="connector-badge">
+                  <span>↓</span>
+                  <span>Secure Cloud Data Layer</span>
+                  <span>↓</span>
+                </div>
+                <div className="connector-line"></div>
+              </div>
+
+              {/* Tier 3: Database & Cloud */}
+              <div className="arch-layer layer-infra">
+                <div className="layer-header">
+                  <div className="layer-icon-box">
+                    <Cloud size={14} className="layer-icon" />
+                  </div>
+                  <span className="layer-name">Database & Cloud Foundation</span>
+                </div>
+                <div className="layer-chips">
+                  <span className="chip"><Database size={11} /> Scalable Database</span>
+                  <span className="chip"><Cloud size={11} /> Cloud Hosting</span>
+                  <span className="chip"><Shield size={11} /> Data Protection</span>
+                </div>
               </div>
             </div>
 
-            {/* Central Engine Node */}
-            <div className="central-node shadow-premium">
-              <div className="pulse-ring"></div>
-              <div className="pulse-ring-slow"></div>
-              <Cpu size={32} className="central-icon" />
-            </div>
-
-            {/* Surrounding Nodes */}
-            <div className="tech-node node-nw">
-              <Terminal size={16} />
-            </div>
-            <div className="tech-node node-ne">
-              <Database size={16} />
-            </div>
-            <div className="tech-node node-se">
-              <CloudLightning size={16} />
-            </div>
-            <div className="tech-node node-sw">
-              <Shield size={16} />
+            {/* Architecture Footer Status */}
+            <div className="arch-footer">
+              <div className="arch-status-pill">
+                <span className="live-indicator"></span>
+                <span>Production-Ready Engineering</span>
+              </div>
+              <span className="arch-quality-tag">Clean Architecture</span>
             </div>
           </div>
         </div>
       </div>
 
+      {/* Hero Trust Capability Area */}
+      <div className="hero-trust-bar">
+        <div className="container">
+          <div className="trust-grid">
+            {capabilities.map((item, idx) => (
+              <div key={idx} className="trust-card">
+                <div className="trust-card-icon">
+                  <CheckCircle size={18} />
+                </div>
+                <div className="trust-card-content">
+                  <div className="trust-card-title">{item.title}</div>
+                  <div className="trust-card-desc">{item.desc}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
       <style>{`
-        .hero-container {
-          min-height: 100vh;
+        .hero-section {
           position: relative;
-          background-color: var(--color-navy-dark);
-          background-image: var(--grad-hero);
-          display: flex;
-          align-items: center;
-          padding-top: 100px;
-          padding-bottom: 60px;
+          background: linear-gradient(180deg, #FFFFFF 0%, #F7FAFC 100%);
+          padding-top: 60px;
+          padding-bottom: 0;
           overflow: hidden;
+          border-bottom: 1px solid var(--color-border);
         }
 
-        .hero-content {
+        .hero-pattern {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-image: 
+            radial-gradient(rgba(23, 105, 224, 0.04) 1px, transparent 1px);
+          background-size: 28px 28px;
+          pointer-events: none;
+        }
+
+        .hero-container {
           position: relative;
-          z-index: 10;
+          z-index: 2;
           display: grid;
-          grid-template-columns: 1.1fr 0.9fr;
+          grid-template-columns: 1.15fr 0.85fr;
+          gap: 48px;
           align-items: center;
-          gap: 40px;
-          padding: 0 24px;
+          padding-bottom: 72px;
         }
 
-        .hero-text-side {
+        /* Left Copy */
+        .hero-content {
           display: flex;
           flex-direction: column;
           align-items: flex-start;
-          text-align: left;
         }
 
         .hero-badge {
-          margin-bottom: 24px;
-        }
-        
-        .badge-sparkle {
-          animation: pulseGlow 1.5s infinite;
-        }
-
-        .hero-headline {
-          font-size: clamp(2.5rem, 5vw, 4rem);
-          font-weight: 800;
-          line-height: 1.15;
-          letter-spacing: -1.5px;
           margin-bottom: 20px;
         }
 
-        .hero-subheading {
-          font-size: clamp(1rem, 1.2vw, 1.15rem);
-          color: var(--color-gray-medium);
+        .hero-title {
+          font-size: clamp(2.4rem, 4.2vw, 3.6rem);
+          font-weight: 800;
+          color: var(--color-primary-navy);
+          line-height: 1.16;
+          letter-spacing: -0.03em;
+          margin-bottom: 22px;
+        }
+
+        .hero-title-highlight {
+          color: var(--color-primary-blue);
+          position: relative;
+          display: inline-block;
+        }
+
+        .hero-description {
+          font-size: clamp(1.05rem, 1.3vw, 1.18rem);
+          color: var(--color-text-secondary);
+          line-height: 1.65;
           margin-bottom: 36px;
-          max-width: 580px;
-          line-height: 1.6;
+          max-width: 600px;
         }
 
-        .hero-actions {
-          display: flex;
-          gap: 16px;
-          margin-bottom: 48px;
-          width: 100%;
-        }
-
-        /* Buttons Styling */
-        .btn-primary {
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-cyan) 100%);
-          border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.95rem;
-          padding: 14px 28px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          box-shadow: 0 4px 15px rgba(0, 191, 255, 0.25);
-          transition: var(--transition-fast);
-        }
-
-        .btn-primary:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 25px rgba(0, 191, 255, 0.4), 0 0 20px rgba(109, 93, 252, 0.2);
-        }
-
-        .btn-secondary {
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.95rem;
-          padding: 14px 28px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          transition: var(--transition-fast);
-        }
-
-        .btn-secondary:hover {
-          background: rgba(255, 255, 255, 0.08);
-          border-color: var(--color-cyan);
-          transform: translateY(-2px);
-        }
-
-        /* Trust indicators styling */
-        .trust-indicators {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
-          max-width: 500px;
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
-          padding-top: 24px;
-        }
-
-        .trust-item {
+        .hero-cta-group {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 16px;
+          margin-bottom: 28px;
+          flex-wrap: wrap;
         }
 
-        .check-mark {
-          color: var(--color-cyan);
-          font-weight: 700;
-          font-size: 1rem;
+        .hero-btn {
+          padding: 14px 28px;
+          font-size: 0.96rem;
         }
 
-        .trust-text {
-          font-size: 0.85rem;
-          color: var(--color-gray-medium);
+        .hero-trust-statement {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 0.9rem;
+          color: var(--color-primary-navy);
           font-weight: 500;
         }
 
-        /* Right side tech illustration */
-        .hero-visual-side {
-          display: flex;
-          justify-content: center;
-          align-items: center;
+        .trust-check-icon {
+          color: var(--color-success);
+          flex-shrink: 0;
+        }
+
+        /* Right Visual */
+        .hero-visual {
           position: relative;
-          height: 100%;
         }
 
-        .visual-wrapper {
-          position: relative;
-          width: 400px;
-          height: 400px;
+        .architecture-card {
+          background: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-lg);
+          overflow: hidden;
+          background: #FFFFFF;
+          box-shadow: 0 16px 36px rgba(11, 31, 58, 0.08);
+          animation: subtleFloat 6s ease-in-out infinite;
         }
 
-        .tech-globe-circle {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          border: 1px dashed rgba(0, 191, 255, 0.15);
-          border-radius: 50%;
-          animation: spin 30s linear infinite;
+        @keyframes subtleFloat {
+          0%, 100% {
+            transform: translateY(0px);
+          }
+          50% {
+            transform: translateY(-5px);
+          }
         }
 
-        .tech-globe-circle-inner {
-          position: absolute;
-          top: 40px;
-          left: 40px;
-          width: calc(100% - 80px);
-          height: calc(100% - 80px);
-          border: 1px solid rgba(109, 93, 252, 0.1);
-          border-radius: 50%;
-          animation: spin 15s linear infinite reverse;
+        @media (prefers-reduced-motion: reduce) {
+          .architecture-card {
+            animation: none !important;
+          }
         }
 
-        .neural-lines {
-          position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
-          pointer-events: none;
-        }
-
-        /* Central Node Engine */
-        .central-node {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 76px;
-          height: 76px;
-          background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-royal) 100%);
-          border: 2px solid var(--color-cyan);
-          border-radius: 50%;
+        .arch-header {
           display: flex;
           align-items: center;
-          justify-content: center;
-          z-index: 5;
+          justify-content: space-between;
+          padding: 12px 18px;
+          background: #F1F5F9;
+          border-bottom: 1px solid var(--color-border);
         }
 
-        .central-icon {
-          color: var(--color-cyan);
-          filter: drop-shadow(0 0 5px var(--color-cyan));
-        }
-
-        .pulse-ring, .pulse-ring-slow {
-          position: absolute;
-          width: 100%;
-          height: 100%;
-          border: 1.5px solid var(--color-cyan);
-          border-radius: 50%;
-          opacity: 0;
-          pointer-events: none;
-        }
-
-        .pulse-ring {
-          animation: ripple 2s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
-        }
-        .pulse-ring-slow {
-          animation: ripple 3s cubic-bezier(0.1, 0.8, 0.3, 1) infinite 0.8s;
-          border-color: var(--color-purple);
-        }
-
-        /* Tech Orbiting Nodes */
-        .tech-node {
-          position: absolute;
-          width: 36px;
-          height: 36px;
-          background: var(--color-navy);
-          border: 1.5px solid rgba(255, 255, 255, 0.1);
-          border-radius: 50%;
+        .window-dots {
           display: flex;
-          align-items: center;
-          justify-content: center;
-          color: var(--color-white-pure);
-          transition: var(--transition-fast);
-          z-index: 4;
+          gap: 6px;
         }
 
-        .tech-node:hover {
-          color: var(--color-cyan);
-          border-color: var(--color-cyan);
-          box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
+        .dot {
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
         }
 
-        .node-nw { top: 100px; left: 60px; }
-        .node-ne { top: 100px; right: 60px; }
-        .node-se { bottom: 100px; right: 60px; }
-        .node-sw { bottom: 100px; left: 60px; }
+        .dot-red { background: #FF5F56; }
+        .dot-yellow { background: #FFBD2E; }
+        .dot-green { background: #27C93F; }
 
-        /* Floating Dashboard Cards styling */
-        .floating-card {
-          position: absolute;
-          padding: 12px 16px;
-          border-radius: var(--border-radius-md);
-          box-shadow: var(--shadow-lg);
-          border: 1px solid rgba(255, 255, 255, 0.08);
-          z-index: 6;
-          backdrop-filter: blur(8px);
-          -webkit-backdrop-filter: blur(8px);
+        .arch-title-tag {
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: var(--color-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
-        .glass-panel {
-          background: rgba(7, 20, 38, 0.7);
-        }
-
-        .card-analytics {
-          top: 30px;
-          left: -40px;
-          width: 140px;
+        .arch-body {
+          padding: 22px 24px;
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 12px;
+          background: #FAFBFD;
         }
 
-        .card-header {
+        .arch-layer {
+          background: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 12px 16px;
+          box-shadow: var(--shadow-sm);
+          transition: all var(--transition-fast);
+        }
+
+        .arch-layer:hover {
+          border-color: var(--color-primary-blue);
+          transform: translateY(-1px);
+        }
+
+        .layer-header {
           display: flex;
           align-items: center;
+          gap: 8px;
+          margin-bottom: 8px;
+        }
+
+        .layer-icon-box {
+          width: 22px;
+          height: 22px;
+          border-radius: 4px;
+          background: var(--color-light-blue);
+          color: var(--color-primary-blue);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        .layer-icon {
+          color: var(--color-primary-blue);
+        }
+
+        .layer-name {
+          font-size: 0.84rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+        }
+
+        .layer-chips {
+          display: flex;
+          flex-wrap: wrap;
           gap: 6px;
+        }
+
+        .chip {
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          background: var(--color-light-blue);
+          color: var(--color-primary-navy);
+          border: 1px solid rgba(23, 105, 224, 0.15);
+          padding: 3px 8px;
+          border-radius: var(--radius-xs);
+          font-size: 0.72rem;
+          font-weight: 600;
+        }
+
+        /* Connectors */
+        .arch-connector {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+        }
+
+        .connector-line {
+          flex: 1;
+          height: 1px;
+          background: #CBD5E1;
+        }
+
+        .connector-badge {
           font-family: var(--font-mono);
           font-size: 0.65rem;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          color: var(--color-gray-medium);
+          color: var(--color-primary-blue);
+          background: #EEF4FC;
+          border: 1px solid rgba(23, 105, 224, 0.12);
+          padding: 2px 8px;
+          border-radius: 4px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          font-weight: 600;
         }
 
-        .card-icon-blue { color: var(--color-cyan); }
-        .card-icon-purple { color: var(--color-purple); }
+        .arch-footer {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 18px;
+          background: var(--color-white);
+          border-top: 1px solid var(--color-border);
+          font-size: 0.76rem;
+        }
 
-        .card-status-dot {
-          width: 6px;
-          height: 6px;
-          background: #10B981;
+        .arch-status-pill {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          color: var(--color-primary-navy);
+          font-weight: 600;
+        }
+
+        .live-indicator {
+          width: 7px;
+          height: 7px;
+          background: var(--color-success);
           border-radius: 50%;
-          margin-left: auto;
-          box-shadow: 0 0 6px #10B981;
+          box-shadow: 0 0 0 2px rgba(22, 138, 91, 0.15);
         }
 
-        .card-body-chart {
-          display: flex;
-          align-items: flex-end;
-          gap: 6px;
-          height: 40px;
-          padding: 4px 0;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .card-body-chart .bar {
-          flex: 1;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 2px;
-          transition: var(--transition-slow);
-        }
-
-        .card-body-chart .bar.active {
-          background: var(--color-cyan);
-        }
-
-        .card-metric {
+        .arch-quality-tag {
           font-family: var(--font-mono);
-          font-size: 0.85rem;
+          color: var(--color-primary-blue);
+          font-weight: 600;
+          font-size: 0.72rem;
+        }
+
+        /* Trust Bar */
+        .hero-trust-bar {
+          background-color: var(--color-white);
+          border-top: 1px solid var(--color-border);
+          padding: 28px 0;
+        }
+
+        .trust-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+
+        .trust-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 10px;
+          padding: 6px 10px;
+          border-radius: var(--radius-sm);
+          transition: var(--transition-fast);
+        }
+
+        .trust-card-icon {
+          color: var(--color-primary-blue);
+          flex-shrink: 0;
+          margin-top: 2px;
+        }
+
+        .trust-card-title {
+          font-size: 0.92rem;
           font-weight: 700;
-          color: var(--color-white-pure);
-          text-align: right;
+          color: var(--color-primary-navy);
+          margin-bottom: 2px;
         }
 
-        .card-security {
-          bottom: 20px;
-          right: -30px;
-          width: 170px;
-          display: flex;
-          flex-direction: column;
-          gap: 6px;
+        .trust-card-desc {
+          font-size: 0.8rem;
+          color: var(--color-text-secondary);
+          line-height: 1.4;
         }
 
-        .card-log {
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-        }
-
-        .log-line {
-          font-family: var(--font-mono);
-          font-size: 0.6rem;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-
-        .text-cyan { color: var(--color-cyan); }
-        .text-green { color: #10B981; }
-
-        /* Keyframes */
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @keyframes ripple {
-          0% {
-            transform: scale(1);
-            opacity: 0.6;
-          }
-          100% {
-            transform: scale(2.2);
-            opacity: 0;
-          }
-        }
-
-        @media (max-width: 991px) {
-          .hero-content {
+        @media (max-width: 1024px) {
+          .hero-container {
             grid-template-columns: 1fr;
             text-align: center;
-            gap: 60px;
+            gap: 36px;
+            padding-bottom: 48px;
           }
-          .hero-text-side {
+          .hero-content {
             align-items: center;
             text-align: center;
           }
-          .hero-actions {
+          .hero-cta-group {
             justify-content: center;
           }
-          .trust-indicators {
+          .trust-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+          .hero-visual {
+            max-width: 480px;
             margin: 0 auto;
+            width: 100%;
           }
-          .hero-visual-side {
-            order: -1;
-            margin-bottom: 20px;
+        }
+
+        @media (max-width: 640px) {
+          .trust-grid {
+            grid-template-columns: 1fr;
           }
-          .visual-wrapper {
-            width: 320px;
-            height: 320px;
+          .hero-cta-group {
+            flex-direction: column;
+            width: 100%;
           }
-          .node-nw { top: 80px; left: 40px; }
-          .node-ne { top: 80px; right: 40px; }
-          .node-se { bottom: 80px; right: 40px; }
-          .node-sw { bottom: 80px; left: 40px; }
-          .card-analytics { left: -10px; }
-          .card-security { right: -10px; }
+          .hero-btn {
+            width: 100%;
+          }
+          .arch-body {
+            padding: 14px;
+            gap: 8px;
+          }
+          .arch-layer {
+            padding: 10px 12px;
+          }
         }
       `}</style>
     </section>

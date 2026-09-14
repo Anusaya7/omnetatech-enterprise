@@ -1,100 +1,159 @@
 import { useState } from 'react';
-import { ArrowRight, Cpu, Server, ShieldCheck, Activity, X } from 'lucide-react';
+import { 
+  Code, ShoppingBag, Smartphone, Cpu, Database, 
+  ArrowRight, X, CheckCircle2, Globe, Layers, Cloud, Bot
+} from 'lucide-react';
+import { useCms } from '../context/CmsContext';
 
-export default function PortfolioSection() {
+const iconMap = {
+  Code, ShoppingBag, Smartphone, Cpu, Database,
+  Globe, Layers, Cloud, Bot
+};
+
+export default function PortfolioSection({ openConsultationModal }) {
+  const { portfolio: dynamicPortfolio } = useCms();
   const [selectedFilter, setSelectedFilter] = useState('all');
-  const [selectedProject, setSelectedProject] = useState(null);
+  const [activeProject, setActiveProject] = useState(null);
 
   const filters = [
-    { id: 'all', label: 'All Projects' },
-    { id: 'ai', label: 'Artificial Intelligence' },
-    { id: 'cloud', label: 'Cloud Systems' },
-    { id: 'sec', label: 'Cybersecurity' },
-    { id: 'auto', label: 'Automation' }
+    { id: 'all', label: 'All Solutions' },
+    { id: 'web', label: 'Web Applications' },
+    { id: 'mobile', label: 'Mobile Apps' },
+    { id: 'ecommerce', label: 'E-commerce' },
+    { id: 'automation', label: 'Automation' }
   ];
 
-  const projects = [
+  const defaultProjects = [
     {
       id: 1,
-      tag: 'ai',
-      title: 'AI-Driven Support Engine',
-      client: 'Global Logistics Corp',
-      metric: '88% Auto-Resolution Rate',
-      metricLabel: 'Customer tickets closed instantly',
-      icon: Cpu,
-      summary: 'Architecting a state-of-the-art conversational AI agent system powered by deep RAG to ingest internal service databases and resolve queries.',
-      challenge: 'The client was processing over 45,000 service requests daily with high operational costs and average response times exceeding 6 hours.',
-      approach: 'We developed a multi-agent orchestration framework connected to a private vector store database. We fine-tuned open-source models with specific industry-compliant vocabulary.',
-      result: 'Average resolution times dropped to under 90 seconds. Scaled agent infrastructure to support 15 languages, saving ₹35 Crore annually in labor costs.',
-      color: 'var(--color-royal)'
+      tag: 'web',
+      badge: 'Sample Project',
+      title: 'Business Management Platform',
+      category: 'Web Application',
+      icon: Database,
+      techStack: ['React', 'Node.js', 'PostgreSQL', 'AWS'],
+      summary: 'Centralized operations dashboard unifying client tracking, project milestones, and invoicing in one secure web portal.',
+      challenge: 'The business was struggling with disconnected spreadsheets, misplaced client communication, and delayed billing reconciliations.',
+      approach: 'Engineered a modular web application with role-based access, automated PDF invoice generation, and real-time operational status updates.',
+      deliverables: [
+        'Secure role-based dashboard for team and managers',
+        'Automated billing and invoice generation',
+        'Client task and milestone tracking module',
+        'Database optimization for fast search and filtering'
+      ]
     },
     {
       id: 2,
-      tag: 'auto',
-      title: 'Enterprise ERP Automation',
-      client: 'Apex Industrial Manufacturing',
-      metric: '4x Logistics Throughput',
-      metricLabel: 'Supply chain pipelines accelerated',
-      icon: Activity,
-      summary: 'Connecting legacy databases with intelligent SAP/Salesforce integrations, eliminating 12,000 monthly manual entry points.',
-      challenge: 'Siloed database records led to errors in order assembly, delayed tracking notifications, and significant inventory reporting drift.',
-      approach: 'Implemented custom RESTful data adapters linking inventory sensors with the core SAP database and built process automation bots to sync client CRM schedules.',
-      result: 'Achieved 99.9% inventory reporting alignment. Eliminated order verification delays, reducing typical factory shipping cycles from 4 days to 18 hours.',
-      color: '#4F46E5'
+      tag: 'ecommerce',
+      badge: 'Sample Project',
+      title: 'E-commerce Retail Website',
+      category: 'Digital Storefront',
+      icon: ShoppingBag,
+      techStack: ['Next.js', 'Node.js', 'Razorpay', 'MongoDB'],
+      summary: 'Modern, high-speed online shopping experience with seamless checkout, product catalogs, and inventory synchronization.',
+      challenge: 'Existing online store experienced slow loading speeds on mobile devices and high checkout drop-off rates.',
+      approach: 'Built a lightweight, responsive storefront with streamlined one-page checkout, Indian payment gateway integration, and automated order confirmation emails.',
+      deliverables: [
+        'Mobile-first responsive product catalog',
+        'Payment gateway integration (UPI, Cards, NetBanking)',
+        'Admin inventory and order dispatch panel',
+        'Automated customer order status notifications'
+      ]
     },
     {
       id: 3,
-      tag: 'cloud',
-      title: 'Global Cloud Modernization',
-      client: 'Nova Payments & Fintech',
-      metric: '35% Infrastructure Savings',
-      metricLabel: 'Cloud operations overhead cut',
-      icon: Server,
-      summary: 'Migrating a monolithic payment engine into a highly resilient multi-cloud architecture utilizing Kubernetes and secure cloud orchestration.',
-      challenge: 'High maintenance costs and severe scaling restrictions during seasonal payment traffic peaks resulted in occasional transaction losses.',
-      approach: 'Containerized the core API services, built auto-scaling Kubernetes nodes across AWS and Azure, and deployed Terraform scripts for multi-region backup systems.',
-      result: 'System capability scaled to handle 24,000 transactions/second (a 300% capacity increase) with zero recorded core service degradation.',
-      color: 'var(--color-cyan)'
+      tag: 'web',
+      badge: 'Selected Solution',
+      title: 'Service Booking & Inquiry Portal',
+      category: 'Custom Web Application',
+      icon: Code,
+      techStack: ['React', 'Express.js', 'PostgreSQL', 'Redis'],
+      summary: 'Automated booking workflow allowing customers to select services, pick available slots, and receive instant confirmations.',
+      challenge: 'Handling appointments manually via phone calls led to double bookings, customer wait times, and staff scheduling errors.',
+      approach: 'Created an intuitive booking portal with real-time calendar availability, automated reminder notifications, and an admin schedule overview.',
+      deliverables: [
+        'Interactive real-time calendar picker',
+        'Automated email and SMS confirmation triggers',
+        'Staff availability management dashboard',
+        'Customer inquiry intake and follow-up tracker'
+      ]
     },
     {
       id: 4,
-      tag: 'sec',
-      title: 'Zero Trust Cybersecurity',
-      client: 'OmniHealth Medical Network',
-      metric: 'Zero Breaches In 24 Months',
-      metricLabel: 'Continuous network security status',
-      icon: ShieldCheck,
-      summary: 'Designing a zero-trust network access model (ZTNA) combined with endpoint threat mitigation across 12,000 hospital terminals.',
-      challenge: 'Frequent security vulnerabilities, phishing incidents, and legacy Active Directory setups put critical HIPAA-regulated healthcare databases at risk.',
-      approach: 'Deployed identity protection protocols, established continuous network segment access verification, and launched an automated threat auditing console.',
-      result: 'Identified and isolated 4,800 phishing and script execution threats immediately at the gateway level. Achieved 100% HIPAA and SOC 2 audits.',
-      color: 'var(--color-purple)'
+      tag: 'mobile',
+      badge: 'Selected Solution',
+      title: 'Customer & Operations Mobile App',
+      category: 'Cross-Platform Mobile Application',
+      icon: Smartphone,
+      techStack: ['React Native', 'Node.js', 'Firebase', 'REST API'],
+      summary: 'Cross-platform Android and iOS application enabling on-the-go account management and real-time service tracking.',
+      challenge: 'Field staff and end users required reliable access to project information without needing a desktop computer.',
+      approach: 'Developed a cross-platform mobile application using modern frameworks, implementing offline caching and real-time cloud data sync.',
+      deliverables: [
+        'Cross-platform Android and iOS deployment',
+        'Offline-first local caching mechanism',
+        'Push notifications for critical status updates',
+        'Intuitive touch-optimized user interface'
+      ]
+    },
+    {
+      id: 5,
+      tag: 'automation',
+      badge: 'Sample Project',
+      title: 'Business Workflow Automation Pipeline',
+      category: 'Automation Platform',
+      icon: Cpu,
+      techStack: ['Python', 'Node.js', 'Docker', 'Webhooks'],
+      summary: 'Integrated data pipeline synchronizing incoming website inquiries directly with team communication channels and databases.',
+      challenge: 'Valuable customer inquiries were sitting in mailboxes for hours before team members noticed and manually responded.',
+      approach: 'Configured automated API webhooks linking contact forms, lead databases, and instant notifications to alert the team immediately.',
+      deliverables: [
+        'Instant multi-channel notifications on new lead arrival',
+        'Centralized lead capture and deduplication',
+        'Automated acknowledgement emails to clients',
+        'Daily operational summary digests'
+      ]
     }
   ];
 
-  const filteredProjects = selectedFilter === 'all' 
-    ? projects 
+  const projects = dynamicPortfolio && dynamicPortfolio.length > 0
+    ? dynamicPortfolio.map(p => ({
+        id: p.id,
+        tag: p.tag || 'web',
+        badge: p.badge || 'Sample Project',
+        title: p.title,
+        category: p.category || 'Technology Solution',
+        icon: iconMap[p.icon] || Code,
+        techStack: Array.isArray(p.techStack) && p.techStack.length > 0 ? p.techStack : ['React', 'Node.js', 'Cloud', 'SQL'],
+        summary: p.summary || '',
+        challenge: p.challenge || '',
+        approach: p.approach || '',
+        deliverables: Array.isArray(p.deliverables) ? p.deliverables : []
+      }))
+    : defaultProjects;
+
+  const filteredProjects = selectedFilter === 'all'
+    ? projects
     : projects.filter(p => p.tag === selectedFilter);
 
   return (
-    <section id="portfolio" className="portfolio-section">
-      <div className="world-map-bg"></div>
+    <section id="portfolio" className="portfolio-root section section-white">
       <div className="container">
         
-        {/* Section Header */}
-        <div className="portfolio-header">
-          <div className="badge">Success Stories</div>
-          <h2 className="portfolio-title">Enterprise Case Studies</h2>
-          <p className="portfolio-sub">
-            Realizing massive scale, ironclad security, and cost reductions. Explore details on our key customer transformations.
+        {/* Header */}
+        <div className="section-header">
+          <div className="badge">Our Work</div>
+          <h2 className="section-title">Selected Work & Solutions</h2>
+          <p className="section-subtitle">
+            Explore sample projects and technical architectures demonstrating how OmNetaTech builds practical, dependable digital solutions for businesses.
           </p>
 
-          {/* Filter Tabs */}
-          <div className="filter-tabs-row">
+          {/* Filter Pills */}
+          <div className="portfolio-filter-bar">
             {filters.map(f => (
-              <button 
+              <button
                 key={f.id}
-                className={`filter-tab-btn ${selectedFilter === f.id ? 'active' : ''}`}
+                className={`filter-pill-btn ${selectedFilter === f.id ? 'active-filter' : ''}`}
                 onClick={() => setSelectedFilter(f.id)}
               >
                 {f.label}
@@ -103,107 +162,130 @@ export default function PortfolioSection() {
           </div>
         </div>
 
-        {/* Case Study Cards Grid */}
-        <div className="portfolio-grid">
+        {/* Projects Grid */}
+        <div className="projects-grid">
           {filteredProjects.map((proj) => {
-            const IconComponent = proj.icon;
+            const Icon = proj.icon;
             return (
               <div 
                 key={proj.id} 
-                className="project-card shadow-md"
-                onClick={() => setSelectedProject(proj)}
+                className="project-card shadow-sm"
+                onClick={() => setActiveProject(proj)}
               >
-                <div className="project-accent-bar" style={{ backgroundColor: proj.color }}></div>
-                
-                <div className="project-body">
-                  <div className="project-meta-top">
-                    <span className="project-client-name">{proj.client}</span>
-                    <div className="project-icon-box" style={{ color: proj.color }}>
-                      <IconComponent size={20} />
-                    </div>
+                <div className="project-card-header">
+                  <div className="project-icon-box">
+                    <Icon size={20} />
                   </div>
+                  <span className="project-badge-type">{proj.badge}</span>
+                </div>
 
-                  <h3 className="project-title-h3">{proj.title}</h3>
-                  <p className="project-desc-p">{proj.summary}</p>
-                  
-                  {/* Highlighting specific metric */}
-                  <div className="project-metric-block" style={{ borderLeft: `3px solid ${proj.color}`, background: 'rgba(255, 255, 255, 0.02)' }}>
-                    <div className="project-metric-value" style={{ color: proj.color }}>{proj.metric}</div>
-                    <div className="project-metric-label">{proj.metricLabel}</div>
-                  </div>
+                <div className="project-category-sub">{proj.category}</div>
+                <h3 className="project-card-title">{proj.title}</h3>
+                <p className="project-card-summary">{proj.summary}</p>
 
-                  <div className="project-card-action">
-                    <span>View Architectural Details</span>
-                    <ArrowRight size={16} className="arrow-project" />
+                {proj.techStack && proj.techStack.length > 0 && (
+                  <div className="project-tech-pills">
+                    {proj.techStack.map((tech, i) => (
+                      <span key={i} className="tech-pill">{tech}</span>
+                    ))}
                   </div>
+                )}
+
+                <div className="project-deliverables-mini">
+                  <div className="mini-deliverables-title">Key Components:</div>
+                  <ul className="mini-deliverables-list">
+                    {proj.deliverables.slice(0, 3).map((item, i) => (
+                      <li key={i} className="mini-item">
+                        <CheckCircle2 size={13} className="mini-check" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="project-card-action">
+                  <span>View Project Details</span>
+                  <ArrowRight size={14} className="arrow-transition" />
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Expandable Case Study Details Modal */}
-        {selectedProject && (
-          <div className="case-study-modal-backdrop" onClick={() => setSelectedProject(null)}>
-            <div className="case-study-modal-body shadow-premium" onClick={(e) => e.stopPropagation()}>
-              <button className="modal-close-btn" onClick={() => setSelectedProject(null)}>
-                <X size={24} />
-              </button>
-              
-              <div className="modal-accent-top" style={{ backgroundColor: selectedProject.color }}></div>
+        {/* Project Details Modal */}
+        {activeProject && (
+          <div className="project-modal-backdrop" onClick={() => setActiveProject(null)}>
+            <div className="project-modal-content shadow-xl" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-top-bar">
+                <div className="modal-badge-row">
+                  <span className="project-badge-type">{activeProject.badge}</span>
+                  <span className="modal-cat-text">{activeProject.category}</span>
+                </div>
+                <button 
+                  className="modal-close-icon"
+                  onClick={() => setActiveProject(null)}
+                  aria-label="Close modal"
+                >
+                  <X size={20} />
+                </button>
+              </div>
 
-              <div className="modal-main-content">
-                <div className="modal-header-section">
-                  <span className="modal-client-label">{selectedProject.client}</span>
-                  <h3 className="modal-title-h3">{selectedProject.title}</h3>
+              <div className="modal-content-body">
+                <h3 className="modal-project-title">{activeProject.title}</h3>
+                <p className="modal-project-summary">{activeProject.summary}</p>
+
+                {activeProject.techStack && activeProject.techStack.length > 0 && (
+                  <div className="modal-tech-stack-row">
+                    <span className="modal-tech-stack-label">Technology Stack:</span>
+                    <div className="modal-tech-pills">
+                      {activeProject.techStack.map((tech, i) => (
+                        <span key={i} className="tech-pill">{tech}</span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="modal-challenge-solution-grid">
+                  <div className="modal-block">
+                    <h4 className="modal-block-heading">Business Challenge:</h4>
+                    <p className="modal-block-text">{activeProject.challenge}</p>
+                  </div>
+
+                  <div className="modal-block">
+                    <h4 className="modal-block-heading">Our Engineering Approach:</h4>
+                    <p className="modal-block-text">{activeProject.approach}</p>
+                  </div>
                 </div>
 
-                {/* Grid for case study details */}
-                <div className="modal-detail-grid">
-                  <div className="modal-text-col">
-                    <div className="modal-text-block">
-                      <h4 className="modal-block-title">The Challenge</h4>
-                      <p className="modal-block-text">{selectedProject.challenge}</p>
-                    </div>
+                <div className="modal-deliverables-section">
+                  <h4 className="modal-block-heading">Architecture & Features Delivered:</h4>
+                  <ul className="modal-full-list">
+                    {activeProject.deliverables.map((item, idx) => (
+                      <li key={idx} className="modal-list-item">
+                        <CheckCircle2 size={16} className="modal-check-icon" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-                    <div className="modal-text-block">
-                      <h4 className="modal-block-title">Our Technical Approach</h4>
-                      <p className="modal-block-text">{selectedProject.approach}</p>
-                    </div>
-
-                    <div className="modal-text-block">
-                      <h4 className="modal-block-title">Business Outcomes</h4>
-                      <p className="modal-block-text">{selectedProject.result}</p>
-                    </div>
-                  </div>
-
-                  <div className="modal-metric-col" style={{ background: 'rgba(7, 20, 38, 0.4)' }}>
-                    <div className="modal-icon-header" style={{ color: selectedProject.color }}>
-                      <selectedProject.icon size={48} />
-                    </div>
-                    <div className="large-outcome-value" style={{ color: selectedProject.color }}>
-                      {selectedProject.metric}
-                    </div>
-                    <p className="large-outcome-desc">
-                      {selectedProject.metricLabel}
-                    </p>
-                    <div className="sla-guarantee">
-                      ✓ Zero Security Incidents Recorded<br />
-                      ✓ Full Knowledge Transfer Completed
-                    </div>
-                    <button 
-                      className="btn-modal-enquire" 
-                      onClick={() => {
-                        setSelectedProject(null);
-                        setTimeout(() => {
-                          const contactSec = document.getElementById('contact');
-                          if (contactSec) contactSec.scrollIntoView({ behavior: 'smooth' });
-                        }, 200);
-                      }}
-                    >
-                      Inquire About This Service
-                    </button>
-                  </div>
+                <div className="modal-action-bar">
+                  <button 
+                    className="btn-primary-blue"
+                    onClick={() => {
+                      setActiveProject(null);
+                      openConsultationModal();
+                    }}
+                  >
+                    <span>Discuss Similar Solution for Your Business</span>
+                    <ArrowRight size={16} />
+                  </button>
+                  <button 
+                    className="btn-secondary-outline"
+                    onClick={() => setActiveProject(null)}
+                  >
+                    Close
+                  </button>
                 </div>
               </div>
             </div>
@@ -213,201 +295,213 @@ export default function PortfolioSection() {
       </div>
 
       <style>{`
-        .portfolio-section {
-          background-color: var(--color-navy-dark);
-          padding: 100px 24px;
-          position: relative;
-          overflow: hidden;
+        .portfolio-root {
+          background-color: var(--color-white);
+          border-bottom: 1px solid var(--color-border);
         }
 
-        .portfolio-header {
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto 64px auto;
+        .portfolio-filter-bar {
           display: flex;
-          flex-direction: column;
           align-items: center;
-          position: relative;
-          z-index: 10;
-        }
-
-        .portfolio-title {
-          font-size: clamp(2rem, 3.5vw, 2.75rem);
-          color: var(--color-white-pure);
-          margin-top: 16px;
-          margin-bottom: 20px;
-          font-weight: 800;
-        }
-
-        .portfolio-sub {
-          font-size: 1.05rem;
-          color: var(--color-gray-medium);
-          line-height: 1.6;
-          margin-bottom: 40px;
-        }
-
-        /* Filter Tab Row */
-        .filter-tabs-row {
-          display: flex;
           justify-content: center;
           flex-wrap: wrap;
-          gap: 10px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 6px;
-          border-radius: var(--border-radius-md);
+          gap: 8px;
+          margin-top: 24px;
         }
 
-        .filter-tab-btn {
-          background: none;
-          border: none;
-          color: var(--color-gray-dark);
+        .filter-pill-btn {
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          color: var(--color-text-secondary);
           padding: 8px 18px;
-          font-family: var(--font-primary);
+          border-radius: var(--radius-full);
           font-size: 0.85rem;
           font-weight: 600;
           cursor: pointer;
-          border-radius: var(--border-radius-sm);
-          transition: var(--transition-fast);
+          transition: all var(--transition-fast);
         }
 
-        .filter-tab-btn:hover, .filter-tab-btn.active {
-          color: var(--color-cyan);
-          background: rgba(0, 191, 255, 0.1);
+        .filter-pill-btn:hover {
+          color: var(--color-primary-navy);
+          border-color: #CBD5E1;
         }
 
-        /* Portfolio Grid */
-        .portfolio-grid {
+        .active-filter {
+          background-color: var(--color-primary-blue) !important;
+          color: var(--color-white) !important;
+          border-color: var(--color-primary-blue) !important;
+          box-shadow: 0 2px 8px rgba(23, 105, 224, 0.2);
+        }
+
+        /* Projects Grid */
+        .projects-grid {
           display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 32px;
-          position: relative;
-          z-index: 10;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 28px;
         }
 
-        /* Case study card layout */
         .project-card {
-          background: rgba(13, 34, 60, 0.35);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: var(--border-radius-lg);
-          overflow: hidden;
-          transition: all 0.3s ease;
-          cursor: pointer;
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
+          padding: 28px 24px;
           display: flex;
           flex-direction: column;
-        }
-
-        .project-accent-bar {
-          height: 5px;
-          width: 100%;
+          cursor: pointer;
+          transition: all var(--transition-fast);
         }
 
         .project-card:hover {
-          transform: translateY(-5px);
-          border-color: rgba(0, 191, 255, 0.2);
-          box-shadow: var(--shadow-lg);
-          background: rgba(13, 34, 60, 0.55);
+          background: var(--color-white);
+          border-color: var(--color-primary-blue);
+          box-shadow: var(--shadow-hover);
+          transform: translateY(-4px);
         }
 
-        .project-body {
-          padding: 36px;
-          display: flex;
-          flex-direction: column;
-          height: 100%;
-          flex-grow: 1;
-        }
-
-        .project-meta-top {
+        .project-card-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 18px;
-        }
-
-        .project-client-name {
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: var(--color-cyan);
-          text-transform: uppercase;
-          letter-spacing: 1px;
+          margin-bottom: 16px;
         }
 
         .project-icon-box {
-          background: rgba(255, 255, 255, 0.03);
-          width: 36px;
-          height: 36px;
-          border-radius: 50%;
+          width: 40px;
+          height: 40px;
+          border-radius: var(--radius-sm);
+          background: var(--color-light-blue);
+          color: var(--color-primary-blue);
           display: flex;
           align-items: center;
           justify-content: center;
+          transition: all var(--transition-fast);
         }
 
-        .project-title-h3 {
-          font-size: 1.4rem;
-          color: var(--color-white-pure);
-          margin-bottom: 12px;
+        .project-card:hover .project-icon-box {
+          background: var(--color-primary-blue);
+          color: var(--color-white);
+        }
+
+        .project-badge-type {
+          font-family: var(--font-mono);
+          font-size: 0.7rem;
+          font-weight: 600;
+          color: var(--color-primary-blue);
+          background: var(--color-light-blue);
+          border: 1px solid rgba(23, 105, 224, 0.15);
+          padding: 3px 10px;
+          border-radius: var(--radius-full);
+          text-transform: uppercase;
+        }
+
+        .project-category-sub {
+          font-size: 0.78rem;
+          color: var(--color-text-secondary);
+          font-weight: 600;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          margin-bottom: 6px;
+        }
+
+        .project-card-title {
+          font-size: 1.25rem;
+          color: var(--color-primary-navy);
           font-weight: 700;
+          margin-bottom: 10px;
+          line-height: 1.35;
         }
 
-        .project-desc-p {
-          font-size: 0.9rem;
-          color: var(--color-gray-medium);
-          line-height: 1.6;
-          margin-bottom: 24px;
+        .project-card-summary {
+          font-size: 0.86rem;
+          color: var(--color-text-secondary);
+          line-height: 1.55;
+          margin-bottom: 16px;
         }
 
-        /* Metric Block inside Card */
-        .project-metric-block {
-          padding: 16px 20px;
-          border-radius: var(--border-radius-sm);
-          margin-bottom: 24px;
+        .project-tech-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+          margin-bottom: 18px;
+        }
+
+        .tech-pill {
+          font-family: var(--font-mono);
+          font-size: 0.72rem;
+          font-weight: 600;
+          color: var(--color-primary-navy);
+          background: #F1F5F9;
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-xs);
+          padding: 3px 8px;
+          line-height: 1.3;
+        }
+
+        .project-deliverables-mini {
+          border-top: 1px solid var(--color-border);
+          padding-top: 14px;
           margin-top: auto;
+          margin-bottom: 18px;
         }
 
-        .project-metric-value {
-          font-family: var(--font-title);
-          font-size: 1.5rem;
-          font-weight: 800;
+        .mini-deliverables-title {
+          font-size: 0.74rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+          text-transform: uppercase;
+          margin-bottom: 8px;
         }
 
-        .project-metric-label {
-          font-size: 0.75rem;
-          color: var(--color-gray-dark);
+        .mini-deliverables-list {
+          list-style: none;
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+
+        .mini-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 0.8rem;
+          color: var(--color-text);
+          line-height: 1.4;
+        }
+
+        .mini-check {
+          color: var(--color-primary-blue);
           margin-top: 2px;
+          flex-shrink: 0;
         }
 
         .project-card-action {
           display: flex;
           align-items: center;
-          gap: 8px;
-          font-size: 0.85rem;
-          color: var(--color-white-pure);
+          gap: 6px;
+          font-size: 0.84rem;
           font-weight: 600;
-          transition: var(--transition-fast);
+          color: var(--color-primary-blue);
+          border-top: 1px solid var(--color-border);
+          padding-top: 14px;
         }
 
-        .project-card:hover .project-card-action {
-          color: var(--color-cyan);
-        }
-
-        .arrow-project {
+        .arrow-transition {
           transition: transform var(--transition-fast);
         }
 
-        .project-card:hover .arrow-project {
+        .project-card:hover .arrow-transition {
           transform: translateX(4px);
         }
 
-        /* Modal styling */
-        .case-study-modal-backdrop {
+        /* Modal */
+        .project-modal-backdrop {
           position: fixed;
           top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(3, 10, 20, 0.85);
-          backdrop-filter: blur(15px);
-          -webkit-backdrop-filter: blur(15px);
+          background: rgba(11, 31, 58, 0.5);
+          backdrop-filter: blur(4px);
           display: flex;
           align-items: center;
           justify-content: center;
@@ -415,164 +509,162 @@ export default function PortfolioSection() {
           z-index: 2000;
         }
 
-        .case-study-modal-body {
-          background: var(--color-navy);
-          border: 1px solid rgba(0, 191, 255, 0.2);
-          border-radius: var(--border-radius-lg);
-          max-width: 900px;
+        .project-modal-content {
+          background: var(--color-white);
+          border-radius: var(--radius-lg);
+          max-width: 720px;
           width: 100%;
-          position: relative;
+          border: 1px solid var(--color-border);
           overflow: hidden;
-          animation: modalAppear 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          animation: fadeIn 0.25s ease-out;
         }
 
-        .modal-close-btn {
-          position: absolute;
-          top: 20px;
-          right: 20px;
+        .modal-top-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 18px 28px;
+          background: #F8FAFC;
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .modal-badge-row {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .modal-cat-text {
+          font-size: 0.82rem;
+          color: var(--color-text-secondary);
+          font-weight: 600;
+        }
+
+        .modal-close-icon {
           background: none;
           border: none;
-          color: var(--color-gray-dark);
+          color: var(--color-text-secondary);
           cursor: pointer;
-          transition: var(--transition-fast);
-          z-index: 10;
         }
 
-        .modal-close-btn:hover {
-          color: var(--color-white-pure);
+        .modal-close-icon:hover {
+          color: var(--color-primary-navy);
         }
 
-        .modal-accent-top {
-          height: 6px;
+        .modal-content-body {
+          padding: 28px;
         }
 
-        .modal-main-content {
-          padding: 48px;
-        }
-
-        .modal-header-section {
-          margin-bottom: 32px;
-        }
-
-        .modal-client-label {
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: var(--color-cyan);
-          text-transform: uppercase;
-          letter-spacing: 2px;
-        }
-
-        .modal-title-h3 {
-          font-size: 2rem;
-          color: var(--color-white-pure);
+        .modal-project-title {
+          font-size: 1.65rem;
           font-weight: 800;
-          margin-top: 6px;
+          color: var(--color-primary-navy);
+          margin-bottom: 10px;
         }
 
-        .modal-detail-grid {
-          display: grid;
-          grid-template-columns: 1.2fr 0.8fr;
-          gap: 40px;
-        }
-
-        .modal-text-col {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .modal-block-title {
-          font-family: var(--font-title);
-          font-size: 1.05rem;
-          color: var(--color-cyan);
-          margin-bottom: 8px;
-          font-weight: 700;
-        }
-
-        .modal-block-text {
+        .modal-project-summary {
           font-size: 0.95rem;
-          color: var(--color-gray-medium);
+          color: var(--color-text-secondary);
           line-height: 1.6;
+          margin-bottom: 20px;
         }
 
-        .modal-metric-col {
-          border-radius: var(--border-radius-md);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 32px;
+        .modal-tech-stack-row {
           display: flex;
-          flex-direction: column;
           align-items: center;
-          text-align: center;
+          gap: 12px;
+          flex-wrap: wrap;
+          margin-bottom: 24px;
+          padding-bottom: 16px;
+          border-bottom: 1px solid var(--color-border);
         }
 
-        .modal-icon-header {
-          margin-bottom: 16px;
+        .modal-tech-stack-label {
+          font-size: 0.8rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
         }
 
-        .large-outcome-value {
-          font-family: var(--font-title);
-          font-size: 2.25rem;
-          font-weight: 800;
-          line-height: 1.1;
-          margin-bottom: 8px;
+        .modal-tech-pills {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
         }
 
-        .large-outcome-desc {
-          font-size: 0.85rem;
-          color: var(--color-gray-medium);
+        .modal-challenge-solution-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 20px;
+          background: var(--color-bg);
+          padding: 20px;
+          border-radius: var(--radius-md);
+          border: 1px solid var(--color-border);
           margin-bottom: 24px;
         }
 
-        .sla-guarantee {
-          font-family: var(--font-mono);
-          font-size: 0.75rem;
-          color: #10B981;
-          line-height: 1.8;
-          text-align: left;
-          margin-bottom: 32px;
-          width: 100%;
+        .modal-block-heading {
+          font-size: 0.82rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          margin-bottom: 8px;
         }
 
-        .btn-modal-enquire {
-          width: 100%;
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-purple) 100%);
-          border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.9rem;
-          padding: 12px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          transition: var(--transition-fast);
+        .modal-block-text {
+          font-size: 0.86rem;
+          color: var(--color-text);
+          line-height: 1.6;
         }
 
-        .btn-modal-enquire:hover {
-          box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
-          transform: translateY(-2px);
+        .modal-full-list {
+          list-style: none;
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+          margin-top: 12px;
+          margin-bottom: 28px;
         }
 
-        @keyframes modalAppear {
-          from {
-            opacity: 0;
-            transform: scale(0.95);
+        .modal-list-item {
+          display: flex;
+          align-items: flex-start;
+          gap: 8px;
+          font-size: 0.85rem;
+          color: var(--color-text);
+          line-height: 1.45;
+        }
+
+        .modal-check-icon {
+          color: var(--color-success);
+          margin-top: 2px;
+          flex-shrink: 0;
+        }
+
+        .modal-action-bar {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border-top: 1px solid var(--color-border);
+          padding-top: 20px;
+          flex-wrap: wrap;
+        }
+
+        @media (max-width: 1024px) {
+          .projects-grid {
+            grid-template-columns: repeat(2, 1fr);
           }
-          to {
-            opacity: 1;
-            transform: scale(1);
-          }
         }
 
-        @media (max-width: 991px) {
-          .portfolio-grid {
+        @media (max-width: 640px) {
+          .projects-grid {
             grid-template-columns: 1fr;
           }
-          .modal-detail-grid {
+          .modal-challenge-solution-grid,
+          .modal-full-list {
             grid-template-columns: 1fr;
-            gap: 32px;
-          }
-          .modal-main-content {
-            padding: 30px;
           }
         }
       `}</style>

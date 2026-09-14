@@ -1,36 +1,58 @@
-import { useState, useEffect } from 'react';
-import { Menu, X, ChevronDown, Award, Shield, Server, Cpu, Activity, BarChart3, Globe } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { 
+  Menu, X, ChevronDown, Code, Globe, Smartphone, 
+  Palette, Cloud, Bot, Compass, Database, 
+  Layers, ShoppingCart, Cpu
+} from 'lucide-react';
 
 export default function Header({ activeTab, setActiveTab, openConsultationModal }) {
-  const [isSticky, setIsSticky] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [dropdownOpen, setDropdownOpen] = useState(null); // 'services' or 'solutions' or null
+  const [openDropdown, setOpenDropdown] = useState(null); // 'services' | 'solutions' | null
+  const headerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setIsSticky(true);
-      } else {
-        setIsSticky(false);
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Close dropdown on click outside or Escape
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        setOpenDropdown(null);
+        setMobileMenuOpen(false);
       }
     };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const handleClickOutside = (e) => {
+      if (headerRef.current && !headerRef.current.contains(e.target)) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('click', handleClickOutside);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('click', handleClickOutside);
+    };
   }, []);
 
   const handleNavClick = (tabId, sectionId) => {
     setMobileMenuOpen(false);
-    setDropdownOpen(null);
-    
+    setOpenDropdown(null);
+
     if (tabId === 'home') {
       setActiveTab('home');
       if (sectionId) {
         setTimeout(() => {
-          const element = document.getElementById(sectionId);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          const el = document.getElementById(sectionId);
+          if (el) {
+            el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        }, 100);
+        }, 120);
       } else {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
@@ -41,518 +63,691 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
   };
 
   const servicesItems = [
-    { title: 'Artificial Intelligence', icon: Cpu, desc: 'AI Agents, Generative LLM & RAG Systems', section: 'services' },
-    { title: 'Cloud Infrastructure', icon: Server, desc: 'AWS, Azure, GCP & Modern DevOps', section: 'services' },
-    { title: 'Cyber Security', icon: Shield, desc: 'Threat Detection, Compliance & Audits', section: 'services' },
-    { title: 'Enterprise Automation', icon: Activity, desc: 'ERP, CRM & Workflow Optimization', section: 'services' }
+    { title: 'Software Development', icon: Code, desc: 'Custom web apps, APIs & backend architectures' },
+    { title: 'Web Development', icon: Globe, desc: 'Responsive business websites & e-commerce' },
+    { title: 'Mobile App Development', icon: Smartphone, desc: 'Native & cross-platform Android/iOS applications' },
+    { title: 'UI/UX Design', icon: Palette, desc: 'User interface design, design systems & wireframes' },
+    { title: 'Cloud & DevOps', icon: Cloud, desc: 'Hosting, CI/CD, migration & server management' },
+    { title: 'Automation & AI', icon: Bot, desc: 'Process automation & intelligent workflow tools' },
+    { title: 'IT Consulting', icon: Compass, desc: 'Technical audits, architecture planning & roadmaps' }
   ];
 
   const solutionsItems = [
-    { title: 'Finance & Banking', icon: BarChart3, desc: 'Secure payment pipelines & financial AI analytics' },
-    { title: 'Digital Health', icon: Activity, desc: 'HIPAA-compliant software & patient diagnostics' },
-    { title: 'Smart Logistics', icon: Globe, desc: 'Supply chain tracking & operations automation' },
-    { title: 'Modern Manufacturing', icon: Award, desc: 'Industry 4.0 IoT & predictive maintenance' }
+    { title: 'Business Website Solutions', icon: Globe, desc: 'High-performing websites designed to generate business inquiries' },
+    { title: 'Custom Software Solutions', icon: Database, desc: 'Bespoke systems built around your company operations' },
+    { title: 'Business Automation Solutions', icon: Cpu, desc: 'Streamlining manual tasks and multi-app data workflows' },
+    { title: 'Digital Product Development', icon: Layers, desc: 'End-to-end design, MVP building, and technical deployment' },
+    { title: 'E-commerce Solutions', icon: ShoppingCart, desc: 'Custom online storefronts, catalog tools & checkout systems' },
+    { title: 'Cloud & Infrastructure Solutions', icon: Cloud, desc: 'Secure hosting, performance optimization & database setups' },
+    { title: 'AI-Powered Business Solutions', icon: Bot, desc: 'Intelligent features, document processing & assistants' }
   ];
 
   return (
-    <header className={`header-container ${isSticky ? 'sticky' : ''}`}>
+    <header 
+      ref={headerRef}
+      className={`header-root ${isScrolled ? 'header-scrolled' : ''}`}
+    >
       <div className="header-inner container">
-        {/* Logo */}
-        <div className="logo-section" onClick={() => handleNavClick('home')}>
-          <span className="logo-glow"></span>
-          <span className="logo-text">OmNetaTech</span>
-          <span className="logo-subtext">Digital Futures</span>
-        </div>
+        {/* Brand Logo */}
+        <button 
+          className="brand-logo"
+          onClick={() => handleNavClick('home')}
+          aria-label="OmNetaTech Home"
+        >
+          <div className="logo-symbol">
+            <span className="logo-letter">O</span>
+          </div>
+          <div className="logo-text-group">
+            <span className="brand-name">OmNetaTech</span>
+            <span className="brand-tagline">Technology • Innovation • Digital Solutions</span>
+          </div>
+        </button>
 
         {/* Desktop Navigation */}
-        <nav className="desktop-nav">
-          <div className="nav-item">
-            <button 
-              className={`nav-link ${activeTab === 'home' ? 'active' : ''}`}
-              onClick={() => handleNavClick('home')}
-            >
-              Home
-            </button>
-          </div>
+        <nav className="desktop-navigation" aria-label="Main Navigation">
+          <button 
+            className={`nav-btn ${activeTab === 'home' && !openDropdown ? 'nav-btn-active' : ''}`}
+            onClick={() => handleNavClick('home')}
+          >
+            Home
+          </button>
 
-          <div className="nav-item">
-            <button 
-              className={`nav-link ${activeTab === 'about' ? 'active' : ''}`}
-              onClick={() => handleNavClick('about')}
-            >
-              About
-            </button>
-          </div>
+          <button 
+            className={`nav-btn ${activeTab === 'about' ? 'nav-btn-active' : ''}`}
+            onClick={() => handleNavClick('about')}
+          >
+            About
+          </button>
 
           {/* Services Dropdown */}
           <div 
-            className="nav-item has-dropdown"
-            onMouseEnter={() => setDropdownOpen('services')}
-            onMouseLeave={() => setDropdownOpen(null)}
+            className="nav-dropdown-wrapper"
+            onMouseEnter={() => setOpenDropdown('services')}
+            onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button className="nav-link flex-center">
-              Services <ChevronDown size={14} className="chevron-icon" />
+            <button 
+              className={`nav-btn nav-btn-dropdown ${openDropdown === 'services' ? 'dropdown-active' : ''}`}
+              onClick={() => setOpenDropdown(openDropdown === 'services' ? null : 'services')}
+              aria-expanded={openDropdown === 'services'}
+            >
+              <span>Services</span>
+              <ChevronDown size={14} className={`dropdown-arrow ${openDropdown === 'services' ? 'arrow-up' : ''}`} />
             </button>
-            <div className={`dropdown-menu ${dropdownOpen === 'services' ? 'show' : ''}`}>
-              <div className="dropdown-grid">
-                {servicesItems.map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className="dropdown-card"
-                    onClick={() => handleNavClick('home', item.section)}
+
+            {openDropdown === 'services' && (
+              <div className="dropdown-panel dropdown-services-panel shadow-lg">
+                <div className="dropdown-header-strip">
+                  <span>Core Technology Services</span>
+                  <button 
+                    className="dropdown-view-all"
+                    onClick={() => handleNavClick('home', 'services')}
                   >
-                    <item.icon className="dropdown-icon" size={20} />
-                    <div>
-                      <div className="dropdown-title">{item.title}</div>
-                      <div className="dropdown-desc">{item.desc}</div>
-                    </div>
-                  </div>
-                ))}
+                    View All Services →
+                  </button>
+                </div>
+                <div className="dropdown-grid-services">
+                  {servicesItems.map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={idx}
+                        className="dropdown-item-btn"
+                        onClick={() => handleNavClick('home', 'services')}
+                      >
+                        <div className="dropdown-item-icon">
+                          <Icon size={18} />
+                        </div>
+                        <div className="dropdown-item-text">
+                          <div className="dropdown-item-title">{item.title}</div>
+                          <div className="dropdown-item-desc">{item.desc}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Solutions Dropdown */}
           <div 
-            className="nav-item has-dropdown"
-            onMouseEnter={() => setDropdownOpen('solutions')}
-            onMouseLeave={() => setDropdownOpen(null)}
+            className="nav-dropdown-wrapper"
+            onMouseEnter={() => setOpenDropdown('solutions')}
+            onMouseLeave={() => setOpenDropdown(null)}
           >
-            <button className="nav-link flex-center">
-              Solutions <ChevronDown size={14} className="chevron-icon" />
+            <button 
+              className={`nav-btn nav-btn-dropdown ${openDropdown === 'solutions' ? 'dropdown-active' : ''}`}
+              onClick={() => setOpenDropdown(openDropdown === 'solutions' ? null : 'solutions')}
+              aria-expanded={openDropdown === 'solutions'}
+            >
+              <span>Solutions</span>
+              <ChevronDown size={14} className={`dropdown-arrow ${openDropdown === 'solutions' ? 'arrow-up' : ''}`} />
             </button>
-            <div className={`dropdown-menu mega-dropdown ${dropdownOpen === 'solutions' ? 'show' : ''}`}>
-              <div className="dropdown-grid cols-2">
-                {solutionsItems.map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className="dropdown-card"
-                    onClick={() => handleNavClick('home', 'industries')}
+
+            {openDropdown === 'solutions' && (
+              <div className="dropdown-panel dropdown-solutions-panel shadow-lg">
+                <div className="dropdown-header-strip">
+                  <span>Business-Driven Solutions</span>
+                  <button 
+                    className="dropdown-view-all"
+                    onClick={() => handleNavClick('home', 'solutions')}
                   >
-                    <item.icon className="dropdown-icon" size={20} />
-                    <div>
-                      <div className="dropdown-title">{item.title}</div>
-                      <div className="dropdown-desc">{item.desc}</div>
-                    </div>
-                  </div>
+                    View All Solutions →
+                  </button>
+                </div>
+                <div className="dropdown-grid-solutions">
+                  {solutionsItems.map((item, idx) => {
+                    const Icon = item.icon;
+                    return (
+                      <button
+                        key={idx}
+                        className="dropdown-item-btn"
+                        onClick={() => handleNavClick('home', 'solutions')}
+                      >
+                        <div className="dropdown-item-icon">
+                          <Icon size={18} />
+                        </div>
+                        <div className="dropdown-item-text">
+                          <div className="dropdown-item-title">{item.title}</div>
+                          <div className="dropdown-item-desc">{item.desc}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+
+          <button 
+            className="nav-btn"
+            onClick={() => handleNavClick('home', 'industries')}
+          >
+            Industries
+          </button>
+
+          <button 
+            className={`nav-btn ${activeTab === 'insights' ? 'nav-btn-active' : ''}`}
+            onClick={() => handleNavClick('insights')}
+          >
+            Insights
+          </button>
+
+          <button 
+            className={`nav-btn ${activeTab === 'careers' ? 'nav-btn-active' : ''}`}
+            onClick={() => handleNavClick('careers')}
+          >
+            Careers
+          </button>
+
+          <button 
+            className="nav-btn"
+            onClick={() => handleNavClick('home', 'contact')}
+          >
+            Contact
+          </button>
+        </nav>
+
+        {/* Right CTA Button */}
+        <div className="header-action-area">
+          <button 
+            className="btn-primary-blue header-consult-btn"
+            onClick={openConsultationModal}
+          >
+            Get a Free Consultation
+          </button>
+
+          <button 
+            className="mobile-hamburger-btn"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="mobile-nav-backdrop" onClick={() => setMobileMenuOpen(false)}>
+          <div 
+            className="mobile-nav-drawer shadow-xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="mobile-drawer-header">
+              <div className="brand-name">OmNetaTech</div>
+              <button 
+                className="drawer-close-btn"
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                <X size={22} />
+              </button>
+            </div>
+
+            <div className="mobile-nav-scroll">
+              <button 
+                className={`mobile-nav-link ${activeTab === 'home' ? 'mobile-active' : ''}`}
+                onClick={() => handleNavClick('home')}
+              >
+                Home
+              </button>
+
+              <button 
+                className={`mobile-nav-link ${activeTab === 'about' ? 'mobile-active' : ''}`}
+                onClick={() => handleNavClick('about')}
+              >
+                About OmNetaTech
+              </button>
+
+              <div className="mobile-category-title">Services</div>
+              <div className="mobile-sublinks-group">
+                {servicesItems.map((item, i) => (
+                  <button
+                    key={i}
+                    className="mobile-sublink-btn"
+                    onClick={() => handleNavClick('home', 'services')}
+                  >
+                    {item.title}
+                  </button>
                 ))}
+              </div>
+
+              <div className="mobile-category-title">Solutions</div>
+              <div className="mobile-sublinks-group">
+                {solutionsItems.slice(0, 5).map((item, i) => (
+                  <button
+                    key={i}
+                    className="mobile-sublink-btn"
+                    onClick={() => handleNavClick('home', 'solutions')}
+                  >
+                    {item.title}
+                  </button>
+                ))}
+              </div>
+
+              <button 
+                className="mobile-nav-link"
+                onClick={() => handleNavClick('home', 'industries')}
+              >
+                Industries
+              </button>
+
+              <button 
+                className={`mobile-nav-link ${activeTab === 'insights' ? 'mobile-active' : ''}`}
+                onClick={() => handleNavClick('insights')}
+              >
+                Insights
+              </button>
+
+              <button 
+                className={`mobile-nav-link ${activeTab === 'careers' ? 'mobile-active' : ''}`}
+                onClick={() => handleNavClick('careers')}
+              >
+                Careers
+              </button>
+
+              <button 
+                className="mobile-nav-link"
+                onClick={() => handleNavClick('home', 'contact')}
+              >
+                Contact
+              </button>
+
+              <div className="mobile-drawer-cta">
+                <button 
+                  className="btn-primary-blue w-full"
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    openConsultationModal();
+                  }}
+                >
+                  Get a Free Consultation
+                </button>
               </div>
             </div>
           </div>
-
-          <div className="nav-item">
-            <button 
-              className="nav-link"
-              onClick={() => handleNavClick('home', 'industries')}
-            >
-              Industries
-            </button>
-          </div>
-
-          <div className="nav-item">
-            <button 
-              className="nav-link"
-              onClick={() => handleNavClick('home', 'portfolio')}
-            >
-              Portfolio
-            </button>
-          </div>
-
-          <div className="nav-item">
-            <button 
-              className={`nav-link ${activeTab === 'careers' ? 'active' : ''}`}
-              onClick={() => handleNavClick('careers')}
-            >
-              Careers
-            </button>
-          </div>
-
-          <div className="nav-item">
-            <button 
-              className={`nav-link ${activeTab === 'insights' ? 'active' : ''}`}
-              onClick={() => handleNavClick('insights')}
-            >
-              Insights
-            </button>
-          </div>
-
-          <div className="nav-item">
-            <button 
-              className="nav-link"
-              onClick={() => handleNavClick('home', 'contact')}
-            >
-              Contact
-            </button>
-          </div>
-        </nav>
-
-        {/* Right Action */}
-        <div className="header-actions">
-          <button className="btn-consultation" onClick={openConsultationModal}>
-            Book Consultation
-          </button>
-          <button className="mobile-toggle" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
         </div>
-      </div>
+      )}
 
-      {/* Mobile Navigation Drawer */}
-      <div className={`mobile-nav-drawer ${mobileMenuOpen ? 'open' : ''}`}>
-        <div className="mobile-nav-links">
-          <button onClick={() => handleNavClick('home')} className="mobile-link">Home</button>
-          <button onClick={() => handleNavClick('about')} className="mobile-link">About Us</button>
-          
-          <div className="mobile-section-header">Services</div>
-          {servicesItems.map((item, idx) => (
-            <button 
-              key={idx} 
-              onClick={() => handleNavClick('home', 'services')} 
-              className="mobile-sublink"
-            >
-              {item.title}
-            </button>
-          ))}
-
-          <div className="mobile-section-header">Solutions & Industries</div>
-          {solutionsItems.map((item, idx) => (
-            <button 
-              key={idx} 
-              onClick={() => handleNavClick('home', 'industries')} 
-              className="mobile-sublink"
-            >
-              {item.title}
-            </button>
-          ))}
-
-          <button onClick={() => handleNavClick('home', 'portfolio')} className="mobile-link">Portfolio</button>
-          <button onClick={() => handleNavClick('careers')} className="mobile-link">Careers</button>
-          <button onClick={() => handleNavClick('insights')} className="mobile-link">Insights</button>
-          <button onClick={() => handleNavClick('home', 'contact')} className="mobile-link">Contact</button>
-          
-          <button 
-            className="mobile-btn-consultation" 
-            onClick={() => {
-              setMobileMenuOpen(false);
-              openConsultationModal();
-            }}
-          >
-            Book Consultation
-          </button>
-        </div>
-      </div>
-
-      {/* CSS Styles Specific to Header */}
       <style>{`
-        .header-container {
-          position: fixed;
+        .header-root {
+          position: sticky;
           top: 0;
           left: 0;
           right: 0;
           z-index: 1000;
-          background: rgba(7, 20, 38, 0.2);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          transition: var(--transition-normal);
-          height: 80px;
+          background-color: var(--color-white);
+          border-bottom: 1px solid var(--color-border);
+          transition: all var(--transition-normal);
+          height: 76px;
           display: flex;
           align-items: center;
         }
-        
-        .header-container.sticky {
-          background: rgba(3, 10, 20, 0.95);
-          border-bottom: 1px solid rgba(0, 191, 255, 0.15);
-          box-shadow: var(--shadow-md);
-          height: 70px;
+
+        .header-scrolled {
+          height: 68px;
+          background-color: rgba(255, 255, 255, 0.98);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          box-shadow: 0 4px 16px rgba(11, 31, 58, 0.06);
+          border-bottom-color: #D6E2EE;
         }
 
         .header-inner {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          padding: 0 24px;
+          gap: 20px;
         }
 
-        /* Logo Styling */
-        .logo-section {
-          display: flex;
-          flex-direction: column;
-          cursor: pointer;
-          position: relative;
-        }
-        
-        .logo-glow {
-          position: absolute;
-          width: 50px;
-          height: 50px;
-          background: radial-gradient(circle, rgba(0, 191, 255, 0.2) 0%, transparent 70%);
-          top: -15px;
-          left: -15px;
-          pointer-events: none;
-        }
-
-        .logo-text {
-          font-family: var(--font-title);
-          font-weight: 800;
-          font-size: 1.5rem;
-          color: var(--color-white-pure);
-          line-height: 1;
-          letter-spacing: -0.5px;
-          background: linear-gradient(90deg, #fff 0%, var(--color-cyan) 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-        }
-
-        .logo-subtext {
-          font-family: var(--font-mono);
-          font-weight: 500;
-          font-size: 0.65rem;
-          text-transform: uppercase;
-          letter-spacing: 2px;
-          color: var(--color-cyan);
-          margin-top: 2px;
-        }
-
-        /* Nav Link Styling */
-        .desktop-nav {
+        /* Logo */
+        .brand-logo {
           display: flex;
           align-items: center;
-          gap: 4px;
-        }
-
-        .nav-item {
-          position: relative;
-        }
-
-        .nav-link {
+          gap: 12px;
           background: none;
           border: none;
-          color: var(--color-gray-dark);
-          font-family: var(--font-primary);
-          font-weight: 500;
-          font-size: 0.9rem;
-          padding: 8px 16px;
           cursor: pointer;
-          border-radius: var(--border-radius-sm);
-          transition: var(--transition-fast);
+          padding: 0;
+          text-align: left;
         }
 
-        .nav-link:hover, .nav-link.active {
-          color: var(--color-cyan);
-          background: rgba(0, 191, 255, 0.05);
+        .logo-symbol {
+          width: 38px;
+          height: 38px;
+          background: linear-gradient(135deg, var(--color-primary-navy) 0%, var(--color-primary-blue) 100%);
+          border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          box-shadow: 0 2px 8px rgba(23, 105, 224, 0.25);
+          flex-shrink: 0;
         }
 
-        .flex-center {
+        .logo-letter {
+          color: var(--color-white);
+          font-family: var(--font-title);
+          font-weight: 800;
+          font-size: 1.25rem;
+          line-height: 1;
+        }
+
+        .logo-text-group {
+          display: flex;
+          flex-direction: column;
+        }
+
+        .brand-name {
+          font-family: var(--font-title);
+          font-weight: 800;
+          font-size: 1.35rem;
+          color: var(--color-primary-navy);
+          letter-spacing: -0.02em;
+          line-height: 1.15;
+        }
+
+        .brand-tagline {
+          font-size: 0.68rem;
+          color: var(--color-text-secondary);
+          font-weight: 500;
+          letter-spacing: 0.02em;
+        }
+
+        /* Desktop Nav */
+        .desktop-navigation {
           display: flex;
           align-items: center;
           gap: 6px;
         }
 
-        .chevron-icon {
-          transition: var(--transition-fast);
+        .nav-btn {
+          background: none;
+          border: none;
+          color: var(--color-primary-navy);
+          font-size: 0.9rem;
+          font-weight: 600;
+          padding: 8px 14px;
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          position: relative;
         }
-        .has-dropdown:hover .chevron-icon {
+
+        .nav-btn:hover {
+          color: var(--color-primary-blue);
+          background-color: var(--color-light-blue);
+        }
+
+        .nav-btn-active {
+          color: var(--color-primary-blue);
+          background-color: var(--color-light-blue);
+          font-weight: 700;
+        }
+
+        .nav-dropdown-wrapper {
+          position: relative;
+        }
+
+        .dropdown-arrow {
+          transition: transform var(--transition-fast);
+          color: var(--color-text-secondary);
+        }
+
+        .dropdown-arrow.arrow-up {
           transform: rotate(180deg);
-          color: var(--color-cyan);
+          color: var(--color-primary-blue);
         }
 
-        /* Dropdown Styling */
-        .dropdown-menu {
+        /* Dropdown panels */
+        .dropdown-panel {
           position: absolute;
-          top: 100%;
+          top: calc(100% + 8px);
           left: 50%;
-          transform: translateX(-50%) translateY(10px);
-          opacity: 0;
-          visibility: hidden;
-          background: rgba(7, 20, 38, 0.98);
-          border: 1px solid rgba(0, 191, 255, 0.15);
-          border-radius: var(--border-radius-md);
-          box-shadow: var(--shadow-premium);
+          transform: translateX(-50%);
+          background: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
           padding: 16px;
-          width: 320px;
-          transition: var(--transition-normal);
-          backdrop-filter: blur(10px);
           z-index: 100;
+          animation: fadeIn 0.2s ease-out;
         }
 
-        .dropdown-menu.mega-dropdown {
+        .dropdown-services-panel {
           width: 580px;
         }
 
-        .has-dropdown:hover .dropdown-menu {
-          opacity: 1;
-          visibility: visible;
-          transform: translateX(-50%) translateY(0);
+        .dropdown-solutions-panel {
+          width: 620px;
         }
 
-        .dropdown-grid {
-          display: grid;
-          gap: 12px;
-        }
-
-        .dropdown-grid.cols-2 {
-          grid-template-columns: repeat(2, 1fr);
-        }
-
-        .dropdown-card {
+        .dropdown-header-strip {
           display: flex;
-          gap: 12px;
-          padding: 10px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          transition: var(--transition-fast);
+          justify-content: space-between;
+          align-items: center;
+          padding: 4px 8px 12px 8px;
+          border-bottom: 1px solid var(--color-border);
+          margin-bottom: 12px;
+          font-size: 0.78rem;
+          font-weight: 700;
+          color: var(--color-text-secondary);
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
         }
 
-        .dropdown-card:hover {
-          background: rgba(15, 82, 186, 0.15);
-          border-left: 3px solid var(--color-cyan);
-        }
-
-        .dropdown-icon {
-          color: var(--color-cyan);
-          margin-top: 2px;
-          flex-shrink: 0;
-        }
-
-        .dropdown-title {
-          font-family: var(--font-title);
-          font-weight: 600;
-          font-size: 0.9rem;
-          color: var(--color-white-pure);
-        }
-
-        .dropdown-desc {
-          font-size: 0.75rem;
-          color: var(--color-gray-dark);
-          margin-top: 2px;
-        }
-
-        /* Buttons & Actions */
-        .btn-consultation {
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-purple) 100%);
+        .dropdown-view-all {
+          background: none;
           border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
+          color: var(--color-primary-blue);
+          font-size: 0.78rem;
           font-weight: 600;
-          font-size: 0.85rem;
-          padding: 10px 22px;
-          border-radius: var(--border-radius-sm);
           cursor: pointer;
-          box-shadow: 0 4px 15px rgba(109, 93, 252, 0.3);
-          transition: var(--transition-fast);
         }
 
-        .btn-consultation:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(109, 93, 252, 0.5), 0 0 15px rgba(0, 191, 255, 0.3);
-          background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-cyan) 100%);
+        .dropdown-view-all:hover {
+          text-decoration: underline;
         }
 
-        .mobile-toggle {
+        .dropdown-grid-services,
+        .dropdown-grid-solutions {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 8px;
+        }
+
+        .dropdown-item-btn {
+          display: flex;
+          align-items: flex-start;
+          gap: 12px;
+          padding: 10px 12px;
+          border-radius: var(--radius-sm);
+          background: none;
+          border: 1px solid transparent;
+          text-align: left;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .dropdown-item-btn:hover {
+          background-color: var(--color-light-blue);
+          border-color: rgba(23, 105, 224, 0.15);
+        }
+
+        .dropdown-item-icon {
+          width: 32px;
+          height: 32px;
+          border-radius: var(--radius-xs);
+          background: #F0F6FF;
+          color: var(--color-primary-blue);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+          margin-top: 2px;
+          transition: all var(--transition-fast);
+        }
+
+        .dropdown-item-btn:hover .dropdown-item-icon {
+          background: var(--color-primary-blue);
+          color: var(--color-white);
+        }
+
+        .dropdown-item-title {
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: var(--color-primary-navy);
+          line-height: 1.3;
+        }
+
+        .dropdown-item-desc {
+          font-size: 0.76rem;
+          color: var(--color-text-secondary);
+          margin-top: 3px;
+          line-height: 1.4;
+        }
+
+        /* Right CTA */
+        .header-action-area {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .header-consult-btn {
+          padding: 10px 20px;
+          font-size: 0.88rem;
+        }
+
+        .mobile-hamburger-btn {
           display: none;
           background: none;
           border: none;
-          color: var(--color-white-pure);
+          color: var(--color-primary-navy);
           cursor: pointer;
+          padding: 6px;
         }
 
-        /* Mobile Nav Drawer */
-        .mobile-nav-drawer {
+        /* Mobile Drawer */
+        .mobile-nav-backdrop {
           position: fixed;
-          top: 80px;
+          top: 0;
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(3, 10, 20, 0.98);
-          border-top: 1px solid rgba(255, 255, 255, 0.05);
-          backdrop-filter: blur(15px);
-          z-index: 999;
-          transform: translateY(-100%);
-          opacity: 0;
-          visibility: hidden;
-          transition: var(--transition-normal);
-          overflow-y: auto;
-          padding: 24px;
+          background: rgba(11, 31, 58, 0.45);
+          backdrop-filter: blur(4px);
+          z-index: 1100;
         }
 
-        .mobile-nav-drawer.open {
-          transform: translateY(0);
-          opacity: 1;
-          visibility: visible;
-        }
-
-        .mobile-nav-links {
+        .mobile-nav-drawer {
+          position: absolute;
+          top: 0;
+          right: 0;
+          bottom: 0;
+          width: 85%;
+          max-width: 360px;
+          background: var(--color-white);
           display: flex;
           flex-direction: column;
-          gap: 16px;
+          z-index: 1200;
+          animation: slideInRight 0.25s ease-out;
         }
 
-        .mobile-link {
+        .mobile-drawer-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 20px 24px;
+          border-bottom: 1px solid var(--color-border);
+        }
+
+        .drawer-close-btn {
+          background: none;
+          border: none;
+          color: var(--color-primary-navy);
+          cursor: pointer;
+          padding: 4px;
+        }
+
+        .mobile-nav-scroll {
+          padding: 20px 24px;
+          overflow-y: auto;
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
+        }
+
+        .mobile-nav-link {
           background: none;
           border: none;
           text-align: left;
-          font-family: var(--font-title);
-          font-size: 1.25rem;
+          font-size: 1.05rem;
           font-weight: 700;
-          color: var(--color-white-pure);
-          padding: 8px 0;
+          color: var(--color-primary-navy);
+          padding: 10px 0;
           cursor: pointer;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+          border-bottom: 1px solid rgba(227, 234, 243, 0.6);
         }
 
-        .mobile-section-header {
-          font-family: var(--font-mono);
+        .mobile-nav-link.mobile-active {
+          color: var(--color-primary-blue);
+        }
+
+        .mobile-category-title {
           font-size: 0.75rem;
+          font-weight: 700;
+          color: var(--color-text-secondary);
           text-transform: uppercase;
-          letter-spacing: 1.5px;
-          color: var(--color-cyan);
-          margin-top: 12px;
+          letter-spacing: 0.06em;
+          margin-top: 14px;
+          margin-bottom: 4px;
         }
 
-        .mobile-sublink {
+        .mobile-sublinks-group {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding-left: 8px;
+          border-left: 2px solid var(--color-light-blue);
+          margin-bottom: 8px;
+        }
+
+        .mobile-sublink-btn {
           background: none;
           border: none;
           text-align: left;
-          font-family: var(--font-primary);
-          font-size: 0.95rem;
-          color: var(--color-gray-dark);
-          padding: 4px 12px;
+          font-size: 0.88rem;
+          color: var(--color-primary-navy);
+          padding: 6px 0;
           cursor: pointer;
         }
 
-        .mobile-sublink:hover {
-          color: var(--color-cyan);
+        .mobile-drawer-cta {
+          margin-top: 24px;
+          padding-bottom: 24px;
         }
 
-        .mobile-btn-consultation {
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-purple) 100%);
-          border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 1rem;
-          padding: 14px;
-          border-radius: var(--border-radius-md);
-          margin-top: 20px;
-          cursor: pointer;
-          text-align: center;
+        .w-full {
+          width: 100%;
         }
 
-        @media (max-width: 991px) {
-          .desktop-nav {
+        @keyframes slideInRight {
+          from { transform: translateX(100%); }
+          to { transform: translateX(0); }
+        }
+
+        @media (max-width: 1080px) {
+          .desktop-navigation {
             display: none;
           }
-          .mobile-toggle {
+          .header-consult-btn {
+            display: none;
+          }
+          .mobile-hamburger-btn {
             display: block;
-          }
-          .btn-consultation {
-            display: none;
-          }
-          .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
           }
         }
       `}</style>

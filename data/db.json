@@ -1,0 +1,799 @@
+{
+  "admin": {
+    "id": "admin-1",
+    "email": "admin@omnetatech.com",
+    "name": "OmNetaTech Admin",
+    "passwordHash": "c31529a8fa3193b6098c5ee2aca7f553:13f291d4f82afaef3fec6cad05b75810133af72a8e1afe10c008709b86fe8b5780fc9cb7519059c7d75fb875113f352eaacd2c76210d276b8addceb29f355d3e",
+    "updatedAt": "2026-09-12T08:41:40.542Z"
+  },
+  "sessions": [
+    {
+      "token": "aee82e33921b0f243dd5db16f9bf698405c8ad144bea9205f36b87db1e0e2677",
+      "userId": "admin-1",
+      "expiresAt": "2026-09-13T08:43:25.019Z"
+    },
+    {
+      "token": "bae49caba2d38d1e012cbef36289c8b5281eb0dcbebb27d2278f8d706b091114",
+      "userId": "admin-1",
+      "expiresAt": "2026-09-13T08:43:36.900Z"
+    },
+    {
+      "token": "3026f63b21f529c3ca4ae29de1499ea6f824fb99248331cf814a6989dd6c9621",
+      "userId": "admin-1",
+      "expiresAt": "2026-09-13T09:17:44.086Z"
+    },
+    {
+      "token": "78d58e2fd3f88b0f8576b0c2d480b40e9e79f8e6f22a53222e92652549af17f4",
+      "userId": "admin-1",
+      "expiresAt": "2026-09-13T09:21:47.785Z"
+    },
+    {
+      "token": "dfc8a21f47c7076f52c84d7a8555b7bf9909e8d4f00a091d1bb3d9255386d4b2",
+      "userId": "admin-1",
+      "expiresAt": "2026-09-13T09:48:06.070Z"
+    }
+  ],
+  "enquiries": [
+    {
+      "id": "enq-1789206485543-3d2294",
+      "fullName": "Sunil Verma",
+      "companyName": "",
+      "email": "sunil.verma@enterpriseindia.in",
+      "phone": "+91 98765 43210",
+      "service": "Software Development",
+      "message": "Need cloud transformation and enterprise architecture consulting for our warehousing systems across India.",
+      "status": "Contacted",
+      "isRead": false,
+      "adminNote": "Called Sunil Verma. Scheduled discovery call for Monday 11 AM IST.",
+      "createdAt": "2026-09-12T09:48:05.556Z",
+      "updatedAt": "2026-09-12T09:48:06.264Z"
+    },
+    {
+      "id": "enq-1789204663961-6b19a9",
+      "fullName": "Sunil Verma",
+      "companyName": "",
+      "email": "sunil.verma@enterpriseindia.in",
+      "phone": "+91 98765 43210",
+      "service": "Software Development",
+      "message": "Need cloud transformation and enterprise architecture consulting for our warehousing systems across India.",
+      "status": "Contacted",
+      "isRead": false,
+      "adminNote": "Called Sunil Verma. Scheduled discovery call for Monday 11 AM IST.",
+      "createdAt": "2026-09-12T09:17:43.967Z",
+      "updatedAt": "2026-09-12T09:17:44.137Z"
+    },
+    {
+      "id": "enq-1789202616781-76a5d8",
+      "fullName": "Rajesh Kumar",
+      "companyName": "",
+      "email": "rajesh@example.com",
+      "phone": "+91 9876543210",
+      "service": "Software Development",
+      "message": "Need ERP system for logistics operations in Pune.",
+      "status": "New",
+      "isRead": false,
+      "adminNote": "",
+      "createdAt": "2026-09-12T08:43:36.781Z",
+      "updatedAt": "2026-09-12T08:43:36.781Z"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif-1789206485556-56422a",
+      "type": "NEW_ENQUIRY",
+      "title": "New Contact Enquiry",
+      "message": "New enquiry received from Sunil Verma for Software Development.",
+      "relatedId": "enq-1789206485543-3d2294",
+      "customerName": "Sunil Verma",
+      "email": "sunil.verma@enterpriseindia.in",
+      "phone": "+91 98765 43210",
+      "company": "",
+      "service": "Software Development",
+      "isRead": true,
+      "createdAt": "2026-09-12T09:48:05.557Z"
+    },
+    {
+      "id": "notif-1789204663968-d71839",
+      "type": "NEW_ENQUIRY",
+      "title": "New Contact Enquiry",
+      "message": "New enquiry received from Sunil Verma for Software Development.",
+      "relatedId": "enq-1789204663961-6b19a9",
+      "customerName": "Sunil Verma",
+      "email": "sunil.verma@enterpriseindia.in",
+      "phone": "+91 98765 43210",
+      "company": "",
+      "service": "Software Development",
+      "isRead": true,
+      "createdAt": "2026-09-12T09:17:43.969Z"
+    },
+    {
+      "id": "notif-1789202616782-785a95",
+      "type": "NEW_ENQUIRY",
+      "title": "New Contact Enquiry",
+      "message": "New enquiry received from Rajesh Kumar for Software Development.",
+      "relatedId": "enq-1789202616781-76a5d8",
+      "customerName": "Rajesh Kumar",
+      "email": "rajesh@example.com",
+      "phone": "+91 9876543210",
+      "company": "",
+      "service": "Software Development",
+      "isRead": false,
+      "createdAt": "2026-09-12T08:43:36.782Z"
+    }
+  ],
+  "services": [
+    {
+      "id": "svc-1",
+      "title": "Software Development",
+      "slug": "software-development",
+      "category": "Core Engineering",
+      "shortDescription": "Engineered backend systems, custom web software, and secure APIs designed to handle complex business operations efficiently.",
+      "description": "We build custom business software tailored to your specific organizational workflows. Our development focus emphasizes clean architecture, database efficiency, secure endpoints, and maintainability for long-term scalability.",
+      "features": [
+        "Custom Web Applications",
+        "Business Software Solutions",
+        "API Development & Integration",
+        "Backend Systems & Microservices",
+        "Database Architecture & Optimization"
+      ],
+      "icon": "Code",
+      "status": "Published",
+      "displayOrder": 1,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "svc-2",
+      "title": "Web Development",
+      "slug": "web-development",
+      "category": "Digital Presence",
+      "shortDescription": "Modern, high-speed, and responsive business websites crafted to establish trust and convert visitors into active inquiries.",
+      "description": "From corporate brand websites to dynamic client portals, we build fast, SEO-friendly, and mobile-responsive web platforms using modern web standards that represent your brand with technical authority.",
+      "features": [
+        "Business & Corporate Websites",
+        "Responsive Web Applications",
+        "Custom E-commerce Solutions",
+        "Content Management Platforms",
+        "Website Maintenance & Speed Optimization"
+      ],
+      "icon": "Globe",
+      "status": "Published",
+      "displayOrder": 2,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "svc-3",
+      "title": "Mobile App Development",
+      "slug": "mobile-app-development",
+      "category": "Application Engineering",
+      "shortDescription": "Intuitive native and cross-platform mobile apps for Android and iOS that provide smooth performance and delightful user experience.",
+      "description": "We design and develop mobile applications that deliver consistent experiences across diverse devices. We handle state management, offline-first caching, push notifications, and secure backend synchronization.",
+      "features": [
+        "Android Applications",
+        "iOS Applications",
+        "Cross-Platform Development (Flutter/React Native)",
+        "Mobile API Integration",
+        "App Maintenance & Store Publishing"
+      ],
+      "icon": "Smartphone",
+      "status": "Published",
+      "displayOrder": 3,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "svc-4",
+      "title": "UI/UX Design",
+      "slug": "ui-ux-design",
+      "category": "Product Design",
+      "shortDescription": "User-centered interfaces that balance visual elegance, brand consistency, and frictionless user journeys across screens.",
+      "description": "Great software starts with clear design. We map out user personas, wireframes, interactive prototypes, and production design systems to ensure users complete their goals without confusion.",
+      "features": [
+        "Website & Portal UI Design",
+        "Application & Dashboard UI",
+        "User Experience & Wireframing",
+        "Responsive Layout Systems",
+        "Design Systems & Component Libraries"
+      ],
+      "icon": "Palette",
+      "status": "Published",
+      "displayOrder": 4,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "svc-5",
+      "title": "Cloud & DevOps",
+      "slug": "cloud-devops",
+      "category": "Infrastructure",
+      "shortDescription": "Reliable cloud environments, automated deployment pipelines, and proactive server configuration for maximum uptime.",
+      "description": "We help businesses set up, manage, and scale cloud environments across standard cloud providers. Our automated pipelines reduce manual deployment errors and ensure your applications run reliably.",
+      "features": [
+        "Cloud Deployment & Hosting",
+        "CI/CD Automated Pipelines",
+        "Server Configuration & Management",
+        "Performance & Load Optimization",
+        "Backup & Disaster Recovery Planning"
+      ],
+      "icon": "Cloud",
+      "status": "Published",
+      "displayOrder": 5,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "svc-6",
+      "title": "Automation & AI",
+      "slug": "automation-ai",
+      "category": "Process Intelligence",
+      "shortDescription": "Practical automation workflows and intelligent tools that eliminate repetitive tasks and accelerate business turnaround.",
+      "description": "We integrate practical AI capabilities and workflow automations into existing operations—such as document processing, data extraction, and CRM updates—saving valuable team hours and reducing operational friction.",
+      "features": [
+        "Business Process Automation",
+        "AI-Powered Practical Features",
+        "Workflow & Notification Automation",
+        "Third-Party API Automation",
+        "Intelligent Business Tools"
+      ],
+      "icon": "Bot",
+      "status": "Published",
+      "displayOrder": 6,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "svc-7",
+      "title": "IT Consulting",
+      "slug": "it-consulting",
+      "category": "Technology Advisory",
+      "shortDescription": "Strategic guidance on technology selection, technical feasibility, architecture planning, and digital modernization roadmaps.",
+      "description": "Whether you are planning a new software product or revamping legacy systems, our consulting services help you make informed architectural decisions, avoid costly technical debt, and plan realistic timelines.",
+      "features": [
+        "Technology Stack Consulting",
+        "System Architecture Planning",
+        "Product Development Strategy",
+        "Code & Infrastructure Technical Audits",
+        "Digital Transformation Roadmaps"
+      ],
+      "icon": "Compass",
+      "status": "Published",
+      "displayOrder": 7,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    }
+  ],
+  "solutions": [
+    {
+      "id": "sol-1",
+      "title": "Business Website Solutions",
+      "slug": "business-website-solutions",
+      "tagline": "Transforming digital presence into reliable lead pipelines",
+      "problem": "Businesses frequently suffer from slow, outdated websites that fail to establish credibility or convert visitors into inquiries.",
+      "solution": "We build modern, ultra-responsive corporate websites with clean messaging, mobile speed optimization, and clear call-to-actions.",
+      "benefit": "Increased inbound inquiries, professional digital brand authority, and seamless viewing across mobile and desktop devices.",
+      "icon": "Globe",
+      "status": "Published",
+      "displayOrder": 1,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "sol-2",
+      "title": "Custom Software Solutions",
+      "slug": "custom-software-solutions",
+      "tagline": "Tailored systems built around your operational workflows",
+      "problem": "Generic off-the-shelf software rarely fits specific operational workflows, forcing teams to rely on clumsy spreadsheets.",
+      "solution": "We develop bespoke web applications, internal dashboards, and database tools specifically mapped to your day-to-day operations.",
+      "benefit": "Elimination of manual errors, faster team coordination, centralized data access, and full ownership of your technology.",
+      "icon": "Database",
+      "status": "Published",
+      "displayOrder": 2,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "sol-3",
+      "title": "Automation Solutions",
+      "slug": "automation-solutions",
+      "tagline": "Eliminating repetitive manual bottlenecks across tools",
+      "problem": "Valuable employee hours are wasted copying data between software, sending manual follow-ups, and compiling routine reports.",
+      "solution": "We build automated pipelines connecting your emails, forms, databases, and third-party tools to trigger actions automatically.",
+      "benefit": "Drastic reduction in repetitive manual tasks, faster customer response times, and higher employee productivity.",
+      "icon": "Cpu",
+      "status": "Published",
+      "displayOrder": 3,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "sol-4",
+      "title": "Digital Product Development",
+      "slug": "digital-product-development",
+      "tagline": "From initial concept to production-ready digital products",
+      "problem": "Startups and SMEs often struggle to turn software ideas into functional, reliable products without escalating development costs.",
+      "solution": "We guide digital products through structured prototyping, MVP engineering, user testing, and scalable cloud deployment.",
+      "benefit": "Clear milestones, predictable development velocity, and a well-architected software foundation ready for user growth.",
+      "icon": "Layers",
+      "status": "Published",
+      "displayOrder": 4,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "sol-5",
+      "title": "E-commerce Solutions",
+      "slug": "ecommerce-solutions",
+      "tagline": "Fast and secure digital commerce platforms",
+      "problem": "Online stores often struggle with clunky checkout flows, inventory mismatches, and poor performance during customer traffic spikes.",
+      "solution": "We build custom, fast e-commerce platforms with streamlined payment gateways, catalog management, and automated order notifications.",
+      "benefit": "Higher checkout completion rates, smooth customer purchasing experience, and simplified product administration.",
+      "icon": "ShoppingCart",
+      "status": "Published",
+      "displayOrder": 5,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "sol-6",
+      "title": "Cloud & Infrastructure Solutions",
+      "slug": "cloud-infrastructure-solutions",
+      "tagline": "Dependable hosting and cloud architectures",
+      "problem": "Unmanaged servers lead to unexpected downtime, slow load times, data loss vulnerabilities, and security concerns.",
+      "solution": "We set up secure cloud hosting environments with automated backups, monitoring, and performance tuning.",
+      "benefit": "Reliable application availability, peace of mind regarding data safety, and infrastructure that scales as your traffic expands.",
+      "icon": "Cloud",
+      "status": "Published",
+      "displayOrder": 6,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "sol-7",
+      "title": "AI-Powered Business Solutions",
+      "slug": "ai-powered-business-solutions",
+      "tagline": "Practical AI implementations delivering tangible value",
+      "problem": "Organizations want to leverage modern AI but struggle to identify realistic applications that actually assist their business operations.",
+      "solution": "We implement targeted AI features such as intelligent document parsing, smart search across internal files, and automated chat assistance.",
+      "benefit": "Faster information retrieval, automated first-line customer responses, and intelligent insights from your company data.",
+      "icon": "Bot",
+      "status": "Published",
+      "displayOrder": 7,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    }
+  ],
+  "industries": [
+    {
+      "id": "ind-1",
+      "title": "Healthcare",
+      "slug": "healthcare",
+      "desc": "Technology solutions for Healthcare clinics, practices, and health businesses: patient inquiry portals, digital booking systems, and responsive health service websites.",
+      "icon": "HeartPulse",
+      "status": "Published",
+      "displayOrder": 1,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-2",
+      "title": "Education",
+      "slug": "education",
+      "desc": "Technology solutions for Education institutions and training academies: student learning portals, course registration workflows, and educational content hubs.",
+      "icon": "GraduationCap",
+      "status": "Published",
+      "displayOrder": 2,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-3",
+      "title": "Finance",
+      "slug": "finance",
+      "desc": "Technology solutions for Finance firms and advisory services: client onboarding forms, invoice and billing integrations, and secure account access portals.",
+      "icon": "Landmark",
+      "status": "Published",
+      "displayOrder": 3,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-4",
+      "title": "Retail & E-commerce",
+      "slug": "retail-ecommerce",
+      "desc": "Technology solutions for Retail & E-commerce businesses: modern online storefronts, catalog management tools, and seamless payment gateway integrations.",
+      "icon": "ShoppingBag",
+      "status": "Published",
+      "displayOrder": 4,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-5",
+      "title": "Manufacturing",
+      "slug": "manufacturing",
+      "desc": "Technology solutions for Manufacturing units: internal operational trackers, supply scheduling dashboards, and distributor communication portals.",
+      "icon": "Factory",
+      "status": "Published",
+      "displayOrder": 5,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-6",
+      "title": "Real Estate",
+      "slug": "real-estate",
+      "desc": "Technology solutions for Real Estate agencies and developers: property showcases, dynamic lead inquiry forms, and virtual project presentation websites.",
+      "icon": "Building2",
+      "status": "Published",
+      "displayOrder": 6,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-7",
+      "title": "Logistics",
+      "slug": "logistics",
+      "desc": "Technology solutions for Logistics & transport providers: delivery status lookups, customer booking tools, and automated dispatch notification systems.",
+      "icon": "Truck",
+      "status": "Published",
+      "displayOrder": 7,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-8",
+      "title": "Professional Services",
+      "slug": "professional-services",
+      "desc": "Technology solutions for Legal, accounting, and consulting firms: authoritative corporate websites, appointment schedulers, and client intake workflows.",
+      "icon": "Briefcase",
+      "status": "Published",
+      "displayOrder": 8,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ind-9",
+      "title": "Startups & SMEs",
+      "slug": "startups-smes",
+      "desc": "Technology solutions for Startups & growing Indian businesses: agile MVP development, scalable web applications, and fast time-to-market software delivery.",
+      "icon": "Rocket",
+      "status": "Published",
+      "displayOrder": 9,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    }
+  ],
+  "portfolio": [
+    {
+      "id": "proj-1",
+      "title": "Business Management Platform",
+      "slug": "business-management-platform",
+      "tag": "web",
+      "badge": "Sample Project",
+      "category": "Web Application",
+      "icon": "Database",
+      "summary": "Centralized operations dashboard unifying client tracking, project milestones, and invoicing in one secure web portal.",
+      "challenge": "The business was struggling with disconnected spreadsheets, misplaced client communication, and delayed billing reconciliations.",
+      "approach": "Engineered a modular web application with role-based access, automated PDF invoice generation, and real-time operational status updates.",
+      "deliverables": [
+        "Secure role-based dashboard for team and managers",
+        "Automated billing and invoice generation",
+        "Client task and milestone tracking module",
+        "Database optimization for fast search and filtering"
+      ],
+      "status": "Published",
+      "displayOrder": 1,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "proj-2",
+      "title": "E-commerce Retail Website",
+      "slug": "ecommerce-retail-website",
+      "tag": "ecommerce",
+      "badge": "Sample Project",
+      "category": "Digital Storefront",
+      "icon": "ShoppingBag",
+      "summary": "Modern, high-speed online shopping experience with seamless checkout, product catalogs, and inventory synchronization.",
+      "challenge": "Existing online store experienced slow loading speeds on mobile devices and high checkout drop-off rates.",
+      "approach": "Built a lightweight, responsive storefront with streamlined one-page checkout, Indian payment gateway integration, and automated order confirmation emails.",
+      "deliverables": [
+        "Mobile-first responsive product catalog",
+        "Payment gateway integration (UPI, Cards, NetBanking)",
+        "Admin inventory and order dispatch panel",
+        "Automated customer order status notifications"
+      ],
+      "status": "Published",
+      "displayOrder": 2,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "proj-3",
+      "title": "Service Booking & Inquiry Portal",
+      "slug": "service-booking-inquiry-portal",
+      "tag": "web",
+      "badge": "Selected Solution",
+      "category": "Custom Web Application",
+      "icon": "Code",
+      "summary": "Automated booking workflow allowing customers to select services, pick available slots, and receive instant confirmations.",
+      "challenge": "Handling appointments manually via phone calls led to double bookings, customer wait times, and staff scheduling errors.",
+      "approach": "Created an intuitive booking portal with real-time calendar availability, automated reminder notifications, and an admin schedule overview.",
+      "deliverables": [
+        "Interactive real-time calendar picker",
+        "Automated email and SMS confirmation triggers",
+        "Staff availability management dashboard",
+        "Customer inquiry intake and follow-up tracker"
+      ],
+      "status": "Published",
+      "displayOrder": 3,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "proj-4",
+      "title": "Customer & Operations Mobile App",
+      "slug": "customer-operations-mobile-app",
+      "tag": "mobile",
+      "badge": "Selected Solution",
+      "category": "Cross-Platform Mobile Application",
+      "icon": "Smartphone",
+      "summary": "Cross-platform Android and iOS application enabling on-the-go account management and real-time service tracking.",
+      "challenge": "Field staff and end users required reliable access to project information without needing a desktop computer.",
+      "approach": "Developed a cross-platform mobile application using modern frameworks, implementing offline caching and real-time cloud data sync.",
+      "deliverables": [
+        "Cross-platform Android and iOS deployment",
+        "Offline-first local caching mechanism",
+        "Push notifications for critical status updates",
+        "Intuitive touch-optimized user interface"
+      ],
+      "status": "Published",
+      "displayOrder": 4,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "proj-5",
+      "title": "Business Workflow Automation Pipeline",
+      "slug": "business-workflow-automation-pipeline",
+      "tag": "automation",
+      "badge": "Sample Project",
+      "category": "Automation Platform",
+      "icon": "Cpu",
+      "summary": "Integrated data pipeline synchronizing incoming website inquiries directly with team communication channels and databases.",
+      "challenge": "Valuable customer inquiries were sitting in mailboxes for hours before team members noticed and manually responded.",
+      "approach": "Configured automated API webhooks linking contact forms, lead databases, and instant notifications to alert the team immediately.",
+      "deliverables": [
+        "Instant multi-channel notifications on new lead arrival",
+        "Centralized lead capture and deduplication",
+        "Automated acknowledgement emails to clients",
+        "Daily operational summary digests"
+      ],
+      "status": "Published",
+      "displayOrder": 5,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    }
+  ],
+  "insights": [
+    {
+      "id": "ins-1",
+      "title": "Key Considerations When Building Custom Web Applications for Growing Businesses",
+      "slug": "custom-web-applications-growing-businesses",
+      "category": "Software Development",
+      "author": "OmNetaTech Engineering Team",
+      "date": "August 2026",
+      "readTime": "6 min read",
+      "summary": "Why off-the-shelf software often creates operational bottlenecks, and how custom software architectures help companies scale their workflows efficiently.",
+      "content": [
+        "As organizations grow, their operational processes invariably diverge from generic software templates. While standard SaaS tools are excellent for early-stage validation, expanding companies soon encounter data silos, manual reconciliation steps, and subscription overhead.",
+        "Custom web applications allow businesses to design databases and user interfaces directly around their actual operations. When architected cleanly, custom software provides proprietary data ownership, eliminates recurring seat licensing fees, and adapts smoothly as operational needs change.",
+        "When planning a custom web application, teams should prioritize clean database schema design, modular API endpoints, and a component-driven frontend architecture to ensure long-term maintainability."
+      ],
+      "status": "Published",
+      "displayOrder": 1,
+      "createdAt": "2026-08-15T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ins-2",
+      "title": "Practical Automation: Streamlining Operations Without Overcomplicating Tools",
+      "slug": "practical-automation-streamlining-operations",
+      "category": "AI & Automation",
+      "author": "OmNetaTech Engineering Team",
+      "date": "July 2026",
+      "readTime": "5 min read",
+      "summary": "How small to mid-sized organizations can implement workflow automation and intelligent document tools to reduce daily manual tasks.",
+      "content": [
+        "Automation does not need to mean complex machine learning models or expensive enterprise software suites. Most business efficiency gains come from automating high-frequency, repetitive tasks.",
+        "Examples include automatically parsing incoming customer inquiries into internal trackers, triggering instant WhatsApp or email alerts to the sales team, and generating formatted PDF invoices automatically upon payment confirmation.",
+        "By focusing on high-ROI automation bottlenecks first, organizations can free up valuable employee time and reduce clerical errors without incurring high implementation overhead."
+      ],
+      "status": "Published",
+      "displayOrder": 2,
+      "createdAt": "2026-07-20T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ins-3",
+      "title": "Why Mobile Responsiveness and Fast Loading Speed Matter for Digital Success",
+      "slug": "mobile-responsiveness-fast-loading-speed",
+      "category": "Web Development",
+      "author": "OmNetaTech Engineering Team",
+      "date": "July 2026",
+      "readTime": "4 min read",
+      "summary": "Exploring why responsive design, web performance optimization, and clean typography directly impact client trust and inquiry conversions.",
+      "content": [
+        "In the modern digital landscape, over 70% of initial business website visits in India happen on mobile devices. A website that is slow to load or suffers from broken touch layouts creates an immediate impression of technical neglect.",
+        "Optimizing images, eliminating unnecessary third-party scripts, and enforcing clean semantic HTML ensures fast load times even on mobile connections.",
+        "A fast, responsive website establishes technical credibility within seconds, reassuring prospective clients and significantly increasing the likelihood of an inquiry."
+      ],
+      "status": "Published",
+      "displayOrder": 3,
+      "createdAt": "2026-07-10T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "ins-4",
+      "title": "Cloud Deployment Fundamentals: Choosing Dependable Hosting for Web Applications",
+      "slug": "cloud-deployment-fundamentals-dependable-hosting",
+      "category": "Cloud",
+      "author": "OmNetaTech Engineering Team",
+      "date": "June 2026",
+      "readTime": "5 min read",
+      "summary": "A guide to cloud hosting selection, automated backups, and server monitoring tailored for business applications.",
+      "content": [
+        "Selecting the right cloud hosting architecture is crucial for maintaining application uptime and data security without paying for idle server capacity.",
+        "Key cloud fundamentals include setting up automated database backups, configuring SSL certificates properly, implementing automated deployment pipelines (CI/CD), and monitoring server CPU and memory usage proactively.",
+        "A dependable hosting setup ensures your business applications remain available to clients 24/7 with zero unexpected downtime."
+      ],
+      "status": "Published",
+      "displayOrder": 4,
+      "createdAt": "2026-06-25T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    }
+  ],
+  "careers": [
+    {
+      "id": "job-1",
+      "title": "Full-Stack Web Developer",
+      "department": "Engineering",
+      "location": "India (Remote / Hybrid)",
+      "type": "Full-Time",
+      "description": "Join our development team building responsive web platforms, modern frontend applications, and clean backend API services using React, Node.js, and modern ecosystems.",
+      "requirements": [
+        "Proficiency with React, Node.js, and modern JavaScript / TypeScript",
+        "Experience designing RESTful APIs and working with relational or document databases",
+        "Strong understanding of responsive layouts, semantic HTML, and web performance",
+        "Commitment to clean code, testing, and collaborative git workflows"
+      ],
+      "responsibilities": [
+        "Develop and maintain client web applications and internal tools",
+        "Collaborate closely with UI/UX designers to translate Figma mockups into clean React code",
+        "Participate in sprint planning and code reviews"
+      ],
+      "status": "Active",
+      "displayOrder": 1,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "job-2",
+      "title": "Mobile App Developer",
+      "department": "Mobile Engineering",
+      "location": "India (Remote / Hybrid)",
+      "type": "Full-Time",
+      "description": "Craft performant cross-platform and native mobile applications for Android and iOS using Flutter or React Native.",
+      "requirements": [
+        "Hands-on experience with Flutter or React Native",
+        "Understanding of mobile UI patterns, offline caching, and state management",
+        "Experience integrating third-party REST APIs and push notification services",
+        "Knowledge of publishing workflows for Google Play and Apple App Store"
+      ],
+      "responsibilities": [
+        "Build and optimize cross-platform mobile apps for business clients",
+        "Ensure fluid 60fps animations and touch-responsive interactions",
+        "Debug cross-device rendering and performance quirks"
+      ],
+      "status": "Active",
+      "displayOrder": 2,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "job-3",
+      "title": "UI/UX & Product Designer",
+      "department": "Design",
+      "location": "India (Remote / Hybrid)",
+      "type": "Full-Time",
+      "description": "Design intuitive user experiences, wireframes, high-fidelity mockups, and modular design systems using Figma.",
+      "requirements": [
+        "Portfolio demonstrating clean, modern corporate and web application design",
+        "Mastery of Figma (auto-layout, components, design tokens)",
+        "Strong grasp of typography, whitespace, and accessibility contrast standards",
+        "Ability to communicate design rationale clearly with engineering teams"
+      ],
+      "responsibilities": [
+        "Produce user flows, wireframes, and production-ready Figma designs",
+        "Maintain and expand OmNetaTech design libraries and component systems",
+        "Conduct usability evaluations on prototypes and live products"
+      ],
+      "status": "Active",
+      "displayOrder": 3,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    },
+    {
+      "id": "job-4",
+      "title": "Backend & Cloud Engineer",
+      "department": "Infrastructure",
+      "location": "India (Remote / Hybrid)",
+      "type": "Full-Time",
+      "description": "Architect relational and NoSQL databases, RESTful web services, automated deployment pipelines, and cloud hosting setups.",
+      "requirements": [
+        "Strong backend fundamentals in Node.js, Python, or Go",
+        "Experience with cloud environments (AWS, GCP, or Azure), Docker, and CI/CD",
+        "Solid database design skills (PostgreSQL, MySQL, Redis)",
+        "Understanding of basic security practices (SSL, CORS, token auth, rate limiting)"
+      ],
+      "responsibilities": [
+        "Design scalable database schemas and high-throughput APIs",
+        "Set up automated backup schedules and server monitoring alerts",
+        "Optimize application query performance and load handling"
+      ],
+      "status": "Active",
+      "displayOrder": 4,
+      "createdAt": "2026-09-01T10:00:00.000Z",
+      "updatedAt": "2026-09-12T10:00:00.000Z"
+    }
+  ],
+  "websiteContent": {
+    "hero": {
+      "headline": "Building Digital Solutions That Move Your Business Forward",
+      "highlight": "Business Forward",
+      "subheading": "OmNetaTech delivers practical, scalable and reliable technology solutions that help businesses improve operations, automate processes and build better digital experiences.",
+      "primaryCta": "Get a Free Consultation",
+      "secondaryCta": "Explore Our Services",
+      "trustStatement": "Technology solutions designed around your business goals.",
+      "badgeText": "Indian Technology Services Company",
+      "badge": "Transforming Enterprises Across India & Worldwide"
+    },
+    "about": {
+      "badge": "About OmNetaTech",
+      "headline": "Practical Technology Built Around Your Goals",
+      "leadText": "OmNetaTech is an India-based technology company focused on helping businesses use technology to solve real-world challenges. We work across software development, web and mobile solutions, automation, cloud technologies and modern digital experiences.",
+      "visionTitle": "Empowering Businesses Through Technology",
+      "visionDesc": "To be a trusted technology partner for growing Indian businesses and global organizations by delivering practical, scalable, and beautifully engineered software solutions that drive sustainable business growth.",
+      "missionTitle": "Reliable Engineering Without Compromise",
+      "missionDesc": "To bridge the gap between business objectives and technology implementation. We craft maintainable codebases, prioritize honest communication, and design digital experiences that users love."
+    },
+    "whyChoose": {
+      "badge": "Why OmNetaTech",
+      "title": "A Dedicated Technology Partner for Your Business",
+      "subtitle": "We focus on establishing long-term technology partnerships built on engineering reliability, honest timelines, and business-focused delivery."
+    },
+    "techFocus": {
+      "badge": "Our Technical Standard",
+      "title": "Engineering Excellence in Every Project",
+      "subtitle": "We focus on clean software architecture and practical usability rather than hype. Our goal is delivering digital solutions that work reliably day in and day out."
+    },
+    "contact": {
+      "badge": "Get in Touch",
+      "heading": "Let's Build Something Great Together",
+      "subheading": "Have a project, business requirement or technology challenge? Talk to the OmNetaTech team.",
+      "phone": "+91 8237140776",
+      "email": "omnetatech@gmail.com",
+      "country": "India",
+      "supportHours": "Available Mon – Sat, 9:30 AM – 6:30 PM IST"
+    },
+    "footer": {
+      "description": "Technology solutions that help businesses build, grow and transform.",
+      "copyright": "OmNetaTech. All rights reserved.",
+      "privacyPolicy": "Standard Privacy Policy for client data protection, NDA assurance, and confidential software engagements in India and worldwide.",
+      "termsConditions": "Standard Terms & Conditions governing technology consulting, intellectual property code ownership upon milestone delivery, and service terms under the laws of India."
+    },
+    "lastUpdated": "2026-09-12T09:48:06.457Z",
+    "updatedBy": "OmNetaTech Admin"
+  }
+}

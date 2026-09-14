@@ -1,535 +1,593 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Loader2, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, Shield, AlertCircle } from 'lucide-react';
+import { api } from '../services/api';
+import { useCms } from '../context/CmsContext';
 
 export default function ContactSection() {
-  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', msg: '' });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  const [activeOffice, setActiveOffice] = useState('amer'); // 'amer' or 'apac' or 'emea'
+  const { content } = useCms();
+  const contactInfo = content?.contact || {};
 
-  const offices = [
-    {
-      id: 'amer',
-      name: 'Americas HQ',
-      city: 'Seattle, USA',
-      addr: '1201 Third Ave, Suite 3000',
-      phone: '+1 (206) 555-0190',
-      email: 'us.operations@omneta.com',
-      mapPos: { top: '35%', left: '20%' }
-    },
-    {
-      id: 'apac',
-      name: 'APAC HQ',
-      city: 'Singapore',
-      addr: '10 Collyer Quay, Ocean Financial Centre',
-      phone: '+65 6789 0120',
-      email: 'apac.operations@omneta.com',
-      mapPos: { top: '65%', left: '78%' }
-    },
-    {
-      id: 'emea',
-      name: 'Europe HQ',
-      city: 'London, UK',
-      addr: '30 St Mary Axe, The Gherkin',
-      phone: '+44 (20) 7946 0958',
-      email: 'eu.operations@omneta.com',
-      mapPos: { top: '32%', left: '48%' }
-    }
+  const [form, setForm] = useState({
+    fullName: '',
+    companyName: '',
+    email: '',
+    phone: '',
+    service: 'Software Development',
+    message: ''
+  });
+
+  const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null);
+  const [createdEnquiryId, setCreatedEnquiryId] = useState(null);
+
+  const servicesList = [
+    'Software Development',
+    'Web Development',
+    'Mobile App Development',
+    'UI/UX Design',
+    'Cloud & DevOps',
+    'Automation & AI',
+    'IT Consulting',
+    'Other'
   ];
 
   const handleInputChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    if (errorMessage) setErrorMessage(null);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
-    setTimeout(() => {
+    setErrorMessage(null);
+
+    try {
+      const res = await api.submitContact(form);
+      if (res.success) {
+        setCreatedEnquiryId(res.enquiryId);
+        setSubmitted(true);
+      } else {
+        setErrorMessage(res.error || 'Failed to submit enquiry. Please try again.');
+      }
+    } catch (err) {
+      console.error('Contact submission error:', err);
+      setErrorMessage(err.message || 'An error occurred while submitting. Please check your details and try again.');
+    } finally {
       setIsSubmitting(false);
-      setSuccess(true);
-      setForm({ name: '', company: '', email: '', phone: '', msg: '' });
-    }, 1500);
+    }
+  };
+
+  const handleReset = () => {
+    setSubmitted(false);
+    setErrorMessage(null);
+    setCreatedEnquiryId(null);
+    setForm({
+      fullName: '',
+      companyName: '',
+      email: '',
+      phone: '',
+      service: 'Software Development',
+      message: ''
+    });
   };
 
   return (
-    <section id="contact" className="contact-section">
+    <section id="contact" className="contact-root section section-navy">
       <div className="container">
         
         {/* Header */}
-        <div className="contact-header">
-          <div className="badge">Consultation Portal</div>
-          <h2 className="contact-title">Initiate Your Transformation</h2>
-          <p className="contact-sub">
-            Ready to design your digital architecture? Complete the consultation form below, or reach out directly to one of our global headquarters.
+        <div className="section-header">
+          <div className="badge contact-badge">Get in Touch</div>
+          <h2 className="section-title contact-title">Let's Build Something Great Together</h2>
+          <p className="section-subtitle contact-subtitle">
+            Have a project, business requirement or technology challenge? Talk to the OmNetaTech team.
           </p>
         </div>
 
-        {/* Core Layout Grid */}
-        <div className="contact-grid">
+        {/* Contact Container Grid */}
+        <div className="contact-main-grid">
           
-          {/* Left Column: Form & Info */}
-          <div className="contact-left-col">
-            {!success ? (
-              <form className="contact-form shadow-md" onSubmit={handleSubmit}>
-                <h3 className="form-title-h3">Request Architecture Brief</h3>
-                
-                <div className="contact-form-grid">
-                  <div className="form-field-wrapper">
-                    <label className="contact-label">Full Name *</label>
+          {/* Left Column: Direct Contact Information */}
+          <div className="contact-info-panel shadow-sm">
+            <h3 className="panel-heading">Direct Contact Information</h3>
+            <p className="panel-sub">
+              Reach out directly to our engineering and consulting team for project inquiries, technical evaluations, or partnership discussions.
+            </p>
+
+            <div className="contact-methods-list">
+              {/* Phone */}
+              <a href={`tel:${contactInfo.phone || '+918237140776'}`} className="contact-method-card">
+                <div className="method-icon-box">
+                  <Phone size={20} />
+                </div>
+                <div className="method-details">
+                  <div className="method-label">Call or WhatsApp</div>
+                  <div className="method-value">{contactInfo.phone || '+91 8237140776'}</div>
+                  <div className="method-note">{contactInfo.supportHours || 'Available Mon – Sat, 9:30 AM – 6:30 PM IST'}</div>
+                </div>
+              </a>
+
+              {/* Email */}
+              <a href={`mailto:${contactInfo.email || 'omnetatech@gmail.com'}`} className="contact-method-card">
+                <div className="method-icon-box">
+                  <Mail size={20} />
+                </div>
+                <div className="method-details">
+                  <div className="method-label">Official Email</div>
+                  <div className="method-value">{contactInfo.email || 'omnetatech@gmail.com'}</div>
+                  <div className="method-note">For project briefs, RFP inquiries & resumes</div>
+                </div>
+              </a>
+
+              {/* Location */}
+              <div className="contact-method-card static-method">
+                <div className="method-icon-box">
+                  <MapPin size={20} />
+                </div>
+                <div className="method-details">
+                  <div className="method-label">Headquarters Location</div>
+                  <div className="method-value">{contactInfo.country || 'India'}</div>
+                  <div className="method-note">Serving clients across India & global regions</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Trust Points */}
+            <div className="contact-trust-points">
+              <div className="trust-point-row">
+                <Clock size={16} className="trust-icon" />
+                <span>Quick Response: We respond to enquiries within 1 business day</span>
+              </div>
+              <div className="trust-point-row">
+                <Shield size={16} className="trust-icon" />
+                <span>NDA & Confidentiality: Your project ideas and data remain strictly confidential</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Lead Generation Form */}
+          <div className="contact-form-panel shadow-md">
+            {!submitted ? (
+              <form onSubmit={handleSubmit} className="contact-form-inner">
+                <h3 className="form-heading">Send Us an Enquiry</h3>
+                <p className="form-sub">Fill out the form below and our team will get in touch with you shortly.</p>
+
+                {errorMessage && (
+                  <div className="form-error-alert" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '10px',
+                    padding: '12px 16px',
+                    marginBottom: '20px',
+                    backgroundColor: '#FEF2F2',
+                    border: '1px solid #F87171',
+                    borderRadius: '8px',
+                    color: '#991B1B',
+                    fontSize: '0.9rem',
+                    fontWeight: 500
+                  }}>
+                    <AlertCircle size={18} style={{ flexShrink: 0 }} />
+                    <span>{errorMessage}</span>
+                  </div>
+                )}
+
+                <div className="form-inputs-grid">
+                  
+                  {/* Full Name */}
+                  <div className="form-control-group">
+                    <label className="form-label" htmlFor="fullName">Full Name *</label>
                     <input 
+                      id="fullName"
                       type="text" 
-                      name="name" 
-                      required 
-                      className="contact-text-input" 
-                      placeholder="E.g. Elena Rostova"
-                      value={form.name}
+                      name="fullName"
+                      required
+                      placeholder="Your full name"
+                      className="form-input"
+                      value={form.fullName}
                       onChange={handleInputChange}
                     />
                   </div>
 
-                  <div className="form-field-wrapper">
-                    <label className="contact-label">Company Name *</label>
+                  {/* Company Name */}
+                  <div className="form-control-group">
+                    <label className="form-label" htmlFor="companyName">Company Name</label>
                     <input 
+                      id="companyName"
                       type="text" 
-                      name="company" 
-                      required 
-                      className="contact-text-input" 
-                      placeholder="E.g. Rostova Financials"
-                      value={form.company}
+                      name="companyName"
+                      placeholder="Your business or organization"
+                      className="form-input"
+                      value={form.companyName}
                       onChange={handleInputChange}
                     />
                   </div>
 
-                  <div className="form-field-wrapper">
-                    <label className="contact-label">Corporate Email Address *</label>
+                  {/* Email Address */}
+                  <div className="form-control-group">
+                    <label className="form-label" htmlFor="email">Email Address *</label>
                     <input 
+                      id="email"
                       type="email" 
-                      name="email" 
-                      required 
-                      className="contact-text-input" 
-                      placeholder="E.g. e.rostova@rostova.com"
+                      name="email"
+                      required
+                      placeholder="name@example.com"
+                      className="form-input"
                       value={form.email}
                       onChange={handleInputChange}
                     />
                   </div>
 
-                  <div className="form-field-wrapper">
-                    <label className="contact-label">Phone Number *</label>
+                  {/* Phone Number */}
+                  <div className="form-control-group">
+                    <label className="form-label" htmlFor="phone">Phone Number *</label>
                     <input 
+                      id="phone"
                       type="tel" 
-                      name="phone" 
-                      required 
-                      className="contact-text-input" 
-                      placeholder="E.g. +1 (206) 555-0144"
+                      name="phone"
+                      required
+                      placeholder="+91 98765 43210"
+                      className="form-input"
                       value={form.phone}
                       onChange={handleInputChange}
                     />
                   </div>
 
-                  <div className="form-field-wrapper full-width">
-                    <label className="contact-label">Message / Project Parameters *</label>
+                  {/* Service Required Dropdown */}
+                  <div className="form-control-group full-span">
+                    <label className="form-label" htmlFor="service">Service Required *</label>
+                    <select 
+                      id="service"
+                      name="service"
+                      required
+                      className="form-select"
+                      value={form.service}
+                      onChange={handleInputChange}
+                    >
+                      {servicesList.map((svc, i) => (
+                        <option key={i} value={svc}>{svc}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Message */}
+                  <div className="form-control-group full-span">
+                    <label className="form-label" htmlFor="message">Message *</label>
                     <textarea 
-                      name="msg" 
-                      required 
-                      rows="4" 
-                      className="contact-textarea" 
-                      placeholder="Describe target databases, volume scales, current SLA challenges, and estimated start schedules..."
-                      value={form.msg}
+                      id="message"
+                      name="message"
+                      required
+                      rows="4"
+                      placeholder="Tell us about your project requirements, target timeline, or technology challenge..."
+                      className="form-textarea"
+                      value={form.message}
                       onChange={handleInputChange}
                     ></textarea>
                   </div>
+
                 </div>
 
-                <button type="submit" className="btn-contact-submit" disabled={isSubmitting}>
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 size={16} className="animate-spin" />
-                      <span>Transmitting Files...</span>
-                    </>
-                  ) : (
-                    <>
-                      <span>Transmit Request</span>
-                      <ArrowRight size={16} />
-                    </>
-                  )}
+                <button 
+                  type="submit" 
+                  className="btn-primary-blue form-submit-btn"
+                  disabled={isSubmitting}
+                >
+                  <span>{isSubmitting ? 'Sending Enquiry...' : 'Send Enquiry'}</span>
+                  <Send size={16} />
                 </button>
               </form>
             ) : (
-              <div className="contact-form shadow-md contact-success-body">
-                <CheckCircle2 size={54} className="success-icon-svg" />
-                <h3 className="form-title-h3" style={{ textAlign: 'center' }}>Request Transmitted</h3>
-                <p className="contact-success-text">
-                  Thank you. Your project brief has been logged inside our CRM database. A Solutions Architect representing your region will review your specifications and schedule a consultation within 4 hours.
+              <div className="contact-success-view animate-fade-in">
+                <div className="success-icon-wrap">
+                  <CheckCircle2 size={54} />
+                </div>
+                <h3 className="success-title">Enquiry Received</h3>
+                <p className="success-message">
+                  Thank you! Your enquiry has been received. Our team will get in touch with you soon.
                 </p>
-                <button className="btn-contact-reset" onClick={() => setSuccess(false)}>
+                <div className="success-meta-box">
+                  {createdEnquiryId && (
+                    <div style={{ color: 'var(--color-primary-blue)', fontWeight: 600, paddingBottom: '6px', borderBottom: '1px solid var(--color-border)', marginBottom: '8px' }}>
+                      <strong>Reference ID:</strong> {createdEnquiryId}
+                    </div>
+                  )}
+                  <div><strong>Name:</strong> {form.fullName}</div>
+                  <div><strong>Service:</strong> {form.service}</div>
+                  <div><strong>Email:</strong> {form.email}</div>
+                  {form.phone && <div><strong>Phone:</strong> {form.phone}</div>}
+                </div>
+                <button className="btn-secondary-outline" onClick={handleReset}>
                   Send Another Message
                 </button>
               </div>
             )}
           </div>
 
-          {/* Right Column: Global Locations & Interactive Map */}
-          <div className="contact-right-col">
-            
-            {/* Interactive Office Map Simulation */}
-            <div className="simulated-map shadow-md">
-              {/* World Grid Lines */}
-              <div className="grid-overlay"></div>
-              
-              {/* Pulsating Map Markers */}
-              {offices.map((office) => (
-                <div 
-                  key={office.id} 
-                  className={`simulated-map-marker ${activeOffice === office.id ? 'active-marker' : ''}`}
-                  style={{ top: office.mapPos.top, left: office.mapPos.left }}
-                  onMouseEnter={() => setActiveOffice(office.id)}
-                >
-                  {/* Tooltip on hover */}
-                  <div className="simulated-map-label">
-                    {office.city}
-                  </div>
-                </div>
-              ))}
-
-              {/* Map watermark world illustration */}
-              <div className="world-map-bg" style={{ opacity: 0.1 }}></div>
-            </div>
-
-            {/* Office Directory details based on active id */}
-            <div className="office-directory shadow-sm">
-              <div className="directory-tabs">
-                {offices.map(o => (
-                  <button 
-                    key={o.id}
-                    className={`directory-tab-btn ${activeOffice === o.id ? 'active' : ''}`}
-                    onClick={() => setActiveOffice(o.id)}
-                  >
-                    {o.name}
-                  </button>
-                ))}
-              </div>
-
-              <div className="active-office-details">
-                <h4 className="active-office-title">{offices.find(o => o.id === activeOffice).city} Office</h4>
-                <div className="active-office-info-item">
-                  <MapPin size={16} className="office-icon" />
-                  <span>{offices.find(o => o.id === activeOffice).addr}</span>
-                </div>
-                <div className="active-office-info-item">
-                  <Phone size={16} className="office-icon" />
-                  <span>{offices.find(o => o.id === activeOffice).phone}</span>
-                </div>
-                <div className="active-office-info-item">
-                  <Mail size={16} className="office-icon" />
-                  <span>{offices.find(o => o.id === activeOffice).email}</span>
-                </div>
-              </div>
-            </div>
-
-          </div>
-
         </div>
+
       </div>
 
       <style>{`
-        .contact-section {
-          background-color: var(--color-white);
-          color: #1E293B;
-          padding: 100px 24px;
-          position: relative;
+        .contact-root {
+          background-color: #0B1F3A;
+          background-image: 
+            radial-gradient(circle at 15% 20%, rgba(23, 105, 224, 0.18) 0%, transparent 45%),
+            radial-gradient(circle at 85% 75%, rgba(47, 128, 237, 0.14) 0%, transparent 45%),
+            linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+          background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+          color: #FFFFFF;
         }
 
-        .contact-header {
-          text-align: center;
-          max-width: 800px;
-          margin: 0 auto 64px auto;
-          display: flex;
-          flex-direction: column;
-          align-items: center;
+        .contact-badge {
+          background: rgba(23, 105, 224, 0.25);
+          color: #93C5FD;
+          border: 1px solid rgba(147, 197, 253, 0.3);
         }
 
         .contact-title {
-          font-size: clamp(2rem, 3.5vw, 2.75rem);
-          color: var(--color-navy-dark);
-          margin-top: 16px;
-          margin-bottom: 20px;
-          font-weight: 800;
+          color: #FFFFFF !important;
         }
 
-        .contact-sub {
-          font-size: 1.05rem;
-          color: #475569;
-          line-height: 1.6;
+        .contact-subtitle {
+          color: #CBD5E1 !important;
         }
 
-        /* Contact Grid */
-        .contact-grid {
+        .contact-main-grid {
           display: grid;
-          grid-template-columns: 1.1fr 0.9fr;
-          gap: 40px;
+          grid-template-columns: 0.9fr 1.1fr;
+          gap: 36px;
         }
 
-        /* Contact Form Card */
-        .contact-form {
-          background: var(--color-white-pure);
-          border: 1px solid rgba(7, 20, 38, 0.08);
-          border-radius: var(--border-radius-lg);
-          padding: 40px;
+        /* Left Info Panel */
+        .contact-info-panel {
+          background: rgba(255, 255, 255, 0.04);
+          backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: var(--radius-lg);
+          padding: 36px;
+          display: flex;
+          flex-direction: column;
         }
 
-        .form-title-h3 {
-          font-family: var(--font-title);
-          font-size: 1.5rem;
-          color: var(--color-navy-dark);
-          margin-bottom: 24px;
+        .panel-heading {
+          font-size: 1.45rem;
+          color: #FFFFFF;
           font-weight: 700;
+          margin-bottom: 10px;
         }
 
-        .contact-form-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 20px;
+        .panel-sub {
+          font-size: 0.88rem;
+          color: #94A3B8;
+          line-height: 1.6;
           margin-bottom: 28px;
         }
 
-        .form-field-wrapper {
+        .contact-methods-list {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-bottom: 32px;
+        }
+
+        .contact-method-card {
+          display: flex;
+          align-items: flex-start;
+          gap: 16px;
+          padding: 16px;
+          border-radius: var(--radius-md);
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          transition: all var(--transition-fast);
+          text-decoration: none;
+        }
+
+        .contact-method-card:not(.static-method):hover {
+          background: rgba(255, 255, 255, 0.09);
+          border-color: #60A5FA;
+          box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+          transform: translateY(-2px);
+        }
+
+        .method-icon-box {
+          width: 44px;
+          height: 44px;
+          border-radius: var(--radius-sm);
+          background: rgba(23, 105, 224, 0.25);
+          color: #60A5FA;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          flex-shrink: 0;
+        }
+
+        .method-label {
+          font-size: 0.74rem;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.04em;
+          color: #94A3B8;
+        }
+
+        .method-value {
+          font-size: 1.05rem;
+          font-weight: 700;
+          color: #FFFFFF;
+          margin-top: 2px;
+          margin-bottom: 2px;
+        }
+
+        .method-note {
+          font-size: 0.78rem;
+          color: #CBD5E1;
+        }
+
+        .contact-trust-points {
+          margin-top: auto;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+          padding-top: 20px;
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+
+        .trust-point-row {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-size: 0.82rem;
+          color: #E2E8F0;
+          font-weight: 500;
+        }
+
+        .trust-icon {
+          color: #60A5FA;
+          flex-shrink: 0;
+        }
+
+        /* Right Form Panel: Clean White Elevated Card */
+        .contact-form-panel {
+          background: #FFFFFF;
+          border: 1px solid #E2E8F0;
+          border-radius: var(--radius-lg);
+          padding: 40px;
+          box-shadow: 0 20px 45px -15px rgba(0, 0, 0, 0.45);
+        }
+
+        .form-heading {
+          font-size: 1.45rem;
+          color: var(--color-primary-navy);
+          font-weight: 700;
+          margin-bottom: 6px;
+        }
+
+        .form-sub {
+          font-size: 0.88rem;
+          color: var(--color-text-secondary);
+          margin-bottom: 24px;
+        }
+
+        .form-inputs-grid {
+          display: grid;
+          grid-template-columns: repeat(2, 1fr);
+          gap: 18px;
+          margin-bottom: 24px;
+        }
+
+        .form-control-group {
           display: flex;
           flex-direction: column;
           gap: 6px;
         }
 
-        .form-field-wrapper.full-width {
+        .form-control-group.full-span {
           grid-column: span 2;
         }
 
-        .contact-label {
-          font-size: 0.8rem;
-          color: #475569;
+        .form-label {
+          font-size: 0.84rem;
           font-weight: 600;
+          color: var(--color-primary-navy);
         }
 
-        .contact-text-input {
-          background: var(--color-gray-light);
-          border: 1px solid var(--color-gray-medium);
-          color: var(--color-navy-dark);
-          padding: 12px 16px;
-          border-radius: var(--border-radius-sm);
-          font-family: var(--font-primary);
-          font-size: 0.9rem;
-          outline: none;
-          transition: border var(--transition-fast);
-        }
-
-        .contact-text-input:focus, .contact-textarea:focus {
-          border-color: var(--color-royal);
-          background: var(--color-white-pure);
-        }
-
-        .contact-textarea {
-          background: var(--color-gray-light);
-          border: 1px solid var(--color-gray-medium);
-          color: var(--color-navy-dark);
-          padding: 12px 16px;
-          border-radius: var(--border-radius-sm);
-          font-family: var(--font-primary);
-          font-size: 0.9rem;
-          resize: none;
-          outline: none;
-          transition: border var(--transition-fast);
-        }
-
-        .btn-contact-submit {
+        .form-input,
+        .form-select,
+        .form-textarea {
           width: 100%;
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-purple) 100%);
-          border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.95rem;
+          min-height: 46px;
+          padding: 12px 14px;
+          background: #F8FAFC;
+          border: 1px solid #CBD5E1;
+          border-radius: var(--radius-sm);
+          font-family: inherit;
+          font-size: 0.9rem;
+          color: var(--color-text);
+          outline: none;
+          transition: all var(--transition-fast);
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+          background: #FFFFFF;
+          border-color: var(--color-primary-blue);
+          box-shadow: 0 0 0 3px rgba(23, 105, 224, 0.15);
+        }
+
+        .form-textarea {
+          resize: vertical;
+          min-height: 100px;
+        }
+
+        .form-submit-btn {
+          width: 100%;
           padding: 14px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          transition: var(--transition-fast);
+          font-size: 0.96rem;
+          border-radius: var(--radius-sm);
         }
 
-        .btn-contact-submit:hover {
-          box-shadow: 0 4px 15px rgba(109, 93, 252, 0.4);
-          transform: translateY(-1px);
-        }
-
-        /* Success Page inside Card */
-        .contact-success-body {
+        /* Success View */
+        .contact-success-view {
           display: flex;
           flex-direction: column;
           align-items: center;
           text-align: center;
+          padding: 40px 20px;
         }
 
-        .success-icon-svg {
-          color: #10B981;
+        .success-icon-wrap {
+          color: var(--color-success);
           margin-bottom: 16px;
         }
 
-        .contact-success-text {
-          font-size: 0.95rem;
-          color: #475569;
+        .success-title {
+          font-size: 1.6rem;
+          font-weight: 800;
+          color: var(--color-primary-navy);
+          margin-bottom: 10px;
+        }
+
+        .success-message {
+          font-size: 1rem;
+          color: var(--color-text-secondary);
           line-height: 1.6;
+          max-width: 440px;
           margin-bottom: 24px;
         }
 
-        .btn-contact-reset {
-          background: none;
-          border: 1px solid var(--color-royal);
-          color: var(--color-royal);
-          padding: 10px 20px;
-          font-weight: 600;
+        .success-meta-box {
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm);
+          padding: 16px;
+          text-align: left;
           font-size: 0.85rem;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
+          color: var(--color-text);
+          line-height: 1.8;
+          width: 100%;
+          max-width: 400px;
+          margin-bottom: 24px;
         }
 
-        /* Right Column layout & Simulated Map */
-        .contact-right-col {
-          display: flex;
-          flex-direction: column;
-          gap: 24px;
-        }
-
-        .simulated-map {
-          background-color: var(--color-navy-dark);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: var(--border-radius-lg);
-          height: 320px;
-          position: relative;
-          overflow: hidden;
-        }
-
-        .simulated-map-marker {
-          position: absolute;
-          width: 14px;
-          height: 14px;
-          background: var(--color-cyan);
-          border-radius: 50%;
-          border: 2px solid var(--color-white-pure);
-          box-shadow: 0 0 10px var(--color-cyan);
-          cursor: pointer;
-          z-index: 5;
-        }
-
-        .simulated-map-marker::after {
-          content: '';
-          position: absolute;
-          top: -4px;
-          left: -4px;
-          right: -4px;
-          bottom: -4px;
-          border: 1.5px solid var(--color-cyan);
-          border-radius: 50%;
-          animation: pulseGlow 2s infinite;
-        }
-
-        .simulated-map-label {
-          position: absolute;
-          background: var(--color-navy);
-          color: var(--color-white-pure);
-          padding: 4px 8px;
-          border-radius: var(--border-radius-sm);
-          font-size: 0.7rem;
-          font-family: var(--font-mono);
-          border: 1px solid rgba(255, 255, 255, 0.15);
-          transform: translate(-50%, -130%);
-          pointer-events: none;
-          white-space: nowrap;
-          opacity: 0;
-          transition: opacity var(--transition-fast);
-        }
-
-        .simulated-map-marker:hover .simulated-map-label {
-          opacity: 1;
-        }
-
-        /* Directory panel */
-        .office-directory {
-          background: var(--color-gray-light);
-          border: 1px solid var(--color-gray-medium);
-          border-radius: var(--border-radius-md);
-          padding: 24px;
-        }
-
-        .directory-tabs {
-          display: flex;
-          border-bottom: 1px solid var(--color-gray-medium);
-          padding-bottom: 12px;
-          margin-bottom: 16px;
-          gap: 12px;
-        }
-
-        .directory-tab-btn {
-          background: none;
-          border: none;
-          font-family: var(--font-primary);
-          font-size: 0.85rem;
-          font-weight: 600;
-          color: #64748B;
-          cursor: pointer;
-          padding: 6px 12px;
-          border-radius: var(--border-radius-sm);
-        }
-
-        .directory-tab-btn.active {
-          color: var(--color-royal);
-          background: rgba(15, 82, 186, 0.05);
-        }
-
-        .active-office-title {
-          font-family: var(--font-title);
-          font-size: 1.15rem;
-          color: var(--color-navy-dark);
-          margin-bottom: 12px;
-          font-weight: 700;
-        }
-
-        .active-office-info-item {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          font-size: 0.9rem;
-          color: #475569;
-          margin-bottom: 8px;
-        }
-
-        .office-icon {
-          color: var(--color-royal);
-          flex-shrink: 0;
-        }
-
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-
-        @media (max-width: 991px) {
-          .contact-grid {
+        @media (max-width: 960px) {
+          .contact-main-grid {
             grid-template-columns: 1fr;
           }
         }
 
-        @media (max-width: 576px) {
-          .contact-form-grid {
+        @media (max-width: 600px) {
+          .form-inputs-grid {
             grid-template-columns: 1fr;
           }
-          .form-field-wrapper.full-width {
+          .form-control-group.full-span {
             grid-column: span 1;
           }
-          .contact-form {
+          .contact-form-panel {
+            padding: 24px;
+          }
+          .contact-info-panel {
             padding: 24px;
           }
         }

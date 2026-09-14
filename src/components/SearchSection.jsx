@@ -1,143 +1,200 @@
 import { useState } from 'react';
-import { Search, ChevronDown, Check, ArrowRight } from 'lucide-react';
+import { Search, ChevronDown, Check, ArrowRight, X } from 'lucide-react';
 
-export default function SearchSection({ onSearchSubmit }) {
+export default function SearchSection({ onNavigate, openConsultationModal }) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedIndustry, setSelectedIndustry] = useState('All Industries');
+  const [selectedCategory, setSelectedCategory] = useState('All');
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  const industries = [
-    'All Industries',
-    'Banking',
-    'Healthcare',
-    'Retail',
-    'Manufacturing',
-    'Education',
-    'Logistics',
-    'Technology'
+  const categories = [
+    'All',
+    'Services',
+    'Solutions',
+    'Industries',
+    'Insights'
   ];
 
-  // Simulated Knowledge Base for search matching
-  const searchDatabase = [
-    { title: 'Generative AI & LLM Integration', cat: 'Services', desc: 'Secure agent workflows and custom business model training.', ind: ['Banking', 'Healthcare', 'Retail', 'Technology'] },
-    { title: 'Cloud Infrastructure Modernization', cat: 'Services', desc: 'AWS/Azure/GCP multi-cloud orchestration and container migration.', ind: ['Banking', 'Retail', 'Logistics', 'Technology'] },
-    { title: 'HIPAA & ISO Cybersecurity Audits', cat: 'Services', desc: 'Threat hunting, vulnerability scans, and continuous compliance reporting.', ind: ['Healthcare', 'Banking', 'Technology'] },
-    { title: 'Predictive Manufacturing Logistics', cat: 'Solutions', desc: 'IoT sensors and predictive maintenance scheduling.', ind: ['Manufacturing', 'Logistics'] },
-    { title: 'AI Customer Operations Engine', cat: 'Solutions', desc: 'Custom conversational support agents integrated with ERP systems.', ind: ['Retail', 'Education', 'Banking'] },
-    { title: 'Automated Financial Reconciliation', cat: 'Solutions', desc: 'RPA automation for accounts payable and transaction auditing.', ind: ['Banking', 'Technology'] },
-    { title: 'Decentralized Supply Chain Ledgers', cat: 'Solutions', desc: 'Secure ledger integration for real-time tracking.', ind: ['Logistics', 'Manufacturing'] },
-    { title: 'AI Adaptive Learning Platform', cat: 'Solutions', desc: 'Interactive portals with personalized course paths.', ind: ['Education'] }
+  // Verified, genuine OmNetaTech content database
+  const searchableDatabase = [
+    // Services
+    { title: 'Software Development', type: 'Services', section: 'services', desc: 'Custom web applications, business software, API development, backend systems and database architectures.' },
+    { title: 'Web Development', type: 'Services', section: 'services', desc: 'Responsive business websites, corporate portals, e-commerce solutions, and website maintenance.' },
+    { title: 'Mobile App Development', type: 'Services', section: 'services', desc: 'Android applications, iOS applications, cross-platform apps using Flutter/React Native, and API integration.' },
+    { title: 'UI/UX Design', type: 'Services', section: 'services', desc: 'Website UI, mobile app interfaces, user experience wireframing, design systems, and component libraries.' },
+    { title: 'Cloud & DevOps', type: 'Services', section: 'services', desc: 'Cloud deployment, application hosting, automated CI/CD pipelines, server configuration, and performance optimization.' },
+    { title: 'Automation & AI', type: 'Services', section: 'services', desc: 'Business process automation, practical AI features, workflow automation, third-party API connectivity, and custom tools.' },
+    { title: 'IT Consulting', type: 'Services', section: 'services', desc: 'Technology consulting, architecture planning, product development strategy, code audits, and digital transformation roadmaps.' },
+
+    // Solutions
+    { title: 'Business Website Solutions', type: 'Solutions', section: 'solutions', desc: 'High-performing, responsive websites built to generate client inquiries and establish digital authority.' },
+    { title: 'Custom Software Solutions', type: 'Solutions', section: 'solutions', desc: 'Tailored software systems engineered to replace clunky spreadsheets and automate operations.' },
+    { title: 'Automation Solutions', type: 'Solutions', section: 'solutions', desc: 'Streamlining repetitive tasks, syncing data between business tools, and accelerating turnaround times.' },
+    { title: 'Digital Product Development', type: 'Solutions', section: 'solutions', desc: 'End-to-end MVP building, structured product prototyping, and reliable cloud deployments for startups.' },
+    { title: 'E-commerce Solutions', type: 'Solutions', section: 'solutions', desc: 'Custom digital storefronts, product catalogs, Indian payment gateway integrations, and order dispatch tools.' },
+    { title: 'Cloud & Infrastructure Solutions', type: 'Solutions', section: 'solutions', desc: 'Secure cloud hosting, automated backups, and server monitoring to guarantee application availability.' },
+    { title: 'AI-Powered Business Solutions', type: 'Solutions', section: 'solutions', desc: 'Practical implementations of document parsing, smart internal search, and conversational business assistants.' },
+
+    // Industries
+    { title: 'Healthcare Solutions', type: 'Industries', section: 'industries', desc: 'Technology solutions for clinics, health practices, and diagnostic centers: patient booking and digital inquiry portals.' },
+    { title: 'Education & LMS Solutions', type: 'Industries', section: 'industries', desc: 'Learning platforms, course enrollment workflows, student portals, and educational resource hubs.' },
+    { title: 'Finance & Banking Solutions', type: 'Industries', section: 'industries', desc: 'Client onboarding workflows, billing integrations, financial calculators, and secure account portals.' },
+    { title: 'Retail & E-commerce Solutions', type: 'Industries', section: 'industries', desc: 'Online storefronts, catalog management tools, and reliable checkout payment processing.' },
+    { title: 'Manufacturing Solutions', type: 'Industries', section: 'industries', desc: 'Internal operational trackers, production scheduling dashboards, and distributor coordination portals.' },
+    { title: 'Real Estate Solutions', type: 'Industries', section: 'industries', desc: 'Property listings, interactive floor plans, virtual tours, and automated property inquiry capture.' },
+    { title: 'Logistics Solutions', type: 'Industries', section: 'industries', desc: 'Consignment tracking portals, customer booking systems, and automated dispatch status alerts.' },
+    { title: 'Startups & SMEs Solutions', type: 'Industries', section: 'industries', desc: 'Agile MVP development, scalable web architectures, and rapid time-to-market software delivery.' },
+
+    // Insights
+    { title: 'Key Considerations When Building Custom Web Applications', type: 'Insights', tab: 'insights', desc: 'Why custom software architecture helps growing businesses scale operational workflows efficiently.' },
+    { title: 'Practical Automation: Streamlining Internal Operations', type: 'Insights', tab: 'insights', desc: 'How to implement workflow automation to reduce repetitive clerical overhead without overcomplicating tools.' },
+    { title: 'Why Mobile Responsiveness Matters for Digital Success', type: 'Insights', tab: 'insights', desc: 'Exploring how mobile optimization and clean typography directly impact client trust and inquiry conversions.' },
+    { title: 'Cloud Deployment Fundamentals for Web Applications', type: 'Insights', tab: 'insights', desc: 'A guide to cloud hosting selection, automated backups, and server monitoring tailored for business software.' }
   ];
 
   const handleSearch = (e) => {
     e?.preventDefault();
     setHasSearched(true);
-    
-    // Filter database
-    const results = searchDatabase.filter(item => {
-      const matchQuery = searchQuery.trim() === '' || 
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        item.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.cat.toLowerCase().includes(searchQuery.toLowerCase());
-        
-      const matchInd = selectedIndustry === 'All Industries' || item.ind.includes(selectedIndustry);
-      
-      return matchQuery && matchInd;
+
+    const query = searchQuery.trim().toLowerCase();
+    const results = searchableDatabase.filter(item => {
+      const matchesQuery = query === '' || 
+        item.title.toLowerCase().includes(query) || 
+        item.desc.toLowerCase().includes(query) ||
+        item.type.toLowerCase().includes(query);
+
+      const matchesCat = selectedCategory === 'All' || item.type === selectedCategory;
+
+      return matchesQuery && matchesCat;
     });
 
     setSearchResults(results);
-    
-    if (onSearchSubmit) {
-      onSearchSubmit(searchQuery, selectedIndustry, results);
+  };
+
+  const handleResultClick = (item) => {
+    setHasSearched(false);
+    if (item.tab && onNavigate) {
+      onNavigate(item.tab);
+    } else if (item.section) {
+      if (onNavigate) {
+        onNavigate('home', item.section);
+      } else {
+        const el = document.getElementById(item.section);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }
     }
   };
 
-  const selectIndustryOption = (ind) => {
-    setSelectedIndustry(ind);
-    setIsDropdownOpen(false);
-  };
-
   return (
-    <div className="search-section container">
-      <div className="search-card-wrapper shadow-premium">
-        <form className="search-form" onSubmit={handleSearch}>
+    <div className="search-section-wrap container">
+      <div className="search-box-card shadow-md">
+        <form className="search-form-row" onSubmit={handleSearch}>
           
-          {/* Input field */}
-          <div className="search-input-group">
-            <Search className="search-icon-input" size={20} />
+          {/* Input */}
+          <div className="search-field-left">
+            <Search size={18} className="search-icon-svg" />
             <input 
               type="text" 
-              placeholder="Search Services, Industries, Solutions..."
-              className="search-input"
+              placeholder="Search services, solutions, industries, or technical insights..."
+              className="search-text-input"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                if (hasSearched) setHasSearched(false);
+              }}
             />
+            {searchQuery && (
+              <button 
+                type="button" 
+                className="btn-clear-query"
+                onClick={() => {
+                  setSearchQuery('');
+                  setHasSearched(false);
+                }}
+              >
+                <X size={16} />
+              </button>
+            )}
           </div>
 
-          {/* Industry dropdown selection */}
-          <div className="search-dropdown-group">
+          {/* Category Dropdown */}
+          <div className="search-category-dropdown">
             <button 
               type="button" 
-              className="dropdown-trigger-btn"
+              className="category-dropdown-trigger"
               onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             >
-              <span>{selectedIndustry}</span>
-              <ChevronDown size={16} className={`chevron-down-search ${isDropdownOpen ? 'open' : ''}`} />
+              <span>{selectedCategory === 'All' ? 'All Categories' : selectedCategory}</span>
+              <ChevronDown size={14} className={`chevron-down ${isDropdownOpen ? 'open' : ''}`} />
             </button>
-            
+
             {isDropdownOpen && (
-              <ul className="dropdown-options-list">
-                {industries.map((ind, idx) => (
+              <ul className="category-options-menu shadow-lg">
+                {categories.map((cat, idx) => (
                   <li 
-                    key={idx} 
-                    className={`dropdown-option-item ${selectedIndustry === ind ? 'active-option' : ''}`}
-                    onClick={() => selectIndustryOption(ind)}
+                    key={idx}
+                    className={`category-option-item ${selectedCategory === cat ? 'active-cat' : ''}`}
+                    onClick={() => {
+                      setSelectedCategory(cat);
+                      setIsDropdownOpen(false);
+                    }}
                   >
-                    <span>{ind}</span>
-                    {selectedIndustry === ind && <Check size={14} className="check-icon-search" />}
+                    <span>{cat === 'All' ? 'All Categories' : cat}</span>
+                    {selectedCategory === cat && <Check size={14} className="check-icon" />}
                   </li>
                 ))}
               </ul>
             )}
           </div>
 
-          {/* Action button */}
-          <button type="submit" className="search-action-btn">
-            Explore Solutions
+          {/* Submit */}
+          <button type="submit" className="btn-primary-blue search-submit-btn">
+            Find Solutions
           </button>
         </form>
 
-        {/* Live Search Results Overlay */}
+        {/* Search Results Overlay */}
         {hasSearched && (
-          <div className="search-results-overlay">
-            <div className="results-header">
-              <span className="results-count">{searchResults.length} Solutions Found</span>
-              <button className="btn-close-results" onClick={() => setHasSearched(false)}>Clear</button>
+          <div className="live-search-results animate-fade-in">
+            <div className="results-status-bar">
+              <span className="results-count-text">
+                Found {searchResults.length} {searchResults.length === 1 ? 'result' : 'results'}
+              </span>
+              <button className="close-results-btn" onClick={() => setHasSearched(false)}>
+                Close Results
+              </button>
             </div>
-            
+
             {searchResults.length > 0 ? (
-              <div className="results-grid">
-                {searchResults.map((res, idx) => (
-                  <div key={idx} className="result-item-card">
-                    <div className="result-badge-cat">{res.cat}</div>
-                    <h4 className="result-title-h4">{res.title}</h4>
-                    <p className="result-desc-p">{res.desc}</p>
-                    <div className="result-footer-row">
-                      <div className="result-tags">
-                        {res.ind.map((i, k) => <span key={k} className="result-tag-span">#{i}</span>)}
-                      </div>
-                      <a href="#contact" className="result-learn-more" onClick={() => setHasSearched(false)}>
-                        Enquire <ArrowRight size={14} />
-                      </a>
+              <div className="results-grid-cards">
+                {searchResults.map((res, i) => (
+                  <div 
+                    key={i} 
+                    className="search-result-card shadow-sm"
+                    onClick={() => handleResultClick(res)}
+                  >
+                    <div className="result-card-top">
+                      <span className="result-type-badge">{res.type}</span>
+                      <ArrowRight size={14} className="result-arrow-icon" />
                     </div>
+                    <h4 className="result-title">{res.title}</h4>
+                    <p className="result-desc">{res.desc}</p>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="no-results-view">
-                No direct solutions found matching your search. Contact our experts to customize a solution.
+              <div className="search-no-results">
+                <p>No exact results found for "{searchQuery}".</p>
+                <button 
+                  className="btn-primary-blue mt-3"
+                  onClick={() => {
+                    setHasSearched(false);
+                    if (openConsultationModal) openConsultationModal();
+                  }}
+                >
+                  Consult Our Team Directly
+                </button>
               </div>
             )}
           </div>
@@ -145,271 +202,253 @@ export default function SearchSection({ onSearchSubmit }) {
       </div>
 
       <style>{`
-        .search-section {
+        .search-section-wrap {
           position: relative;
-          z-index: 20;
-          margin-top: -40px;
-          padding: 0 24px;
+          z-index: 30;
+          margin-top: -30px;
+          margin-bottom: 40px;
         }
 
-        .search-card-wrapper {
-          background: rgba(13, 34, 60, 0.95);
-          border: 1px solid rgba(0, 191, 255, 0.25);
-          border-radius: var(--border-radius-md);
+        .search-box-card {
+          background: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-md);
           padding: 8px;
           position: relative;
-          backdrop-filter: blur(10px);
-          -webkit-backdrop-filter: blur(10px);
         }
 
-        .search-form {
+        .search-form-row {
           display: flex;
           align-items: center;
           gap: 8px;
         }
 
-        .search-input-group {
+        .search-field-left {
           display: flex;
           align-items: center;
           gap: 12px;
           flex: 1;
-          background: rgba(7, 20, 38, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          padding: 12px 18px;
-          border-radius: var(--border-radius-sm);
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          padding: 11px 16px;
+          border-radius: var(--radius-sm);
         }
 
-        .search-icon-input {
-          color: var(--color-cyan);
+        .search-icon-svg {
+          color: var(--color-primary-blue);
+          flex-shrink: 0;
         }
 
-        .search-input {
+        .search-text-input {
+          width: 100%;
           background: none;
           border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-size: 0.95rem;
-          width: 100%;
           outline: none;
-        }
-
-        .search-input::placeholder {
-          color: var(--color-gray-dark);
-        }
-
-        /* Dropdown custom styling */
-        .search-dropdown-group {
-          position: relative;
-          min-width: 180px;
-        }
-
-        .dropdown-trigger-btn {
-          width: 100%;
-          background: rgba(7, 20, 38, 0.4);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          color: var(--color-white-pure);
-          padding: 14px 18px;
-          border-radius: var(--border-radius-sm);
-          font-family: var(--font-primary);
+          font-family: inherit;
           font-size: 0.9rem;
-          font-weight: 500;
+          color: var(--color-primary-navy);
+        }
+
+        .search-text-input::placeholder {
+          color: var(--color-text-secondary);
+        }
+
+        .btn-clear-query {
+          background: none;
+          border: none;
+          color: var(--color-text-secondary);
           cursor: pointer;
+          display: flex;
+          align-items: center;
+        }
+
+        /* Dropdown */
+        .search-category-dropdown {
+          position: relative;
+          min-width: 170px;
+        }
+
+        .category-dropdown-trigger {
+          width: 100%;
           display: flex;
           justify-content: space-between;
           align-items: center;
-          gap: 12px;
+          gap: 8px;
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          padding: 12px 16px;
+          border-radius: var(--radius-sm);
+          font-family: inherit;
+          font-size: 0.88rem;
+          font-weight: 600;
+          color: var(--color-primary-navy);
+          cursor: pointer;
         }
 
-        .chevron-down-search {
-          color: var(--color-gray-dark);
-          transition: var(--transition-fast);
+        .chevron-down {
+          color: var(--color-text-secondary);
+          transition: transform var(--transition-fast);
         }
 
-        .chevron-down-search.open {
+        .chevron-down.open {
           transform: rotate(180deg);
-          color: var(--color-cyan);
         }
 
-        .dropdown-options-list {
+        .category-options-menu {
           position: absolute;
           top: calc(100% + 6px);
           left: 0;
           right: 0;
-          background: var(--color-navy-light);
-          border: 1px solid rgba(0, 191, 255, 0.15);
-          border-radius: var(--border-radius-sm);
-          box-shadow: var(--shadow-lg);
+          background: var(--color-white);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm);
           list-style: none;
-          max-height: 240px;
-          overflow-y: auto;
-          z-index: 30;
           padding: 6px 0;
+          z-index: 50;
         }
 
-        .dropdown-option-item {
+        .category-option-item {
           display: flex;
-          align-items: center;
           justify-content: space-between;
-          padding: 10px 16px;
-          font-size: 0.85rem;
+          align-items: center;
+          padding: 8px 16px;
+          font-size: 0.84rem;
+          color: var(--color-primary-navy);
           cursor: pointer;
-          color: var(--color-gray-medium);
-          transition: var(--transition-fast);
+          transition: background var(--transition-fast);
         }
 
-        .dropdown-option-item:hover, .dropdown-option-item.active-option {
-          background: rgba(15, 82, 186, 0.2);
-          color: var(--color-cyan);
+        .category-option-item:hover, .category-option-item.active-cat {
+          background: var(--color-light-blue);
+          color: var(--color-primary-blue);
         }
 
-        .check-icon-search {
-          color: var(--color-cyan);
+        .check-icon {
+          color: var(--color-primary-blue);
         }
 
-        /* Search Submit Button */
-        .search-action-btn {
-          background: linear-gradient(135deg, var(--color-royal) 0%, var(--color-purple) 100%);
-          border: none;
-          color: var(--color-white-pure);
-          font-family: var(--font-primary);
-          font-weight: 600;
-          font-size: 0.95rem;
-          padding: 14px 28px;
-          border-radius: var(--border-radius-sm);
-          cursor: pointer;
-          transition: var(--transition-fast);
-          white-space: nowrap;
+        .search-submit-btn {
+          padding: 12px 24px;
+          font-size: 0.9rem;
         }
 
-        .search-action-btn:hover {
-          background: linear-gradient(135deg, var(--color-purple) 0%, var(--color-cyan) 100%);
-          box-shadow: 0 0 15px rgba(0, 191, 255, 0.4);
+        /* Results */
+        .live-search-results {
+          margin-top: 14px;
+          border-top: 1px solid var(--color-border);
+          padding: 20px 8px 12px 8px;
         }
 
-        /* Results Area overlay */
-        .search-results-overlay {
-          background: rgba(7, 20, 38, 0.98);
-          border-top: 1px solid rgba(255, 255, 255, 0.08);
-          border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
-          padding: 20px;
-          margin-top: 8px;
-          max-height: 400px;
-          overflow-y: auto;
-        }
-
-        .results-header {
+        .results-status-bar {
           display: flex;
           justify-content: space-between;
           align-items: center;
           margin-bottom: 16px;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-          padding-bottom: 8px;
+          padding: 0 4px;
         }
 
-        .results-count {
+        .results-count-text {
           font-family: var(--font-mono);
-          font-size: 0.8rem;
-          color: var(--color-cyan);
+          font-size: 0.78rem;
+          font-weight: 700;
+          color: var(--color-primary-blue);
           text-transform: uppercase;
         }
 
-        .btn-close-results {
+        .close-results-btn {
           background: none;
           border: none;
-          color: var(--color-gray-dark);
-          font-size: 0.8rem;
+          color: var(--color-text-secondary);
+          font-size: 0.82rem;
           cursor: pointer;
-        }
-        .btn-close-results:hover {
-          color: var(--color-white-pure);
-        }
-
-        .results-grid {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 16px;
-        }
-
-        .result-item-card {
-          background: rgba(255, 255, 255, 0.02);
-          border: 1px solid rgba(255, 255, 255, 0.05);
-          border-radius: var(--border-radius-sm);
-          padding: 16px;
-          display: flex;
-          flex-direction: column;
-          gap: 8px;
-        }
-
-        .result-badge-cat {
-          align-self: flex-start;
-          background: rgba(0, 191, 255, 0.1);
-          color: var(--color-cyan);
-          font-family: var(--font-mono);
-          font-size: 0.65rem;
-          padding: 2px 8px;
-          border-radius: 20px;
-          text-transform: uppercase;
-        }
-
-        .result-title-h4 {
-          font-family: var(--font-title);
-          font-size: 1rem;
           font-weight: 600;
-          color: var(--color-white-pure);
         }
 
-        .result-desc-p {
-          font-size: 0.8rem;
-          color: var(--color-gray-medium);
-          line-height: 1.4;
+        .close-results-btn:hover {
+          color: var(--color-primary-navy);
         }
 
-        .result-footer-row {
+        .results-grid-cards {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 14px;
+        }
+
+        .search-result-card {
+          background: var(--color-bg);
+          border: 1px solid var(--color-border);
+          border-radius: var(--radius-sm);
+          padding: 16px;
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .search-result-card:hover {
+          background: var(--color-white);
+          border-color: var(--color-primary-blue);
+          box-shadow: var(--shadow-sm);
+          transform: translateY(-2px);
+        }
+
+        .result-card-top {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-top: auto;
-          padding-top: 8px;
-          font-size: 0.75rem;
+          margin-bottom: 8px;
         }
 
-        .result-tags {
-          display: flex;
-          gap: 6px;
-          color: var(--color-gray-dark);
+        .result-type-badge {
+          font-family: var(--font-mono);
+          font-size: 0.68rem;
+          font-weight: 700;
+          color: var(--color-primary-blue);
+          background: var(--color-light-blue);
+          padding: 2px 8px;
+          border-radius: var(--radius-full);
+          text-transform: uppercase;
         }
 
-        .result-learn-more {
-          color: var(--color-cyan);
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          font-weight: 600;
-        }
-        .result-learn-more:hover {
-          text-decoration: underline;
+        .result-arrow-icon {
+          color: var(--color-text-secondary);
         }
 
-        .no-results-view {
+        .search-result-card:hover .result-arrow-icon {
+          color: var(--color-primary-blue);
+        }
+
+        .result-title {
+          font-size: 0.98rem;
+          font-weight: 700;
+          color: var(--color-primary-navy);
+          margin-bottom: 6px;
+        }
+
+        .result-desc {
+          font-size: 0.8rem;
+          color: var(--color-text-secondary);
+          line-height: 1.5;
+        }
+
+        .search-no-results {
           text-align: center;
-          padding: 30px 0;
-          color: var(--color-gray-dark);
+          padding: 30px;
+          color: var(--color-text-secondary);
           font-size: 0.9rem;
         }
 
-        @media (max-width: 768px) {
-          .search-form {
+        .mt-3 {
+          margin-top: 12px;
+        }
+
+        @media (max-width: 900px) {
+          .search-form-row {
             flex-direction: column;
             align-items: stretch;
           }
-          .search-dropdown-group {
+          .search-category-dropdown {
             width: 100%;
           }
-          .search-action-btn {
-            width: 100%;
-            padding: 14px;
-          }
-          .results-grid {
+          .results-grid-cards {
             grid-template-columns: 1fr;
           }
         }
