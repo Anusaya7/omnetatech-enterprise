@@ -54,8 +54,14 @@ const server = http.createServer((req, res) => {
       
       const headers = {
         'Content-Type': contentType,
-        'X-Content-Type-Options': 'nosniff'
+        'X-Content-Type-Options': 'nosniff',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
       };
+
+      if (process.env.NODE_ENV === 'production' || req.headers['x-forwarded-proto'] === 'https') {
+        headers['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload';
+      }
 
       if (pathname.startsWith('/assets/')) {
         headers['Cache-Control'] = 'public, max-age=31536000, immutable';
@@ -75,13 +81,19 @@ const server = http.createServer((req, res) => {
         res.end('Error loading application. Please ensure "npm run build" has completed.');
         return;
       }
-      res.writeHead(200, {
+      const spaHeaders = {
         'Content-Type': 'text/html; charset=utf-8',
         'Cache-Control': 'no-cache, no-store, must-revalidate',
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'DENY',
-        'X-XSS-Protection': '1; mode=block'
-      });
+        'X-XSS-Protection': '1; mode=block',
+        'Referrer-Policy': 'strict-origin-when-cross-origin',
+        'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'
+      };
+      if (process.env.NODE_ENV === 'production' || req.headers['x-forwarded-proto'] === 'https') {
+        spaHeaders['Strict-Transport-Security'] = 'max-age=63072000; includeSubDomains; preload';
+      }
+      res.writeHead(200, spaHeaders);
       res.end(content);
     });
   });

@@ -1,13 +1,83 @@
 import { db } from './db.js';
 
-// Helper to parse JSON body from incoming HTTP request
+// Rate limiter map for admin login attempts
+const loginAttempts = new Map(); // ip -> { count: number, lockedUntil: number }
+
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket?.remoteAddress || req.connection?.remoteAddress || '127.0.0.1';
+}
+
+function checkLoginRateLimit(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip);
+  if (entry) {
+    if (entry.lockedUntil && entry.lockedUntil > now) {
+      const waitMinutes = Math.ceil((entry.lockedUntil - now) / 60000);
+      return { allowed: false, waitMinutes };
+    }
+    if (entry.lockedUntil && entry.lockedUntil <= now) {
+      loginAttempts.delete(ip);
+    }
+  }
+  return { allowed: true };
+}
+
+function recordFailedLogin(ip) {
+  const now = Date.now();
+  const entry = loginAttempts.get(ip) || { count: 0, firstAttempt: now, lockedUntil: 0 };
+  entry.count += 1;
+  // If 5 failed attempts within 15 minutes, lock for 15 minutes
+  if (entry.count >= 5) {
+    entry.lockedUntil = now + 15 * 60 * 1000;
+  }
+  loginAttempts.set(ip, entry);
+}
+
+function clearFailedLogins(ip) {
+  loginAttempts.delete(ip);
+}
+
+// Input sanitization & validation
+function sanitizeText(str, maxLen = 1000) {
+  if (typeof str !== 'string') return '';
+  return str
+    .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+    .replace(/javascript:/gi, '')
+    .replace(/on\w+="[^"]*"/gi, '')
+    .trim()
+    .slice(0, maxLen);
+}
+
+function isValidEmail(email) {
+  if (!email || typeof email !== 'string' || email.length > 120) return false;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+
+function isValidPhone(phone) {
+  if (!phone || typeof phone !== 'string') return false;
+  const clean = phone.trim();
+  return clean.length >= 6 && clean.length <= 30 && /^[0-9+()\s-]+$/.test(clean);
+}
+
+const MAX_BODY_SIZE = 1024 * 1024; // 1 MB payload limit
+
+// Helper to parse JSON body with payload size protection
 function parseBody(req) {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     if (req.body !== undefined && req.body !== null) {
       if (typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
         return resolve(req.body);
       }
       if (Buffer.isBuffer(req.body)) {
+        if (req.body.length > MAX_BODY_SIZE) {
+          const err = new Error('Payload too large (maximum 1MB allowed)');
+          err.statusCode = 413;
+          return reject(err);
+        }
         try {
           return resolve(JSON.parse(req.body.toString('utf-8')));
         } catch {
@@ -15,6 +85,11 @@ function parseBody(req) {
         }
       }
       if (typeof req.body === 'string') {
+        if (Buffer.byteLength(req.body) > MAX_BODY_SIZE) {
+          const err = new Error('Payload too large (maximum 1MB allowed)');
+          err.statusCode = 413;
+          return reject(err);
+        }
         try {
           return resolve(JSON.parse(req.body));
         } catch {
@@ -23,7 +98,15 @@ function parseBody(req) {
       }
     }
     let body = '';
+    let bytesReceived = 0;
     req.on('data', chunk => {
+      bytesReceived += chunk.length;
+      if (bytesReceived > MAX_BODY_SIZE) {
+        req.destroy();
+        const err = new Error('Payload too large (maximum 1MB allowed)');
+        err.statusCode = 413;
+        return reject(err);
+      }
       body += chunk.toString();
     });
     req.on('end', () => {
@@ -33,8 +116,8 @@ function parseBody(req) {
         resolve({});
       }
     });
-    req.on('error', () => {
-      resolve({});
+    req.on('error', (err) => {
+      reject(err);
     });
   });
 }
@@ -55,7 +138,7 @@ function getBearerToken(req) {
   return null;
 }
 
-// Middleware handler for Vite
+// Middleware handler for Vite, Vercel, and standalone Node.js server
 export async function apiMiddleware(req, res, next) {
   const urlObj = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = urlObj.pathname;
@@ -67,8 +150,32 @@ export async function apiMiddleware(req, res, next) {
 
   const method = req.method.toUpperCase();
 
-  // CORS headers for development flexibility
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS headers with origin verification
+  const origin = req.headers['origin'];
+  const host = req.headers['host'] || '';
+  const allowedOriginsEnv = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim().toLowerCase()) : [];
+  
+  const defaultAllowedOrigins = [
+    'https://omnetatech.com',
+    'https://www.omnetatech.com',
+    'https://omnetatech-enterprise.vercel.app'
+  ];
+
+  if (origin) {
+    const originLower = origin.toLowerCase();
+    if (
+      defaultAllowedOrigins.includes(originLower) ||
+      allowedOriginsEnv.includes(originLower) ||
+      originLower.startsWith('http://localhost:') ||
+      originLower.startsWith('http://127.0.0.1:') ||
+      (host && originLower === `http://${host.toLowerCase()}`) ||
+      (host && originLower === `https://${host.toLowerCase()}`)
+    ) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Vary', 'Origin');
+    }
+  }
+
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
@@ -78,6 +185,19 @@ export async function apiMiddleware(req, res, next) {
   }
 
   try {
+    // ----------------------------------------------------
+    // SYSTEM & HEALTH ROUTES
+    // ----------------------------------------------------
+    if (pathname === '/api/health' && method === 'GET') {
+      return sendJson(res, 200, {
+        status: 'ok',
+        environment: process.env.NODE_ENV || 'production',
+        database: 'ok',
+        uptime: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // ----------------------------------------------------
     // PUBLIC ROUTES
     // ----------------------------------------------------
@@ -133,19 +253,34 @@ export async function apiMiddleware(req, res, next) {
         });
       }
 
-      // Basic email format check
-      const emailRegex = /^[^\s@]+@[^\s@]+$/;
-      if (!emailRegex.test(email)) {
+      if (!isValidEmail(email)) {
         return sendJson(res, 400, { error: 'Please provide a valid email address.' });
       }
 
+      if (!isValidPhone(phone)) {
+        return sendJson(res, 400, { error: 'Please provide a valid contact phone number.' });
+      }
+
+      const cleanName = sanitizeText(fullName, 100);
+      const cleanCompany = sanitizeText(companyName || '', 120);
+      const cleanService = sanitizeText(service || 'Software Development', 80);
+      const cleanMessage = sanitizeText(message, 5000);
+
+      if (cleanName.length < 2) {
+        return sendJson(res, 400, { error: 'Please provide a valid name.' });
+      }
+
+      if (cleanMessage.length < 5) {
+        return sendJson(res, 400, { error: 'Please provide more details regarding your project requirement.' });
+      }
+
       const result = db.createEnquiry({
-        fullName,
-        companyName,
-        email,
-        phone,
-        service: service || 'Software Development',
-        message
+        fullName: cleanName,
+        companyName: cleanCompany,
+        email: email.trim().toLowerCase().slice(0, 120),
+        phone: phone.trim().slice(0, 30),
+        service: cleanService,
+        message: cleanMessage
       });
 
       return sendJson(res, 201, {
@@ -165,13 +300,27 @@ export async function apiMiddleware(req, res, next) {
         return sendJson(res, 400, { error: 'Please provide your Full Name, Email, and Phone number.' });
       }
 
+      if (!isValidEmail(email)) {
+        return sendJson(res, 400, { error: 'Please provide a valid email address.' });
+      }
+
+      if (!isValidPhone(phone)) {
+        return sendJson(res, 400, { error: 'Please provide a valid phone number.' });
+      }
+
+      const cleanName = sanitizeText(fullName, 100);
+      const cleanRole = sanitizeText(role || 'General Application', 100);
+      const cleanExp = sanitizeText(experience || 'Not specified', 100);
+      const cleanUrl = sanitizeText(portfolioUrl || 'None provided', 300);
+      const cleanNotes = sanitizeText(notes || 'None', 2000);
+
       const result = db.createEnquiry({
-        fullName,
-        companyName: `Applicant: ${role || 'General Application'}`,
-        email,
-        phone,
-        service: `Career: ${role || 'General Application'}`,
-        message: `Experience: ${experience || 'Not specified'}\nPortfolio/Resume Link: ${portfolioUrl || 'None provided'}\nAdditional Notes: ${notes || 'None'}`
+        fullName: cleanName,
+        companyName: `Applicant: ${cleanRole}`,
+        email: email.trim().toLowerCase().slice(0, 120),
+        phone: phone.trim().slice(0, 30),
+        service: `Career: ${cleanRole}`,
+        message: `Experience: ${cleanExp}\nPortfolio/Resume Link: ${cleanUrl}\nAdditional Notes: ${cleanNotes}`
       });
 
       return sendJson(res, 201, {
@@ -181,20 +330,30 @@ export async function apiMiddleware(req, res, next) {
       });
     }
 
-    // Admin Login
+    // Admin Login with Rate Limiting & Generic Failure Message
     if (pathname === '/api/admin/auth/login' && method === 'POST') {
+      const clientIp = getClientIp(req);
+      const rateLimitCheck = checkLoginRateLimit(clientIp);
+      if (!rateLimitCheck.allowed) {
+        return sendJson(res, 429, {
+          error: `Too many failed login attempts. Please try again in ${rateLimitCheck.waitMinutes} minute(s).`
+        });
+      }
+
       const body = await parseBody(req);
       const { email, password } = body;
 
-      if (!email || !password) {
+      if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
         return sendJson(res, 400, { error: 'Please provide both email and password.' });
       }
 
       const admin = db.verifyAdmin(email, password);
       if (!admin) {
+        recordFailedLogin(clientIp);
         return sendJson(res, 401, { error: 'Invalid email address or password. Please verify credentials.' });
       }
 
+      clearFailedLogins(clientIp);
       const session = db.createSession(admin.id);
       return sendJson(res, 200, {
         success: true,
@@ -206,6 +365,11 @@ export async function apiMiddleware(req, res, next) {
           name: admin.name
         }
       });
+    }
+
+    // If route is not an admin route, it is an unknown API endpoint -> 404
+    if (!pathname.startsWith('/api/admin/')) {
+      return sendJson(res, 404, { error: `Endpoint ${method} ${pathname} not found` });
     }
 
     // ----------------------------------------------------
@@ -504,7 +668,10 @@ export async function apiMiddleware(req, res, next) {
     return sendJson(res, 404, { error: `Endpoint ${method} ${pathname} not found` });
 
   } catch (error) {
-    console.error('API Middleware Error:', error);
-    return sendJson(res, 500, { error: 'Internal server error occurred.', details: error.message });
+    if (error.statusCode === 413) {
+      return sendJson(res, 413, { error: error.message });
+    }
+    console.error('API Middleware Error:', error.message);
+    return sendJson(res, 500, { error: 'Internal server error occurred.' });
   }
 }

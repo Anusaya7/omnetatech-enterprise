@@ -744,59 +744,148 @@ const initialSeed = {
 class DatabaseManager {
   constructor() {
     this.data = null;
+    this.writeQueue = Promise.resolve();
     this.init();
   }
 
   init() {
     const activeFile = getDbFilePath();
-    try {
-      if (fs.existsSync(activeFile)) {
+    const backupFile = `${activeFile}.bak`;
+
+    let loaded = false;
+
+    // 1. Attempt reading active database file
+    if (fs.existsSync(activeFile)) {
+      try {
         const raw = fs.readFileSync(activeFile, 'utf-8');
-        this.data = JSON.parse(raw);
-        // Merge any missing keys from initialSeed to ensure schema completeness
-        let modified = false;
-        for (const [key, value] of Object.entries(initialSeed)) {
-          if (!(key in this.data)) {
-            this.data[key] = value;
-            modified = true;
-          }
+        if (raw && raw.trim()) {
+          this.data = JSON.parse(raw);
+          loaded = true;
         }
-        if (modified) {
-          this.save();
-        }
-      } else if (fs.existsSync(DB_FILE)) {
-        const raw = fs.readFileSync(DB_FILE, 'utf-8');
-        this.data = JSON.parse(raw);
-        this.save();
-      } else {
-        this.data = { ...initialSeed };
-        this.save();
+      } catch (err) {
+        console.error('Active database file corrupted or unreadable:', err.message);
       }
-    } catch (err) {
-      console.error('Error reading database file, using seed data:', err);
-      this.data = { ...initialSeed };
-      this.save();
+    }
+
+    // 2. If active file failed or was corrupted, attempt recovery from backup
+    if (!loaded && fs.existsSync(backupFile)) {
+      try {
+        console.warn('Attempting recovery from database backup:', backupFile);
+        const rawBackup = fs.readFileSync(backupFile, 'utf-8');
+        if (rawBackup && rawBackup.trim()) {
+          this.data = JSON.parse(rawBackup);
+          loaded = true;
+          // Restore the active file immediately from backup
+          fs.copyFileSync(backupFile, activeFile);
+          console.warn('Database successfully restored from backup.');
+        }
+      } catch (backupErr) {
+        console.error('Backup recovery failed:', backupErr.message);
+      }
+    }
+
+    // 3. Only if no existing database and no backup exists, seed initial data
+    if (!loaded) {
+      console.log('No existing database or backup found. Initializing with verified seed data.');
+      this.data = JSON.parse(JSON.stringify(initialSeed));
+      this.saveSync();
+    } else {
+      // Ensure all top-level collections exist (schema completeness) without clobbering live records
+      let modified = false;
+      for (const [key, value] of Object.entries(initialSeed)) {
+        if (!(key in this.data)) {
+          this.data[key] = Array.isArray(value) ? [] : (typeof value === 'object' ? {} : value);
+          modified = true;
+        }
+      }
+      if (modified) {
+        this.saveSync();
+      }
+    }
+
+    // 4. Override / configure admin credentials from environment variables if provided
+    this.syncEnvironmentAdmin();
+  }
+
+  syncEnvironmentAdmin() {
+    const envEmail = process.env.ADMIN_EMAIL;
+    const envPassword = process.env.ADMIN_PASSWORD;
+    const envPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+
+    if (!this.data.admin) {
+      this.data.admin = {
+        id: 'admin-1',
+        email: envEmail ? envEmail.toLowerCase().trim() : 'admin@omnetatech.com',
+        name: 'OmNetaTech Admin',
+        passwordHash: envPasswordHash || hashPassword(envPassword || 'Admin@OmNetaTech2026!'),
+        updatedAt: new Date().toISOString()
+      };
+      this.saveSync();
+      return;
+    }
+
+    let changed = false;
+    if (envEmail && this.data.admin.email.toLowerCase() !== envEmail.toLowerCase().trim()) {
+      this.data.admin.email = envEmail.toLowerCase().trim();
+      changed = true;
+    }
+    if (envPasswordHash && this.data.admin.passwordHash !== envPasswordHash) {
+      this.data.admin.passwordHash = envPasswordHash;
+      changed = true;
+    } else if (envPassword && !verifyPassword(envPassword, this.data.admin.passwordHash)) {
+      this.data.admin.passwordHash = hashPassword(envPassword);
+      changed = true;
+    }
+    if (changed) {
+      this.data.admin.updatedAt = new Date().toISOString();
+      this.saveSync();
     }
   }
 
-  save() {
+  // Synchronous atomic save with pre-write backup
+  saveSync() {
     try {
       const activeFile = getDbFilePath();
       const dir = path.dirname(activeFile);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
-      const tmpFile = `${activeFile}.tmp.${Date.now()}`;
+
+      // 1. Maintain backup copy of the current file before modifying
+      const backupFile = `${activeFile}.bak`;
+      if (fs.existsSync(activeFile)) {
+        try {
+          fs.copyFileSync(activeFile, backupFile);
+        } catch {
+          // Backup copy non-fatal
+        }
+      }
+
+      // 2. Write to unique temp file
+      const tmpFile = `${activeFile}.tmp.${Date.now()}.${crypto.randomBytes(4).toString('hex')}`;
       fs.writeFileSync(tmpFile, JSON.stringify(this.data, null, 2), 'utf-8');
+
+      // 3. Atomic rename replace
       fs.renameSync(tmpFile, activeFile);
     } catch (err) {
-      console.error('Failed to write database file:', err);
+      console.error('Failed to write database file:', err.message);
     }
+  }
+
+  // Asynchronous queued save (prevents race conditions and clobbering across concurrent requests)
+  save() {
+    this.writeQueue = this.writeQueue.then(() => {
+      this.saveSync();
+    }).catch((err) => {
+      console.error('Error during queued database write:', err.message);
+    });
+    return this.writeQueue;
   }
 
   // Auth & Session
   verifyAdmin(email, password) {
     if (!this.data.admin) return null;
+    if (!email || !password) return null;
     if (this.data.admin.email.toLowerCase() !== email.toLowerCase().trim()) return null;
     if (verifyPassword(password, this.data.admin.passwordHash)) {
       return {
