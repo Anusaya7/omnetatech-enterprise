@@ -3,8 +3,24 @@ import { db } from './db.js';
 // Helper to parse JSON body from incoming HTTP request
 function parseBody(req) {
   return new Promise((resolve) => {
-    if (req.body && typeof req.body === 'object') {
-      return resolve(req.body);
+    if (req.body !== undefined && req.body !== null) {
+      if (typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
+        return resolve(req.body);
+      }
+      if (Buffer.isBuffer(req.body)) {
+        try {
+          return resolve(JSON.parse(req.body.toString('utf-8')));
+        } catch {
+          return resolve({});
+        }
+      }
+      if (typeof req.body === 'string') {
+        try {
+          return resolve(JSON.parse(req.body));
+        } catch {
+          return resolve({});
+        }
+      }
     }
     let body = '';
     req.on('data', chunk => {
@@ -489,6 +505,6 @@ export async function apiMiddleware(req, res, next) {
 
   } catch (error) {
     console.error('API Middleware Error:', error);
-    return sendJson(res, 500, { error: 'Internal server error occurred.' });
+    return sendJson(res, 500, { error: 'Internal server error occurred.', details: error.message });
   }
 }
