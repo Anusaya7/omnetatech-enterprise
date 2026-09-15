@@ -9,9 +9,33 @@ const __dirname = path.dirname(__filename);
 const DATA_DIR = path.resolve(__dirname, '../data');
 const DB_FILE = path.join(DATA_DIR, 'db.json');
 
-// Ensure data directory exists
-if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+// Safe resolution of data directory
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+} catch {
+  // Read-only filesystem in serverless environments
+}
+
+export function getDbFilePath() {
+  if (process.env.DB_FILE_PATH) {
+    return process.env.DB_FILE_PATH;
+  }
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    const tmpPath = path.join('/tmp', 'omnetatech-db.json');
+    if (!fs.existsSync(tmpPath)) {
+      try {
+        if (fs.existsSync(DB_FILE)) {
+          fs.copyFileSync(DB_FILE, tmpPath);
+        }
+      } catch {
+        // ignore copy failure
+      }
+    }
+    return tmpPath;
+  }
+  return DB_FILE;
 }
 
 // Password hashing utility using PBKDF2 (secure server-side hashing)
@@ -724,9 +748,10 @@ class DatabaseManager {
   }
 
   init() {
+    const activeFile = getDbFilePath();
     try {
-      if (fs.existsSync(DB_FILE)) {
-        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+      if (fs.existsSync(activeFile)) {
+        const raw = fs.readFileSync(activeFile, 'utf-8');
         this.data = JSON.parse(raw);
         // Merge any missing keys from initialSeed to ensure schema completeness
         let modified = false;
@@ -739,6 +764,10 @@ class DatabaseManager {
         if (modified) {
           this.save();
         }
+      } else if (fs.existsSync(DB_FILE)) {
+        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+        this.data = JSON.parse(raw);
+        this.save();
       } else {
         this.data = { ...initialSeed };
         this.save();
@@ -752,9 +781,14 @@ class DatabaseManager {
 
   save() {
     try {
-      const tmpFile = `${DB_FILE}.tmp.${Date.now()}`;
+      const activeFile = getDbFilePath();
+      const dir = path.dirname(activeFile);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      const tmpFile = `${activeFile}.tmp.${Date.now()}`;
       fs.writeFileSync(tmpFile, JSON.stringify(this.data, null, 2), 'utf-8');
-      fs.renameSync(tmpFile, DB_FILE);
+      fs.renameSync(tmpFile, activeFile);
     } catch (err) {
       console.error('Failed to write database file:', err);
     }

@@ -31,94 +31,43 @@
       "token": "dfc8a21f47c7076f52c84d7a8555b7bf9909e8d4f00a091d1bb3d9255386d4b2",
       "userId": "admin-1",
       "expiresAt": "2026-09-13T09:48:06.070Z"
+    },
+    {
+      "token": "297901db7b732c3a01daa543e1d965ef18909ebe6ef1a51c4027ca4241ee501b",
+      "userId": "admin-1",
+      "expiresAt": "2026-09-15T16:28:41.779Z"
     }
   ],
   "enquiries": [
     {
-      "id": "enq-1789206485543-3d2294",
-      "fullName": "Sunil Verma",
-      "companyName": "",
-      "email": "sunil.verma@enterpriseindia.in",
-      "phone": "+91 98765 43210",
-      "service": "Software Development",
-      "message": "Need cloud transformation and enterprise architecture consulting for our warehousing systems across India.",
-      "status": "Contacted",
-      "isRead": false,
-      "adminNote": "Called Sunil Verma. Scheduled discovery call for Monday 11 AM IST.",
-      "createdAt": "2026-09-12T09:48:05.556Z",
-      "updatedAt": "2026-09-12T09:48:06.264Z"
-    },
-    {
-      "id": "enq-1789204663961-6b19a9",
-      "fullName": "Sunil Verma",
-      "companyName": "",
-      "email": "sunil.verma@enterpriseindia.in",
-      "phone": "+91 98765 43210",
-      "service": "Software Development",
-      "message": "Need cloud transformation and enterprise architecture consulting for our warehousing systems across India.",
-      "status": "Contacted",
-      "isRead": false,
-      "adminNote": "Called Sunil Verma. Scheduled discovery call for Monday 11 AM IST.",
-      "createdAt": "2026-09-12T09:17:43.967Z",
-      "updatedAt": "2026-09-12T09:17:44.137Z"
-    },
-    {
-      "id": "enq-1789202616781-76a5d8",
-      "fullName": "Rajesh Kumar",
-      "companyName": "",
-      "email": "rajesh@example.com",
-      "phone": "+91 9876543210",
-      "service": "Software Development",
-      "message": "Need ERP system for logistics operations in Pune.",
+      "id": "enq-1789403190425-b7fa96",
+      "fullName": "Anil",
+      "companyName": "Korals",
+      "email": "anil@koralsdesign.com",
+      "phone": "9637698850",
+      "service": "Web Development",
+      "message": "Requested Timeline: Immediate (within 2 weeks)\nProject Notes: Information required",
       "status": "New",
       "isRead": false,
       "adminNote": "",
-      "createdAt": "2026-09-12T08:43:36.781Z",
-      "updatedAt": "2026-09-12T08:43:36.781Z"
+      "createdAt": "2026-09-14T16:26:30.532Z",
+      "updatedAt": "2026-09-14T16:26:30.537Z"
     }
   ],
   "notifications": [
     {
-      "id": "notif-1789206485556-56422a",
+      "id": "notif-1789403190539-1e12d4",
       "type": "NEW_ENQUIRY",
       "title": "New Contact Enquiry",
-      "message": "New enquiry received from Sunil Verma for Software Development.",
-      "relatedId": "enq-1789206485543-3d2294",
-      "customerName": "Sunil Verma",
-      "email": "sunil.verma@enterpriseindia.in",
-      "phone": "+91 98765 43210",
-      "company": "",
-      "service": "Software Development",
-      "isRead": true,
-      "createdAt": "2026-09-12T09:48:05.557Z"
-    },
-    {
-      "id": "notif-1789204663968-d71839",
-      "type": "NEW_ENQUIRY",
-      "title": "New Contact Enquiry",
-      "message": "New enquiry received from Sunil Verma for Software Development.",
-      "relatedId": "enq-1789204663961-6b19a9",
-      "customerName": "Sunil Verma",
-      "email": "sunil.verma@enterpriseindia.in",
-      "phone": "+91 98765 43210",
-      "company": "",
-      "service": "Software Development",
-      "isRead": true,
-      "createdAt": "2026-09-12T09:17:43.969Z"
-    },
-    {
-      "id": "notif-1789202616782-785a95",
-      "type": "NEW_ENQUIRY",
-      "title": "New Contact Enquiry",
-      "message": "New enquiry received from Rajesh Kumar for Software Development.",
-      "relatedId": "enq-1789202616781-76a5d8",
-      "customerName": "Rajesh Kumar",
-      "email": "rajesh@example.com",
-      "phone": "+91 9876543210",
-      "company": "",
-      "service": "Software Development",
+      "message": "New enquiry received from Anil for Web Development.",
+      "relatedId": "enq-1789403190425-b7fa96",
+      "customerName": "Anil",
+      "email": "anil@koralsdesign.com",
+      "phone": "9637698850",
+      "company": "Korals",
+      "service": "Web Development",
       "isRead": false,
-      "createdAt": "2026-09-12T08:43:36.782Z"
+      "createdAt": "2026-09-14T16:26:30.543Z"
     }
   ],
   "services": [

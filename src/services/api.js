@@ -24,7 +24,8 @@ export const authStorage = {
 };
 
 async function request(endpoint, options = {}) {
-  const url = endpoint.startsWith('http') ? endpoint : endpoint;
+  const baseUrl = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_API_URL) ? import.meta.env.VITE_API_URL.replace(/\/$/, '') : '';
+  const url = endpoint.startsWith('http') ? endpoint : `${baseUrl}${endpoint}`;
   const headers = {
     'Content-Type': 'application/json',
     ...(options.headers || {})
