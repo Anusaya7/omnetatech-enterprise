@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   Menu, X, ChevronDown, Code, Globe, Smartphone, 
   Palette, Cloud, Bot, Compass, Database, 
@@ -8,16 +9,68 @@ import {
 export default function Header({ activeTab, setActiveTab, openConsultationModal }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
+  const [mobileSolutionsOpen, setMobileSolutionsOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState(null); // 'services' | 'solutions' | null
   const headerRef = useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
+      if (!mobileMenuOpen) {
+        setIsScrolled(window.scrollY > 20);
+      }
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
+  }, [mobileMenuOpen]);
+
+  // Close mobile menu if window is resized beyond mobile breakpoint (>= 768px)
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 768) {
+        setMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Lock background page scroll when mobile menu is open, preserving scroll position perfectly
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const scrollY = window.scrollY;
+    const originalBodyOverflow = document.body.style.overflow;
+    const originalHtmlOverflow = document.documentElement.style.overflow;
+    const originalBodyTouchAction = document.body.style.touchAction;
+
+    document.body.style.overflow = 'hidden';
+    document.documentElement.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    const handleScrollLock = () => {
+      if (window.scrollY !== scrollY) {
+        window.scrollTo({ top: scrollY, behavior: 'instant' });
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (!e.target.closest('.mobile-nav-scroll-content')) {
+        if (e.cancelable) e.preventDefault();
+      }
+    };
+
+    window.addEventListener('scroll', handleScrollLock, { passive: true });
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+
+    return () => {
+      window.removeEventListener('scroll', handleScrollLock);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.body.style.overflow = originalBodyOverflow;
+      document.documentElement.style.overflow = originalHtmlOverflow;
+      document.body.style.touchAction = originalBodyTouchAction;
+    };
+  }, [mobileMenuOpen]);
 
   // Close dropdown on click outside or Escape
   useEffect(() => {
@@ -44,22 +97,23 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
     setMobileMenuOpen(false);
     setOpenDropdown(null);
 
-    if (tabId === 'home') {
-      setActiveTab('home');
-      if (sectionId) {
-        setTimeout(() => {
+    // Allow the body unfreeze to complete before scrolling
+    setTimeout(() => {
+      if (tabId === 'home') {
+        setActiveTab('home');
+        if (sectionId) {
           const el = document.getElementById(sectionId);
           if (el) {
             el.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }
-        }, 120);
+        } else {
+          window.scrollTo({ top: 0, behavior: 'instant' });
+        }
       } else {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setActiveTab(tabId);
+        window.scrollTo({ top: 0, behavior: 'instant' });
       }
-    } else {
-      setActiveTab(tabId);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    }, 60);
   };
 
   const servicesItems = [
@@ -258,105 +312,172 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
           </button>
 
           <button 
-            className="mobile-hamburger-btn"
+            className={`mobile-hamburger-btn ${mobileMenuOpen ? 'hamburger-active' : ''}`}
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
           >
-            {mobileMenuOpen ? <X size={26} /> : <Menu size={26} />}
+            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
         </div>
       </div>
 
-      {/* Mobile Menu Drawer */}
-      {mobileMenuOpen && (
-        <div className="mobile-nav-backdrop" onClick={() => setMobileMenuOpen(false)}>
+      {/* Mobile Menu Portal (rendered directly to body to avoid header backdrop-filter / containing block bugs) */}
+      {typeof document !== 'undefined' && mobileMenuOpen && createPortal(
+        <div className="mobile-nav-portal-root">
           <div 
-            className="mobile-nav-drawer shadow-xl"
-            onClick={(e) => e.stopPropagation()}
+            className="mobile-nav-backdrop" 
+            onClick={() => setMobileMenuOpen(false)}
+            onTouchMove={(e) => e.preventDefault()}
+            aria-hidden="true"
+          />
+          <nav 
+            className="mobile-nav-panel shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Mobile Navigation Menu"
           >
-            <div className="mobile-drawer-header">
-              <div className="brand-name">OmNetaTech</div>
+            <div className="mobile-nav-scroll-content">
+              {/* 1. Home */}
               <button 
-                className="drawer-close-btn"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                <X size={22} />
-              </button>
-            </div>
-
-            <div className="mobile-nav-scroll">
-              <button 
-                className={`mobile-nav-link ${activeTab === 'home' ? 'mobile-active' : ''}`}
+                className={`mobile-nav-link ${activeTab === 'home' && !openDropdown ? 'mobile-active' : ''}`}
                 onClick={() => handleNavClick('home')}
               >
-                Home
+                <span>Home</span>
               </button>
 
+              {/* 2. About */}
               <button 
                 className={`mobile-nav-link ${activeTab === 'about' ? 'mobile-active' : ''}`}
                 onClick={() => handleNavClick('about')}
               >
-                About OmNetaTech
+                <span>About</span>
               </button>
 
-              <div className="mobile-category-title">Services</div>
-              <div className="mobile-sublinks-group">
-                {servicesItems.map((item, i) => (
-                  <button
-                    key={i}
-                    className="mobile-sublink-btn"
+              {/* 3. Services Accordion Item */}
+              <div className="mobile-accordion-item">
+                <div className="mobile-accordion-header">
+                  <button 
+                    className="mobile-nav-link mobile-accordion-link"
                     onClick={() => handleNavClick('home', 'services')}
                   >
-                    {item.title}
+                    <span>Services</span>
                   </button>
-                ))}
+                  <button 
+                    className={`mobile-accordion-toggle ${mobileServicesOpen ? 'toggle-active' : ''}`}
+                    onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                    aria-label={mobileServicesOpen ? 'Collapse services list' : 'Expand services list'}
+                    aria-expanded={mobileServicesOpen}
+                  >
+                    <ChevronDown size={18} className={`accordion-chevron ${mobileServicesOpen ? 'chevron-up' : ''}`} />
+                  </button>
+                </div>
+
+                {mobileServicesOpen && (
+                  <div className="mobile-accordion-sublinks">
+                    {servicesItems.map((item, i) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={i}
+                          className="mobile-sublink-btn"
+                          onClick={() => handleNavClick('home', 'services')}
+                        >
+                          <div className="mobile-sublink-icon">
+                            <Icon size={16} />
+                          </div>
+                          <span className="mobile-sublink-title">{item.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
-              <div className="mobile-category-title">Solutions</div>
-              <div className="mobile-sublinks-group">
-                {solutionsItems.slice(0, 5).map((item, i) => (
-                  <button
-                    key={i}
-                    className="mobile-sublink-btn"
+              {/* 4. Solutions Accordion Item */}
+              <div className="mobile-accordion-item">
+                <div className="mobile-accordion-header">
+                  <button 
+                    className="mobile-nav-link mobile-accordion-link"
                     onClick={() => handleNavClick('home', 'solutions')}
                   >
-                    {item.title}
+                    <span>Solutions</span>
                   </button>
-                ))}
+                  <button 
+                    className={`mobile-accordion-toggle ${mobileSolutionsOpen ? 'toggle-active' : ''}`}
+                    onClick={() => setMobileSolutionsOpen(!mobileSolutionsOpen)}
+                    aria-label={mobileSolutionsOpen ? 'Collapse solutions list' : 'Expand solutions list'}
+                    aria-expanded={mobileSolutionsOpen}
+                  >
+                    <ChevronDown size={18} className={`accordion-chevron ${mobileSolutionsOpen ? 'chevron-up' : ''}`} />
+                  </button>
+                </div>
+
+                {mobileSolutionsOpen && (
+                  <div className="mobile-accordion-sublinks">
+                    {solutionsItems.map((item, i) => {
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={i}
+                          className="mobile-sublink-btn"
+                          onClick={() => handleNavClick('home', 'solutions')}
+                        >
+                          <div className="mobile-sublink-icon">
+                            <Icon size={16} />
+                          </div>
+                          <span className="mobile-sublink-title">{item.title}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
 
+              {/* 5. Industries */}
               <button 
                 className="mobile-nav-link"
                 onClick={() => handleNavClick('home', 'industries')}
               >
-                Industries
+                <span>Industries</span>
               </button>
 
+              {/* 6. Portfolio */}
               <button 
-                className={`mobile-nav-link ${activeTab === 'insights' ? 'mobile-active' : ''}`}
-                onClick={() => handleNavClick('insights')}
+                className="mobile-nav-link"
+                onClick={() => handleNavClick('home', 'portfolio')}
               >
-                Insights
+                <span>Portfolio</span>
               </button>
 
+              {/* 7. Careers */}
               <button 
                 className={`mobile-nav-link ${activeTab === 'careers' ? 'mobile-active' : ''}`}
                 onClick={() => handleNavClick('careers')}
               >
-                Careers
+                <span>Careers</span>
               </button>
 
+              {/* 8. Blog */}
+              <button 
+                className={`mobile-nav-link ${activeTab === 'insights' ? 'mobile-active' : ''}`}
+                onClick={() => handleNavClick('insights')}
+              >
+                <span>Blog</span>
+              </button>
+
+              {/* 9. Contact */}
               <button 
                 className="mobile-nav-link"
                 onClick={() => handleNavClick('home', 'contact')}
               >
-                Contact
+                <span>Contact</span>
               </button>
 
-              <div className="mobile-drawer-cta">
+              {/* 10 & 11. Mobile CTA and Direct Contact Section */}
+              <div className="mobile-menu-footer">
                 <button 
-                  className="btn-primary-blue w-full"
+                  className="btn-primary-blue mobile-menu-cta"
                   onClick={() => {
                     setMobileMenuOpen(false);
                     openConsultationModal();
@@ -364,10 +485,20 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
                 >
                   Get a Free Consultation
                 </button>
+
+                <div className="mobile-menu-direct-contact">
+                  <a href="tel:+918237140776" className="mobile-contact-pill">
+                    <span>📞 +91 8237140776</span>
+                  </a>
+                  <a href="mailto:omnetatech@gmail.com" className="mobile-contact-pill">
+                    <span>✉️ omnetatech@gmail.com</span>
+                  </a>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
+          </nav>
+        </div>,
+        document.body
       )}
 
       <style>{`
@@ -627,10 +758,27 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
           border: none;
           color: var(--color-primary-navy);
           cursor: pointer;
-          padding: 6px;
+          min-width: 44px;
+          min-height: 44px;
+          padding: 10px;
+          border-radius: var(--radius-sm);
+          align-items: center;
+          justify-content: center;
+          transition: background-color var(--transition-fast), color var(--transition-fast);
         }
 
-        /* Mobile Drawer */
+        .mobile-hamburger-btn:hover,
+        .mobile-hamburger-btn:focus-visible {
+          background-color: var(--color-light-blue);
+          color: var(--color-primary-blue);
+        }
+
+        .mobile-hamburger-btn.hamburger-active {
+          background-color: var(--color-light-blue);
+          color: var(--color-primary-blue);
+        }
+
+        /* Mobile Portal Backdrop & Drawer */
         .mobile-nav-backdrop {
           position: fixed;
           top: 0;
@@ -639,115 +787,267 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
           bottom: 0;
           background: rgba(11, 31, 58, 0.45);
           backdrop-filter: blur(4px);
-          z-index: 1100;
+          -webkit-backdrop-filter: blur(4px);
+          z-index: 998;
+          touch-action: none;
+          animation: fadeInBackdrop 0.2s ease-out;
         }
 
-        .mobile-nav-drawer {
-          position: absolute;
-          top: 0;
+        .mobile-nav-panel {
+          position: fixed;
+          top: var(--mobile-header-height, 68px);
+          left: 0;
           right: 0;
           bottom: 0;
-          width: 85%;
-          max-width: 360px;
-          background: var(--color-white);
+          width: 100%;
+          height: calc(100vh - var(--mobile-header-height, 68px));
+          height: calc(100dvh - var(--mobile-header-height, 68px));
+          max-height: calc(100dvh - var(--mobile-header-height, 68px));
+          background-color: #ffffff;
           display: flex;
           flex-direction: column;
-          z-index: 1200;
-          animation: slideInRight 0.25s ease-out;
+          z-index: 999;
+          box-shadow: 0 12px 32px rgba(11, 31, 58, 0.12);
+          border-top: 1px solid var(--color-border);
+          overflow: hidden;
+          animation: fadeInBackdrop 0.2s ease-out;
         }
 
-        .mobile-drawer-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px 24px;
-          border-bottom: 1px solid var(--color-border);
-        }
-
-        .drawer-close-btn {
-          background: none;
-          border: none;
-          color: var(--color-primary-navy);
-          cursor: pointer;
-          padding: 4px;
-        }
-
-        .mobile-nav-scroll {
-          padding: 20px 24px;
+        .mobile-nav-scroll-content {
+          flex: 1 1 auto;
+          min-height: 0;
           overflow-y: auto;
+          overflow-x: hidden;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
+          padding: 16px 20px calc(36px + env(safe-area-inset-bottom, 20px));
           display: flex;
           flex-direction: column;
-          gap: 8px;
+          gap: 4px;
         }
 
         .mobile-nav-link {
           background: none;
           border: none;
           text-align: left;
-          font-size: 1.05rem;
-          font-weight: 700;
+          font-size: 1rem;
+          font-weight: 600;
           color: var(--color-primary-navy);
-          padding: 10px 0;
+          min-height: 44px;
+          padding: 10px 14px;
+          border-radius: var(--radius-sm);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
           cursor: pointer;
-          border-bottom: 1px solid rgba(227, 234, 243, 0.6);
+          transition: background-color var(--transition-fast), color var(--transition-fast);
+        }
+
+        .mobile-nav-link:hover,
+        .mobile-nav-link:focus-visible {
+          background-color: var(--color-light-blue);
+          color: var(--color-primary-blue);
         }
 
         .mobile-nav-link.mobile-active {
           color: var(--color-primary-blue);
-        }
-
-        .mobile-category-title {
-          font-size: 0.75rem;
           font-weight: 700;
-          color: var(--color-text-secondary);
-          text-transform: uppercase;
-          letter-spacing: 0.06em;
-          margin-top: 14px;
-          margin-bottom: 4px;
+          background-color: rgba(23, 105, 224, 0.06);
         }
 
-        .mobile-sublinks-group {
+        .mobile-accordion-item {
+          display: flex;
+          flex-direction: column;
+          border-radius: var(--radius-sm);
+          margin-bottom: 2px;
+        }
+
+        .mobile-accordion-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+
+        .mobile-accordion-link {
+          flex: 1;
+          min-height: 44px;
+        }
+
+        .mobile-accordion-toggle {
+          min-width: 44px;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: none;
+          border: none;
+          color: var(--color-text-secondary);
+          border-radius: var(--radius-sm);
+          cursor: pointer;
+          transition: all var(--transition-fast);
+        }
+
+        .mobile-accordion-toggle:hover,
+        .mobile-accordion-toggle:focus-visible,
+        .mobile-accordion-toggle.toggle-active {
+          color: var(--color-primary-blue);
+          background-color: var(--color-light-blue);
+        }
+
+        .accordion-chevron {
+          transition: transform 0.2s ease;
+        }
+
+        .accordion-chevron.chevron-up {
+          transform: rotate(180deg);
+          color: var(--color-primary-blue);
+        }
+
+        .mobile-accordion-sublinks {
           display: flex;
           flex-direction: column;
           gap: 4px;
-          padding-left: 8px;
+          padding: 4px 0 8px 12px;
+          margin-left: 12px;
           border-left: 2px solid var(--color-light-blue);
-          margin-bottom: 8px;
+          animation: fadeInBackdrop 0.15s ease-out;
         }
 
         .mobile-sublink-btn {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-height: 40px;
+          padding: 8px 12px;
+          border-radius: var(--radius-sm);
           background: none;
           border: none;
           text-align: left;
-          font-size: 0.88rem;
-          color: var(--color-primary-navy);
-          padding: 6px 0;
           cursor: pointer;
+          transition: background-color var(--transition-fast), color var(--transition-fast);
         }
 
-        .mobile-drawer-cta {
-          margin-top: 24px;
-          padding-bottom: 24px;
+        .mobile-sublink-btn:hover,
+        .mobile-sublink-btn:focus-visible {
+          background-color: var(--color-light-blue);
         }
 
-        .w-full {
+        .mobile-sublink-icon {
+          width: 26px;
+          height: 26px;
+          border-radius: 6px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background-color: rgba(23, 105, 224, 0.08);
+          color: var(--color-primary-blue);
+          flex-shrink: 0;
+        }
+
+        .mobile-sublink-title {
+          font-size: 0.88rem;
+          font-weight: 500;
+          color: var(--color-primary-navy);
+          line-height: 1.3;
+        }
+
+        .mobile-menu-footer {
+          margin-top: 14px;
+          padding-top: 16px;
+          border-top: 1px solid var(--color-border);
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+
+        .mobile-menu-cta {
           width: 100%;
+          min-height: 44px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 0.92rem;
+          font-weight: 600;
         }
 
-        @keyframes slideInRight {
-          from { transform: translateX(100%); }
-          to { transform: translateX(0); }
+        .mobile-menu-direct-contact {
+          display: flex;
+          flex-direction: column;
+          gap: 8px;
         }
 
-        @media (max-width: 1080px) {
+        .mobile-contact-pill {
+          min-height: 40px;
+          display: flex;
+          align-items: center;
+          padding: 8px 14px;
+          background-color: #f4f7fa;
+          border-radius: var(--radius-sm);
+          font-size: 0.82rem;
+          font-weight: 600;
+          color: var(--color-primary-navy);
+          text-decoration: none;
+          border: 1px solid transparent;
+          transition: all var(--transition-fast);
+        }
+
+        .mobile-contact-pill:hover {
+          background-color: var(--color-light-blue);
+          color: var(--color-primary-blue);
+          border-color: rgba(23, 105, 224, 0.15);
+        }
+
+        @keyframes fadeInBackdrop {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
           .desktop-navigation {
-            display: none;
+            display: none !important;
           }
           .header-consult-btn {
-            display: none;
+            display: none !important;
           }
           .mobile-hamburger-btn {
-            display: block;
+            display: inline-flex !important;
+          }
+          .header-root,
+          .header-scrolled {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            height: var(--mobile-header-height, 68px) !important;
+          }
+        }
+
+        @media (min-width: 769px) {
+          .mobile-hamburger-btn {
+            display: none !important;
+          }
+          .desktop-navigation {
+            display: flex;
+          }
+          .header-consult-btn {
+            display: inline-flex;
+          }
+        }
+
+        @media (min-width: 769px) and (max-width: 1080px) {
+          .desktop-navigation {
+            gap: 4px;
+          }
+          .nav-btn {
+            padding: 8px 10px;
+            font-size: 0.84rem;
+          }
+          .header-consult-btn {
+            padding: 9px 14px;
+            font-size: 0.82rem;
+          }
+          .brand-name {
+            font-size: 1.2rem;
           }
         }
       `}</style>

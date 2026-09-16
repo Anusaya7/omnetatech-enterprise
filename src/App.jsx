@@ -44,7 +44,7 @@ function App() {
     const p = window.location.pathname;
     if (p === '/about') return 'about';
     if (p === '/careers') return 'careers';
-    if (p === '/insights') return 'insights';
+    if (p === '/insights' || p === '/blog') return 'insights';
     return 'home';
   });
   const [isConsultationOpen, setIsConsultationOpen] = useState(false);
@@ -83,7 +83,7 @@ function App() {
     } else {
       if (path === '/about') setActiveTab('about');
       else if (path === '/careers') setActiveTab('careers');
-      else if (path === '/insights') setActiveTab('insights');
+      else if (path === '/insights' || path === '/blog') setActiveTab('insights');
       else setActiveTab('home');
     }
   }, []);
@@ -170,7 +170,7 @@ function App() {
         if (el) el.scrollIntoView({ behavior: 'smooth' });
       }, 120);
     } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: 'instant' });
     }
   };
 
