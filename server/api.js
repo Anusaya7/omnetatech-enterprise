@@ -3,6 +3,9 @@ import { db } from './db.js';
 // Rate limiter map for admin login attempts
 const loginAttempts = new Map(); // ip -> { count: number, lockedUntil: number }
 
+// Rate limiter map for public contact and careers submissions
+const submissionAttempts = new Map(); // ip -> { count: number, resetAt: number }
+
 function getClientIp(req) {
   const forwarded = req.headers['x-forwarded-for'];
   if (forwarded) {
@@ -41,6 +44,29 @@ function clearFailedLogins(ip) {
   loginAttempts.delete(ip);
 }
 
+function checkSubmissionRateLimit(ip) {
+  const now = Date.now();
+  const entry = submissionAttempts.get(ip);
+  if (entry) {
+    if (entry.resetAt > now) {
+      if (entry.count >= 15) { // 15 submissions per 10 minutes limit
+        const waitMinutes = Math.ceil((entry.resetAt - now) / 60000);
+        return { allowed: false, waitMinutes };
+      }
+    } else {
+      submissionAttempts.delete(ip);
+    }
+  }
+  return { allowed: true };
+}
+
+function recordSubmission(ip) {
+  const now = Date.now();
+  const entry = submissionAttempts.get(ip) || { count: 0, resetAt: now + 10 * 60 * 1000 };
+  entry.count += 1;
+  submissionAttempts.set(ip, entry);
+}
+
 // Input sanitization & validation
 function sanitizeText(str, maxLen = 1000) {
   if (typeof str !== 'string') return '';
@@ -65,7 +91,7 @@ function isValidPhone(phone) {
 
 const MAX_BODY_SIZE = 1024 * 1024; // 1 MB payload limit
 
-// Helper to parse JSON body with payload size protection
+// Helper to parse JSON body with payload size and malformed JSON protection
 function parseBody(req) {
   return new Promise((resolve, reject) => {
     if (req.body !== undefined && req.body !== null) {
@@ -79,9 +105,12 @@ function parseBody(req) {
           return reject(err);
         }
         try {
-          return resolve(JSON.parse(req.body.toString('utf-8')));
+          const str = req.body.toString('utf-8');
+          return resolve(str && str.trim() ? JSON.parse(str) : {});
         } catch {
-          return resolve({});
+          const err = new Error('Malformed JSON payload');
+          err.statusCode = 400;
+          return reject(err);
         }
       }
       if (typeof req.body === 'string') {
@@ -91,9 +120,11 @@ function parseBody(req) {
           return reject(err);
         }
         try {
-          return resolve(JSON.parse(req.body));
+          return resolve(req.body && req.body.trim() ? JSON.parse(req.body) : {});
         } catch {
-          return resolve({});
+          const err = new Error('Malformed JSON payload');
+          err.statusCode = 400;
+          return reject(err);
         }
       }
     }
@@ -110,10 +141,15 @@ function parseBody(req) {
       body += chunk.toString();
     });
     req.on('end', () => {
+      if (!body || !body.trim()) {
+        return resolve({});
+      }
       try {
-        resolve(body ? JSON.parse(body) : {});
+        resolve(JSON.parse(body));
       } catch {
-        resolve({});
+        const err = new Error('Malformed JSON payload');
+        err.statusCode = 400;
+        reject(err);
       }
     });
     req.on('error', (err) => {
@@ -122,10 +158,12 @@ function parseBody(req) {
   });
 }
 
-// Helper to send JSON response
+// Helper to send JSON response with security headers
 function sendJson(res, statusCode, data) {
   res.statusCode = statusCode;
-  res.setHeader('Content-Type', 'application/json');
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.end(JSON.stringify(data));
 }
 
@@ -244,6 +282,14 @@ export async function apiMiddleware(req, res, next) {
 
     // Public Contact Enquiry submission
     if (pathname === '/api/contact' && method === 'POST') {
+      const clientIp = getClientIp(req);
+      const rateLimitCheck = checkSubmissionRateLimit(clientIp);
+      if (!rateLimitCheck.allowed) {
+        return sendJson(res, 429, {
+          error: `Too many submissions from your connection. Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again.`
+        });
+      }
+
       const body = await parseBody(req);
       const { fullName, email, phone, service, message, companyName } = body;
 
@@ -283,6 +329,8 @@ export async function apiMiddleware(req, res, next) {
         message: cleanMessage
       });
 
+      recordSubmission(clientIp);
+
       return sendJson(res, 201, {
         success: true,
         message: 'Thank you for contacting OmNetaTech. Our team will review your inquiry and respond within 24 hours.',
@@ -293,6 +341,14 @@ export async function apiMiddleware(req, res, next) {
 
     // Public Career Application submission
     if (pathname === '/api/careers/apply' && method === 'POST') {
+      const clientIp = getClientIp(req);
+      const rateLimitCheck = checkSubmissionRateLimit(clientIp);
+      if (!rateLimitCheck.allowed) {
+        return sendJson(res, 429, {
+          error: `Too many submissions from your connection. Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again.`
+        });
+      }
+
       const body = await parseBody(req);
       const { fullName, email, phone, role, experience, portfolioUrl, notes } = body;
 
@@ -322,6 +378,8 @@ export async function apiMiddleware(req, res, next) {
         service: `Career: ${cleanRole}`,
         message: `Experience: ${cleanExp}\nPortfolio/Resume Link: ${cleanUrl}\nAdditional Notes: ${cleanNotes}`
       });
+
+      recordSubmission(clientIp);
 
       return sendJson(res, 201, {
         success: true,
@@ -670,6 +728,9 @@ export async function apiMiddleware(req, res, next) {
   } catch (error) {
     if (error.statusCode === 413) {
       return sendJson(res, 413, { error: error.message });
+    }
+    if (error.statusCode === 400) {
+      return sendJson(res, 400, { error: error.message });
     }
     console.error('API Middleware Error:', error.message);
     return sendJson(res, 500, { error: 'Internal server error occurred.' });

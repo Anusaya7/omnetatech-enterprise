@@ -93,6 +93,25 @@ function App() {
     return () => window.removeEventListener('popstate', handleLocationChange);
   }, [handleLocationChange]);
 
+  // Handle direct navigation to home page section routes on initial load
+  useEffect(() => {
+    const path = window.location.pathname;
+    const sectionMap = {
+      '/services': 'services',
+      '/solutions': 'solutions',
+      '/industries': 'industries',
+      '/portfolio': 'portfolio',
+      '/contact': 'contact',
+      '/about-section': 'about'
+    };
+    if (sectionMap[path]) {
+      setTimeout(() => {
+        const el = document.getElementById(sectionMap[path]);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 250);
+    }
+  }, []);
+
   // Navigate helper
   const navigateTo = (path) => {
     window.history.pushState({}, '', path);

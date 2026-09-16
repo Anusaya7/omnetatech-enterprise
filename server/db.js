@@ -751,8 +751,18 @@ class DatabaseManager {
   init() {
     const activeFile = getDbFilePath();
     const backupFile = `${activeFile}.bak`;
+    const dir = path.dirname(activeFile);
+
+    try {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    } catch (dirErr) {
+      console.warn('Could not create directory for database:', dirErr.message);
+    }
 
     let loaded = false;
+    let fileExistedButCorrupt = false;
 
     // 1. Attempt reading active database file
     if (fs.existsSync(activeFile)) {
@@ -764,6 +774,7 @@ class DatabaseManager {
         }
       } catch (err) {
         console.error('Active database file corrupted or unreadable:', err.message);
+        fileExistedButCorrupt = true;
       }
     }
 
@@ -784,7 +795,33 @@ class DatabaseManager {
       }
     }
 
-    // 3. Only if no existing database and no backup exists, seed initial data
+    // 3. If file existed but was corrupted and backup failed, preserve corrupt file
+    if (!loaded && fileExistedButCorrupt) {
+      try {
+        const corruptCopy = `${activeFile}.corrupt.${Date.now()}`;
+        fs.copyFileSync(activeFile, corruptCopy);
+        console.warn(`Preserved corrupted database file at: ${corruptCopy}`);
+      } catch {
+        // preserve non-fatal
+      }
+    }
+
+    // 4. If persistent DB_FILE_PATH was specified and activeFile is empty, migrate seed from DB_FILE
+    if (!loaded && activeFile !== DB_FILE && fs.existsSync(DB_FILE)) {
+      try {
+        const raw = fs.readFileSync(DB_FILE, 'utf-8');
+        if (raw && raw.trim()) {
+          this.data = JSON.parse(raw);
+          loaded = true;
+          console.log(`Initialized persistent database at ${activeFile} from repository seed: ${DB_FILE}`);
+          this.saveSync();
+        }
+      } catch (seedErr) {
+        console.warn('Could not read existing seed db.json:', seedErr.message);
+      }
+    }
+
+    // 5. Only if no existing database and no backup exists, seed initial data
     if (!loaded) {
       console.log('No existing database or backup found. Initializing with verified seed data.');
       this.data = JSON.parse(JSON.stringify(initialSeed));
@@ -803,7 +840,7 @@ class DatabaseManager {
       }
     }
 
-    // 4. Override / configure admin credentials from environment variables if provided
+    // 6. Override / configure admin credentials from environment variables if provided
     this.syncEnvironmentAdmin();
   }
 
@@ -842,8 +879,9 @@ class DatabaseManager {
     }
   }
 
-  // Synchronous atomic save with pre-write backup
+  // Synchronous atomic save with pre-write backup and cleanup
   saveSync() {
+    let tmpFile = null;
     try {
       const activeFile = getDbFilePath();
       const dir = path.dirname(activeFile);
@@ -862,13 +900,30 @@ class DatabaseManager {
       }
 
       // 2. Write to unique temp file
-      const tmpFile = `${activeFile}.tmp.${Date.now()}.${crypto.randomBytes(4).toString('hex')}`;
+      tmpFile = `${activeFile}.tmp.${Date.now()}.${crypto.randomBytes(4).toString('hex')}`;
       fs.writeFileSync(tmpFile, JSON.stringify(this.data, null, 2), 'utf-8');
 
-      // 3. Atomic rename replace
-      fs.renameSync(tmpFile, activeFile);
+      // 3. Atomic rename replace (with copy/unlink fallback for Windows / cross-device)
+      try {
+        fs.renameSync(tmpFile, activeFile);
+      } catch {
+        fs.copyFileSync(tmpFile, activeFile);
+        try { 
+          fs.unlinkSync(tmpFile); 
+        } catch {
+          // ignore temp file unlink error
+        }
+      }
     } catch (err) {
       console.error('Failed to write database file:', err.message);
+    } finally {
+      if (tmpFile && fs.existsSync(tmpFile)) {
+        try { 
+          fs.unlinkSync(tmpFile); 
+        } catch {
+          // ignore temp file unlink error
+        }
+      }
     }
   }
 
