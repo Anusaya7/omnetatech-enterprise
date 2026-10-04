@@ -8,8 +8,9 @@
       watch: false,
       max_memory_restart: '500M',
       env: {
-        NODE_ENV: 'production',
-        PORT: process.env.PORT || 3000
+        NODE_ENV: process.env.NODE_ENV || 'production',
+        PORT: process.env.PORT || 3000,
+        HOST: process.env.HOST || '0.0.0.0'
       }
     }
   ]

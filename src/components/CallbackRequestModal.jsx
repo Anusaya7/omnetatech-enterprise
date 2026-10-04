@@ -63,6 +63,7 @@ export default function CallbackRequestModal({ isOpen, onClose }) {
   const dialogRef = useRef(null);
   const firstFieldRef = useRef(null);
   const requestKeyRef = useRef('');
+  const submittingRef = useRef(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [errors, setErrors] = useState({});
   const [serverError, setServerError] = useState('');
@@ -70,6 +71,7 @@ export default function CallbackRequestModal({ isOpen, onClose }) {
   const [submitted, setSubmitted] = useState(false);
 
   const resetForm = useCallback(() => {
+    submittingRef.current = false;
     setForm(EMPTY_FORM);
     setErrors({});
     setServerError('');
@@ -147,10 +149,12 @@ export default function CallbackRequestModal({ isOpen, onClose }) {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    if (submittingRef.current) return;
     const nextErrors = validateForm(form);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) return;
 
+    submittingRef.current = true;
     setIsSubmitting(true);
     setServerError('');
     try {
@@ -172,6 +176,7 @@ export default function CallbackRequestModal({ isOpen, onClose }) {
     } catch (error) {
       setServerError(error.message || 'We could not submit your request. Please try again.');
     } finally {
+      submittingRef.current = false;
       setIsSubmitting(false);
     }
   };

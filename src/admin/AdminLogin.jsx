@@ -29,11 +29,6 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
     }
   };
 
-  const handleFillDemo = () => {
-    setEmail('admin@omnetatech.com');
-    setPassword('Admin@OmNetaTech2026!');
-  };
-
   return (
     <div className="login-root">
       
@@ -88,16 +83,7 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
           </div>
 
           <div className="form-group">
-            <div className="label-row">
-              <label className="form-label" htmlFor="admin-password">Password</label>
-              <button 
-                type="button" 
-                className="fill-demo-link" 
-                onClick={handleFillDemo}
-              >
-                Auto-Fill Demo
-              </button>
-            </div>
+            <label className="form-label" htmlFor="admin-password">Password</label>
             <div className="input-with-icon">
               <Lock size={18} className="field-icon" />
               <input 
@@ -132,10 +118,6 @@ export default function AdminLogin({ onLoginSuccess, onBackToSite }) {
 
         {/* Security & Evaluation Note */}
         <div className="login-footer-hint">
-          <div className="hint-pill">
-            <strong>Default Evaluation Credentials:</strong>
-            <code>admin@omnetatech.com</code> / <code>Admin@OmNetaTech2026!</code>
-          </div>
           <p className="security-text">
             Protected with server-side PBKDF2 cryptography & bearer session tokens. Unauthorized attempts are logged.
           </p>

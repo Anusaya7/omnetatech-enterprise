@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { apiMiddleware } from './api.js';
+import { warnIfSmtpUnavailable } from './mail.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -106,6 +107,7 @@ server.listen(PORT, HOST, () => {
   console.log(`[OmNetaTech Server] Running on http://${HOST}:${PORT}`);
   console.log(`[OmNetaTech Server] Serving static files from: ${DIST_DIR}`);
   console.log(`[OmNetaTech Server] API endpoints ready at: http://${HOST}:${PORT}/api/`);
+  warnIfSmtpUnavailable();
 });
 
 export default server;

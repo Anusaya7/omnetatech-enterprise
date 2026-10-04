@@ -1,5 +1,5 @@
 import { db } from './db.js';
-import { sendCallbackNotification } from './mail.js';
+import { safeSmtpError, sendCallbackNotification } from './mail.js';
 
 // Rate limiter map for admin login attempts
 const loginAttempts = new Map(); // ip -> { count: number, lockedUntil: number }
@@ -115,6 +115,34 @@ function normalizeCallbackMobile(phone) {
   return digits;
 }
 
+function parseAllowedOrigins() {
+  return String(process.env.ALLOWED_ORIGINS || '')
+    .split(',')
+    .map((value) => value.trim())
+    .filter(Boolean);
+}
+
+function isLocalDevelopmentOrigin(origin) {
+  try {
+    const url = new URL(origin);
+    if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+    return url.hostname === 'localhost' || url.hostname === '127.0.0.1' || url.hostname === '[::1]';
+  } catch {
+    return false;
+  }
+}
+
+function isAllowedOrigin(origin, host) {
+  if (!origin) return false;
+  const normalized = origin.toLowerCase();
+  if (parseAllowedOrigins().some((item) => item.toLowerCase() === normalized)) return true;
+  if (host) {
+    const hostName = host.toLowerCase();
+    if (normalized === `http://${hostName}` || normalized === `https://${hostName}`) return true;
+  }
+  return process.env.NODE_ENV !== 'production' && isLocalDevelopmentOrigin(origin);
+}
+
 function publicCallbackResponse(request) {
   return {
     success: true,
@@ -222,30 +250,14 @@ export async function apiMiddleware(req, res, next) {
 
   const method = req.method.toUpperCase();
 
-  // CORS headers with origin verification
+  // CORS: configured origins only in production. Same-host requests stay allowed
+  // so the website and API can share one Hostinger application.
   const origin = req.headers['origin'];
   const host = req.headers['host'] || '';
-  const allowedOriginsEnv = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',').map(s => s.trim().toLowerCase()) : [];
-  
-  const defaultAllowedOrigins = [
-    'https://omnetatech.com',
-    'https://www.omnetatech.com',
-    'https://omnetatech-enterprise.vercel.app'
-  ];
 
-  if (origin) {
-    const originLower = origin.toLowerCase();
-    if (
-      defaultAllowedOrigins.includes(originLower) ||
-      allowedOriginsEnv.includes(originLower) ||
-      originLower.startsWith('http://localhost:') ||
-      originLower.startsWith('http://127.0.0.1:') ||
-      (host && originLower === `http://${host.toLowerCase()}`) ||
-      (host && originLower === `https://${host.toLowerCase()}`)
-    ) {
-      res.setHeader('Access-Control-Allow-Origin', origin);
-      res.setHeader('Vary', 'Origin');
-    }
+  if (origin && isAllowedOrigin(origin, host)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
   }
 
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
@@ -480,11 +492,10 @@ export async function apiMiddleware(req, res, next) {
 
       recordSubmission(clientIp);
 
-      const notifyTo = process.env.ADMIN_NOTIFY_EMAIL || db.getWebsiteContent()?.contact?.email || '';
       try {
-        await sendCallbackNotification(request, notifyTo);
+        await sendCallbackNotification(request);
       } catch (mailError) {
-        console.error('Callback notification email failed:', mailError.message);
+        console.error('Callback notification email failed:', safeSmtpError(mailError));
       }
 
       return sendJson(res, 201, publicCallbackResponse(request));

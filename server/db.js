@@ -1,3 +1,4 @@
+import './env.js';
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
@@ -19,8 +20,9 @@ try {
 }
 
 export function getDbFilePath() {
-  if (process.env.DB_FILE_PATH) {
-    return process.env.DB_FILE_PATH;
+  const configured = typeof process.env.DB_FILE_PATH === 'string' ? process.env.DB_FILE_PATH.trim() : '';
+  if (configured) {
+    return configured;
   }
   if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
     const tmpPath = path.join('/tmp', 'omnetatech-db.json');
@@ -99,7 +101,6 @@ const initialSeed = {
     id: 'admin-1',
     email: 'admin@omnetatech.com',
     name: 'OmNetaTech Admin',
-    // Default password: Admin@OmNetaTech2026!
     passwordHash: hashPassword('Admin@OmNetaTech2026!'),
     updatedAt: new Date().toISOString()
   },
@@ -800,8 +801,9 @@ class DatabaseManager {
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
       }
+      fs.accessSync(dir, fs.constants.W_OK);
     } catch (dirErr) {
-      console.warn('Could not create directory for database:', dirErr.message);
+      console.warn('Database directory is not writable. Saved data cannot persist until this directory can be written:', dirErr.message);
     }
 
     let loaded = false;
@@ -892,9 +894,9 @@ class DatabaseManager {
   }
 
   syncEnvironmentAdmin() {
-    const envEmail = process.env.ADMIN_EMAIL;
-    const envPassword = process.env.ADMIN_PASSWORD;
-    const envPasswordHash = process.env.ADMIN_PASSWORD_HASH;
+    const envEmail = typeof process.env.ADMIN_EMAIL === 'string' ? process.env.ADMIN_EMAIL.trim() : '';
+    const envPassword = typeof process.env.ADMIN_PASSWORD === 'string' ? process.env.ADMIN_PASSWORD.trim() : '';
+    const envPasswordHash = typeof process.env.ADMIN_PASSWORD_HASH === 'string' ? process.env.ADMIN_PASSWORD_HASH.trim() : '';
 
     if (!this.data.admin) {
       this.data.admin = {

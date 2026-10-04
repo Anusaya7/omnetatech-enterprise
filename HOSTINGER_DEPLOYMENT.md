@@ -1,121 +1,79 @@
-# OmNetaTech Enterprise — Hostinger Node.js Web App Deployment Guide
+# OmNetaTech Enterprise — Hostinger deployment
 
-This document outlines the verified deployment configuration for hosting **OmNetaTech Enterprise** as a Node.js Web Application on Hostinger.
+The production app is one Node.js process. `npm start` runs `node server.js`, which loads environment variables and then starts `server/server.js`. That process serves the built website from `dist/` and the API from `/api`.
 
----
+Do not commit `.env`, `.env.local`, or `.env.production`. Do not put real passwords in this file.
 
-## A. Repository & Application Configuration
+## Deployment procedure
 
-- **Repository**: `https://github.com/Anusaya7/omnetatech-enterprise.git`
-- **Branch**: `main`
-- **Architecture**: Single unified Node.js production server with React + Vite frontend and native REST API backend
-- **Node.js Runtime Version**: Node.js `20.x` LTS (or `22.x`)
-- **Frontend Build Output Directory**: `dist`
-- **Canonical Production Server Entry Point**: `server.js` (imports `./server/server.js`)
-- **Alternative PM2 Process File**: `ecosystem.config.cjs`
-- **Build Command**: `npm run build`
-- **Start Command**: `npm start` (or `node server.js`)
+1. **Upload or connect the GitHub repository.** In Hostinger hPanel, open Git and connect `https://github.com/Anusaya7/omnetatech-enterprise.git`, branch `main`. Deploy into the application directory that will contain `package.json` and `server.js`.
 
----
+2. **Set the Node.js version.** Use Node.js 20.x LTS. Node.js 22.x is also compatible.
 
-## B. Hostinger hPanel Node.js Setup
+3. **Set the application root.** Use the directory where this repository is deployed. `package.json` and `server.js` must be in that directory.
 
-1. **Log in** to your Hostinger Account and navigate to **hPanel**.
-2. Go to **Websites** → Select or Add your Website → Navigate to **Node.js** (under Advanced or Web App section).
-3. Configure the application runtime parameters:
-   - **Node.js Version**: Select **20.x** (recommended LTS).
-   - **Application Root**: `/public_html` (or your chosen subfolder where the repository is cloned/deployed).
-   - **Application Startup File**: `server.js`
-   - **Application Mode**: `production`
-4. **Git Deployment Setup**:
-   - In hPanel under **Git**, connect repository: `https://github.com/Anusaya7/omnetatech-enterprise.git`
-   - Branch: `main`
-   - Configure Webhook if automatic deployment on `git push` is desired.
-5. **Install Dependencies & Build**:
-   - Run via SSH / Hostinger Terminal:
-     ```bash
-     npm install --production=false
-     npm run build
-     ```
-   - *Note*: `--production=false` ensures `devDependencies` (Vite, Rollup, Terser) are installed so `npm run build` can generate the `dist` directory.
-6. **Start / Restart Application**:
-   - Click **Restart** in the Hostinger Node.js dashboard, or use `npm start`.
+4. **Set the startup file.** Use `server.js`.
 
----
+5. **Set the start command.** Use `npm start`. That script is `node server.js`. The server reads `HOST` and `PORT` from the environment and falls back to `0.0.0.0` and `3000`.
 
-## C. Environment Variables (Hostinger Configuration)
+6. **Install dependencies.** From the application root, install production and build tools:
 
-Configure these environment variables in your Hostinger hPanel Node.js environment settings (or in a `.env` file located in the application root). **Never commit secret values to GitHub.**
+   ```bash
+   npm install --production=false
+   ```
 
-| Variable Name | Required | Default / Description |
-| :--- | :--- | :--- |
-| `NODE_ENV` | Yes | `production` |
-| `PORT` | Auto | Assigned automatically by Hostinger (fallback: `3000`) |
-| `HOST` | Recommended | `0.0.0.0` |
-| `DB_FILE_PATH` | Optional | Absolute persistent path outside git directory (e.g. `/home/username/data/db.json`) |
-| `ADMIN_EMAIL` | Optional | Custom admin login email (default: `admin@omnetatech.com`) |
-| `ADMIN_PASSWORD` | Optional | Custom strong admin password (overrides default seed hash) |
-| `ALLOWED_ORIGINS` | Optional | Comma-separated CORS origins (e.g. `https://omnetatech.com,https://www.omnetatech.com`) |
-| `VITE_API_URL` | Optional | Frontend API base URL (leave blank when frontend and API are unified on the same origin) |
+   Vite is a dev dependency, so a production-only install cannot build the frontend.
 
-> **Persistence Tip**: Hostinger Git deployments may overwrite repository files. Setting `DB_FILE_PATH` to a directory outside your git root (such as `/home/username/data/omnetatech-db.json`) guarantees your enquiries, sessions, and CMS updates remain permanently intact across every git update. On initial startup with a custom `DB_FILE_PATH`, the system will automatically initialize the persistent file from the pre-populated seed data.
+7. **Set environment variables in hPanel.** Hostinger values override a `.env` file. Leave `VITE_API_URL` empty for this same-domain app. Use a Gmail App Password for `SMTP_PASS`, not the normal Gmail password.
 
----
+   | Variable | Production value |
+   | :--- | :--- |
+   | `NODE_ENV` | `production` |
+   | `PORT` | Leave this to Hostinger when it assigns a port. Fallback is `3000`. |
+   | `HOST` | `0.0.0.0` |
+   | `DB_FILE_PATH` | Absolute path outside the deployed repository. See step 9. |
+   | `ADMIN_EMAIL` | Administrator login email. |
+   | `ADMIN_PASSWORD` | Administrator password. Set this in hPanel. |
+   | `ALLOWED_ORIGINS` | `https://omnetatech.com,https://www.omnetatech.com` |
+   | `VITE_API_URL` | Leave empty. |
+   | `SMTP_HOST` | `smtp.gmail.com` |
+   | `SMTP_PORT` | `587` |
+   | `SMTP_SECURE` | `false` |
+   | `SMTP_USER` | Gmail address that sends mail. |
+   | `SMTP_PASS` | Gmail App Password. |
+   | `SMTP_FROM` | Sender address, usually the same Gmail address. |
+   | `ADMIN_NOTIFY_EMAIL` | Inbox that receives callback notifications. |
 
-## D. Verification via Hostinger Preview / Temporary URL
+8. **Build the frontend.** Run this after the environment variables are saved, with `VITE_API_URL` empty:
 
-Before updating public DNS records, verify your deployment:
+   ```bash
+   npm run build
+   ```
 
-1. **System Health Check**:
-   - Visit: `http://<your-preview-domain>/api/health`
-   - Expected Response: `HTTP 200 OK` with JSON `{"status":"ok", "environment":"production", ...}`
-2. **Public CMS Bundle**:
-   - Visit: `http://<your-preview-domain>/api/public/bundle`
-   - Expected Response: `HTTP 200 OK` with JSON containing verified services, solutions, industries, portfolio, insights, and careers.
-3. **Frontend Landing Page**:
-   - Visit: `http://<your-preview-domain>/`
-   - Verify header, hero section, dynamic services, case studies, and footer render properly.
-4. **Client-Side Routing (SPA Fallback)**:
-   - Direct navigation to:
-     - `http://<your-preview-domain>/services`
-     - `http://<your-preview-domain>/about`
-     - `http://<your-preview-domain>/careers`
-     - `http://<your-preview-domain>/insights`
-     - `http://<your-preview-domain>/contact`
-   - Verify page refreshes reload the SPA correctly without 404 errors.
-5. **API Security Check**:
-   - Request non-existent API route: `http://<your-preview-domain>/api/non-existent`
-   - Expected Response: `HTTP 404 Not Found` with JSON `{"error":"Endpoint GET /api/non-existent not found"}` (never HTML).
-6. **Admin Panel Authentication & CMS**:
-   - Visit: `http://<your-preview-domain>/admin/login`
-   - Log in using your configured admin credentials.
-   - Verify dashboard statistics load.
-   - Test editing a service or content item in CMS and verify it reflects in the public bundle.
+   The browser then calls `/api/callback-request` on the same domain.
 
----
+9. **Configure the persistent database path.** Hostinger can replace the application directory on a new Git deployment. Create a writable directory outside that directory, for example `/home/<username>/omnetatech-data/`, and set:
 
-## E. Domain & DNS Configuration
+   ```text
+   DB_FILE_PATH=/home/<username>/omnetatech-data/db.json
+   ```
 
-> **IMPORTANT**: DNS was **NOT** changed during this technical preparation. Update DNS only after temporary URL verification passes.
+   The application creates the file on first start and does not delete an existing `db.json` on restart. If `DB_FILE_PATH` is empty, it uses `./data/db.json` inside the application directory, which a later deployment can replace. The code cannot choose the Hostinger home directory for you.
 
-When you are ready to point your custom domain:
-1. Obtain Hostinger DNS records (A Record / CNAME) from **hPanel** → **Domains**.
-2. Update the DNS records in your domain registrar (e.g. GoDaddy / Cloudflare):
-   - **Type A**: Host `@` pointing to Hostinger server IP.
-   - **Type CNAME**: Host `www` pointing to `@` or your domain.
-3. In Hostinger hPanel, enable **Free SSL Certificate** (Let's Encrypt) to ensure HTTPS encryption and activate HSTS headers.
+10. **Restart the application.** Use the Hostinger Node.js restart control, or run `npm start` from the application root.
 
----
+11. **Configure the domain.** Point `omnetatech.com` and `www.omnetatech.com` at the Hostinger application, then enable the free SSL certificate. Keep `ALLOWED_ORIGINS` set to both HTTPS origins.
 
-## F. Post-Deployment QA Checklist
+12. **Test the callback form.** Open the live site, choose Request a Callback, and submit a valid name and mobile number. The request must remain in the database even if email delivery fails. With SMTP configured, the notification subject is `New Callback Request — OmNetaTech`.
 
-- [ ] `GET /api/health` returns status `200` and JSON `{"status":"ok"}`
-- [ ] `GET /api/public/bundle` returns status `200` with CMS data
-- [ ] Contact form submission successfully creates an enquiry (`POST /api/contact`)
-- [ ] Career application submission works as expected (`POST /api/careers/apply`)
-- [ ] Admin login accepts valid credentials and rejects invalid credentials (`POST /api/admin/auth/login`)
-- [ ] Admin dashboard and enquiries view are accessible with session token
-- [ ] Security headers (`X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, `Referrer-Policy`) present in responses
-- [ ] Unknown `/api/*` requests return JSON 404 errors
-- [ ] Direct browser refreshes on SPA routes load the application cleanly
-- [ ] Database persistence configured via `DB_FILE_PATH` (if isolated storage is desired)
+13. **Test admin login.** Open `/admin/login` and sign in with `ADMIN_EMAIL` and `ADMIN_PASSWORD`. Callback Requests must show the saved name, mobile, email, company, preferred time, message, date, and status. Status values are New, Contacted, Completed, and Cancelled.
+
+14. **Verify email delivery.** Submit one more callback after the Gmail App Password is set. Confirm the message arrives at `ADMIN_NOTIFY_EMAIL`. If SMTP settings are missing, the site still saves the request and logs `SMTP configuration is incomplete; callback email skipped.`
+
+## Checks after restart
+
+- `GET /api/health` returns `{"status":"ok"}`.
+- `GET /` loads the website.
+- `POST /api/callback-request` with a valid body returns success.
+- `GET /api/admin/callback-requests` without a login token returns unauthorized.
+- A second deployment does not erase the file at `DB_FILE_PATH`.
