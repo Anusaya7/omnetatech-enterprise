@@ -3,6 +3,25 @@ import { api } from '../services/api';
 
 const CmsContext = createContext(null);
 
+function applyBundle(bundle, setters) {
+  if (!bundle) return;
+  if (bundle.content) {
+    const content = { ...bundle.content };
+    if (content.contact) {
+      const contact = { ...content.contact };
+      delete contact.phone;
+      content.contact = contact;
+    }
+    setters.setContent(content);
+  }
+  if (Array.isArray(bundle.services)) setters.setServices(bundle.services);
+  if (Array.isArray(bundle.solutions)) setters.setSolutions(bundle.solutions);
+  if (Array.isArray(bundle.industries)) setters.setIndustries(bundle.industries);
+  if (Array.isArray(bundle.portfolio)) setters.setPortfolio(bundle.portfolio);
+  if (Array.isArray(bundle.insights)) setters.setInsights(bundle.insights);
+  if (Array.isArray(bundle.careers)) setters.setCareers(bundle.careers);
+}
+
 export function CmsProvider({ children }) {
   const [content, setContent] = useState(null);
   const [services, setServices] = useState([]);
@@ -18,13 +37,7 @@ export function CmsProvider({ children }) {
     try {
       const bundle = await api.getPublicBundle();
       if (bundle) {
-        if (bundle.content) setContent(bundle.content);
-        if (Array.isArray(bundle.services)) setServices(bundle.services);
-        if (Array.isArray(bundle.solutions)) setSolutions(bundle.solutions);
-        if (Array.isArray(bundle.industries)) setIndustries(bundle.industries);
-        if (Array.isArray(bundle.portfolio)) setPortfolio(bundle.portfolio);
-        if (Array.isArray(bundle.insights)) setInsights(bundle.insights);
-        if (Array.isArray(bundle.careers)) setCareers(bundle.careers);
+        applyBundle(bundle, { setContent, setServices, setSolutions, setIndustries, setPortfolio, setInsights, setCareers });
       }
       setError(null);
     } catch (err) {
@@ -40,13 +53,7 @@ export function CmsProvider({ children }) {
     api.getPublicBundle()
       .then((bundle) => {
         if (!ignore && bundle) {
-          if (bundle.content) setContent(bundle.content);
-          if (Array.isArray(bundle.services)) setServices(bundle.services);
-          if (Array.isArray(bundle.solutions)) setSolutions(bundle.solutions);
-          if (Array.isArray(bundle.industries)) setIndustries(bundle.industries);
-          if (Array.isArray(bundle.portfolio)) setPortfolio(bundle.portfolio);
-          if (Array.isArray(bundle.insights)) setInsights(bundle.insights);
-          if (Array.isArray(bundle.careers)) setCareers(bundle.careers);
+          applyBundle(bundle, { setContent, setServices, setSolutions, setIndustries, setPortfolio, setInsights, setCareers });
           setError(null);
         }
       })

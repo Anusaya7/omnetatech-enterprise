@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { 
-  LayoutDashboard, Mail, Bell, Globe, Briefcase, 
+  LayoutDashboard, Mail, PhoneCall, Bell, Globe, Briefcase, 
   Layers, Building2, FolderKanban, FileText, Users, 
   Settings, LogOut, ExternalLink, Search, Menu, X,
   CheckCircle, ChevronDown
@@ -12,6 +12,7 @@ export default function AdminLayout({ activeRoute, onNavigate, onLogout, childre
   const [user] = useState(() => authStorage.getUser() || { name: 'OmNetaTech Admin', email: 'admin@omnetatech.com' });
   const [unreadCount, setUnreadCount] = useState(0);
   const [newEnquiryCount, setNewEnquiryCount] = useState(0);
+  const [newCallbackCount, setNewCallbackCount] = useState(0);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
@@ -22,6 +23,7 @@ export default function AdminLayout({ activeRoute, onNavigate, onLogout, childre
       if (statsRes?.stats) {
         setUnreadCount(statsRes.stats.unreadNotifications || 0);
         setNewEnquiryCount(statsRes.stats.newEnquiries || 0);
+        setNewCallbackCount(statsRes.stats.newCallbackRequests || 0);
       }
     }).catch(() => {});
   }, []);
@@ -41,6 +43,14 @@ export default function AdminLayout({ activeRoute, onNavigate, onLogout, childre
       path: '/admin/contact-enquiries',
       badge: newEnquiryCount > 0 ? newEnquiryCount : null,
       badgeColor: '#EF4444'
+    },
+    {
+      id: 'callbacks',
+      label: 'Callback Requests',
+      icon: PhoneCall,
+      path: '/admin/callback-requests',
+      badge: newCallbackCount > 0 ? newCallbackCount : null,
+      badgeColor: '#1769E0'
     },
     { 
       id: 'notifications', 

@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Phone, Mail, MapPin, Lock } from 'lucide-react';
 import LegalModal from './LegalModal';
 import { useCms } from '../context/CmsContext';
+import { useCallbackModal } from '../context/CallbackModalContext';
 
 export default function Footer({ setActiveTab }) {
   const { content } = useCms();
+  const { openCallbackModal } = useCallbackModal();
   const footerData = content?.footer || {};
   const contactData = content?.contact || {};
   const [legalType, setLegalType] = useState(null); // 'privacy' | 'terms' | null
@@ -139,10 +141,10 @@ export default function Footer({ setActiveTab }) {
         <div className="footer-contact-col">
           <h4 className="footer-col-heading">Contact</h4>
           <div className="footer-contact-items">
-            <a href={`tel:${contactData.phone || '+918237140776'}`} className="footer-contact-link">
+            <button type="button" className="footer-contact-link" onClick={openCallbackModal}>
               <Phone size={15} className="contact-icon" />
-              <span>{contactData.phone || '+91 8237140776'}</span>
-            </a>
+              <span>Request a Callback</span>
+            </button>
             <a href={`mailto:${contactData.email || 'omnetatech@gmail.com'}`} className="footer-contact-link">
               <Mail size={15} className="contact-icon" />
               <span>{contactData.email || 'omnetatech@gmail.com'}</span>
@@ -277,6 +279,12 @@ export default function Footer({ setActiveTab }) {
 
         .footer-contact-link,
         .footer-contact-static {
+          background: none;
+          border: none;
+          padding: 0;
+          font: inherit;
+          cursor: pointer;
+          text-align: left;
           display: flex;
           align-items: center;
           gap: 10px;

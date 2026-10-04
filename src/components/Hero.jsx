@@ -34,7 +34,7 @@ export default function Hero({ openConsultationModal, scrollToServices }) {
 
           <div className="hero-cta-group">
             <button className="btn-primary-blue hero-btn" onClick={openConsultationModal}>
-              <span>{hero.primaryCta || 'Get a Free Consultation'}</span>
+              <span>{hero.primaryCta || 'Get a Paid Consultation'}</span>
               <ArrowRight size={16} />
             </button>
             <button className="btn-secondary-outline hero-btn" onClick={scrollToServices}>

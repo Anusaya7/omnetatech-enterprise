@@ -83,6 +83,11 @@ export const api = {
     body: data
   }),
 
+  submitCallbackRequest: (data) => request('/api/callback-request', {
+    method: 'POST',
+    body: data
+  }),
+
   // ----------------------------------------------------
   // ADMIN AUTHENTICATION
   // ----------------------------------------------------
@@ -132,6 +137,12 @@ export const api = {
   }),
   deleteEnquiry: (id) => request(`/api/admin/enquiries/${id}`, {
     method: 'DELETE'
+  }),
+
+  getCallbackRequests: (filter = 'All') => request(`/api/admin/callback-requests?filter=${encodeURIComponent(filter)}`),
+  updateCallbackRequest: (id, updates) => request(`/api/admin/callback-requests/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: updates
   }),
 
   // ----------------------------------------------------

@@ -21,7 +21,7 @@ OmNetaTech is a premium enterprise-grade web application built to communicate tr
      - **Under ₹25 Lakhs**
      - **₹25 Lakhs - ₹75 Lakhs**
      - **₹75 Lakhs+**
-   - Clickable contact cards displaying direct corporate lines (📞 **+91 8237140776** / 📧 **omnetatech@gmail.com**).
+   - Contact cards use email (**omnetatech@gmail.com**) and a **Request a Callback** form. The company phone number is not shown on the public website.
 
 2. **Metrics & Financial Localization**:
    - Timelines, portfolios, and service cards use Indian Rupee (₹), Lakhs, and Crores values.

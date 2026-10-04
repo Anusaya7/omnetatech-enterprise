@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useCallbackModal } from '../context/CallbackModalContext';
 import { createPortal } from 'react-dom';
 import { 
   Menu, X, ChevronDown, Code, Globe, Smartphone, 
@@ -7,6 +8,7 @@ import {
 } from 'lucide-react';
 
 export default function Header({ activeTab, setActiveTab, openConsultationModal }) {
+  const { openCallbackModal } = useCallbackModal();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
@@ -308,7 +310,7 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
             className="btn-primary-blue header-consult-btn"
             onClick={openConsultationModal}
           >
-            Get a Free Consultation
+            Get a Paid Consultation
           </button>
 
           <button 
@@ -483,13 +485,20 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
                     openConsultationModal();
                   }}
                 >
-                  Get a Free Consultation
+                  Get a Paid Consultation
                 </button>
 
                 <div className="mobile-menu-direct-contact">
-                  <a href="tel:+918237140776" className="mobile-contact-pill">
-                    <span>📞 +91 8237140776</span>
-                  </a>
+                  <button
+                    type="button"
+                    className="mobile-contact-pill"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      window.setTimeout(() => openCallbackModal(), 0);
+                    }}
+                  >
+                    <span>Request a Callback</span>
+                  </button>
                   <a href="mailto:omnetatech@gmail.com" className="mobile-contact-pill">
                     <span>✉️ omnetatech@gmail.com</span>
                   </a>
@@ -977,6 +986,10 @@ export default function Header({ activeTab, setActiveTab, openConsultationModal 
         }
 
         .mobile-contact-pill {
+          width: 100%;
+          font: inherit;
+          text-align: left;
+          cursor: pointer;
           min-height: 40px;
           display: flex;
           align-items: center;

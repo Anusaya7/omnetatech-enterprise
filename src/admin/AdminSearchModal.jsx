@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, X, Mail, Briefcase, Layers, Building2, FileText, Users, ArrowRight } from 'lucide-react';
+import { Search, X, Mail, PhoneCall, Briefcase, Layers, Building2, FileText, Users, ArrowRight } from 'lucide-react';
 import { api } from '../services/api';
 
 export default function AdminSearchModal({ onClose, onNavigate }) {
@@ -54,6 +54,7 @@ export default function AdminSearchModal({ onClose, onNavigate }) {
 
   const hasResults = results && (
     (results.enquiries?.length || 0) +
+    (results.callbackRequests?.length || 0) +
     (results.services?.length || 0) +
     (results.solutions?.length || 0) +
     (results.industries?.length || 0) +
@@ -123,6 +124,28 @@ export default function AdminSearchModal({ onClose, onNavigate }) {
                       <div className="row-main">
                         <span className="row-title">{enq.fullName}</span>
                         <span className="row-sub">{enq.email} • {enq.service} • Status: {enq.status}</span>
+                      </div>
+                      <ArrowRight size={14} className="row-arrow" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {results.callbackRequests?.length > 0 && (
+                <div className="results-group">
+                  <div className="group-heading">
+                    <PhoneCall size={14} />
+                    <span>Callback Requests ({results.callbackRequests.length})</span>
+                  </div>
+                  {results.callbackRequests.map((item) => (
+                    <div
+                      key={item.id}
+                      className="result-row"
+                      onClick={() => onNavigate('callbacks', '/admin/callback-requests')}
+                    >
+                      <div className="row-main">
+                        <span className="row-title">{item.fullName}</span>
+                        <span className="row-sub">{item.mobile} • {item.preferredTime} • Status: {item.status}</span>
                       </div>
                       <ArrowRight size={14} className="row-arrow" />
                     </div>

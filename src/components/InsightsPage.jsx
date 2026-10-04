@@ -199,7 +199,7 @@ export default function InsightsPage({ openConsultationModal }) {
               <div className="article-modal-cta">
                 <div>
                   <div className="modal-cta-heading">Need assistance implementing this in your business?</div>
-                  <div className="modal-cta-sub">Talk with our engineering team for a free technical consultation.</div>
+                  <div className="modal-cta-sub">Talk with our engineering team for a paid technical consultation.</div>
                 </div>
                 <button 
                   className="btn-primary-blue"

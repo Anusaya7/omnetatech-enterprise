@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { 
   Lock, Key, ShieldCheck, Save, 
   AlertCircle, CheckCircle2, Phone, Mail, MapPin, Eye, EyeOff 
@@ -21,11 +21,32 @@ export default function AdminSettings({ showToast }) {
 
   // Contact settings state
   const contact = content?.contact || {};
-  const [phone, setPhone] = useState(contact.phone || '+91 8237140776');
+  const [contactRecord, setContactRecord] = useState(contact);
+  const [phone, setPhone] = useState('');
   const [email, setEmail] = useState(contact.email || 'omnetatech@gmail.com');
   const [country, setCountry] = useState(contact.country || 'India');
   const [supportHours, setSupportHours] = useState(contact.supportHours || 'Available Mon – Sat, 9:30 AM – 6:30 PM IST');
   const [isSavingContact, setIsSavingContact] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    api.getWebsiteContent()
+      .then((data) => {
+        if (!active) return;
+        const saved = data?.contact || {};
+        setContactRecord(saved);
+        setPhone(saved.phone || '');
+        if (saved.email) setEmail(saved.email);
+        if (saved.country) setCountry(saved.country);
+        if (saved.supportHours) setSupportHours(saved.supportHours);
+      })
+      .catch((err) => {
+        console.error('Failed to load internal contact settings:', err);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handlePasswordSubmit = async (e) => {
     e.preventDefault();
@@ -70,12 +91,19 @@ export default function AdminSettings({ showToast }) {
     setIsSavingContact(true);
     try {
       await api.updateWebsiteContent('contact', {
-        ...contact,
+        ...contactRecord,
         phone,
         email,
         country,
         supportHours
       });
+      setContactRecord((current) => ({
+        ...current,
+        phone,
+        email,
+        country,
+        supportHours
+      }));
       await refreshData();
       showToast?.('Company contact details updated across website');
     } catch (err) {
@@ -199,7 +227,7 @@ export default function AdminSettings({ showToast }) {
             </div>
             <div>
               <h2 className="panel-title">Verified Corporate Contact Channels</h2>
-              <p className="panel-sub">Official communication coordinates displayed to prospective clients.</p>
+              <p className="panel-sub">Email and location stay on the public website. The phone number is kept for internal records only.</p>
             </div>
           </div>
 
@@ -216,7 +244,7 @@ export default function AdminSettings({ showToast }) {
                   onChange={(e) => setPhone(e.target.value)}
                 />
               </div>
-              <span className="field-note">Verified primary contact: +91 8237140776</span>
+              <span className="field-note">Stored internally. This number is not shown on the public website.</span>
             </div>
 
             <div className="form-group">

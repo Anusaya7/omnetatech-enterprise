@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Phone, Mail, MapPin, Send, CheckCircle2, Clock, Shield, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
 import { useCms } from '../context/CmsContext';
+import { useCallbackModal } from '../context/CallbackModalContext';
 
 export default function ContactSection() {
   const { content } = useCms();
+  const { openCallbackModal } = useCallbackModal();
   const contactInfo = content?.contact || {};
 
   const [form, setForm] = useState({
@@ -97,16 +99,16 @@ export default function ContactSection() {
 
             <div className="contact-methods-list">
               {/* Phone */}
-              <a href={`tel:${contactInfo.phone || '+918237140776'}`} className="contact-method-card">
+              <button type="button" className="contact-method-card" onClick={openCallbackModal}>
                 <div className="method-icon-box">
                   <Phone size={20} />
                 </div>
                 <div className="method-details">
-                  <div className="method-label">Call or WhatsApp</div>
-                  <div className="method-value">{contactInfo.phone || '+91 8237140776'}</div>
+                  <div className="method-label">Request a Callback</div>
+                  <div className="method-value">Share your number and we will call you</div>
                   <div className="method-note">{contactInfo.supportHours || 'Available Mon – Sat, 9:30 AM – 6:30 PM IST'}</div>
                 </div>
-              </a>
+              </button>
 
               {/* Email */}
               <a href={`mailto:${contactInfo.email || 'omnetatech@gmail.com'}`} className="contact-method-card">
@@ -373,6 +375,11 @@ export default function ContactSection() {
         }
 
         .contact-method-card {
+          width: 100%;
+          text-align: left;
+          font: inherit;
+          color: inherit;
+          cursor: pointer;
           display: flex;
           align-items: flex-start;
           gap: 16px;

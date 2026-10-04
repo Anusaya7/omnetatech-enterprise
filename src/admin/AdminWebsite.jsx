@@ -299,7 +299,7 @@ export default function AdminWebsite({ showToast }) {
           <div className="editor-section-content">
             <div className="section-title-row">
               <h3>Verified Official Contact Channels</h3>
-              <p>Contact details displayed across header, contact section, modal and footer.</p>
+              <p>Email, location, and support hours are shown on the public website. The phone number is stored internally and is not published.</p>
             </div>
 
             <div className="form-grid">
@@ -308,10 +308,10 @@ export default function AdminWebsite({ showToast }) {
                 <input 
                   type="text" 
                   className="cms-input"
-                  value={content.contact?.phone || '+91 8237140776'}
+                  value={content.contact?.phone || ''}
                   onChange={(e) => handleFieldChange('contact', 'phone', e.target.value)}
                 />
-                <span className="field-hint">Default verified: +91 8237140776</span>
+                <span className="field-hint">Stored for internal admin use. This number is not shown on the public website.</span>
               </div>
 
               <div className="form-group">

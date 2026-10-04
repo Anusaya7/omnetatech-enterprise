@@ -25,6 +25,7 @@ import AdminLayout from './admin/AdminLayout';
 import AdminLogin from './admin/AdminLogin';
 import AdminDashboard from './admin/AdminDashboard';
 import AdminEnquiries from './admin/AdminEnquiries';
+import AdminCallbacks from './admin/AdminCallbacks';
 import AdminNotifications from './admin/AdminNotifications';
 import AdminWebsite from './admin/AdminWebsite';
 import AdminServices from './admin/AdminServices';
@@ -57,6 +58,7 @@ function App() {
   const getAdminSubroute = (path) => {
     if (path === '/admin/login') return 'login';
     if (path === '/admin/contact-enquiries' || path === '/admin/enquiries') return 'enquiries';
+    if (path === '/admin/callback-requests') return 'callbacks';
     if (path === '/admin/notifications') return 'notifications';
     if (path === '/admin/website') return 'website';
     if (path === '/admin/services') return 'services';
@@ -210,6 +212,13 @@ function App() {
                 <AdminEnquiries 
                   showToast={showToast} 
                   refreshBadges={refreshBadges} 
+                />
+              );
+            case 'callbacks':
+              return (
+                <AdminCallbacks
+                  showToast={showToast}
+                  refreshBadges={refreshBadges}
                 />
               );
             case 'notifications':

@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { X, CheckCircle2, Phone, Mail, Send, ArrowRight, AlertCircle } from 'lucide-react';
+import { X, CheckCircle2, Mail, Send, ArrowRight, AlertCircle } from 'lucide-react';
 import { api } from '../services/api';
+import { useCallbackModal } from '../context/CallbackModalContext';
 
 export default function BookConsultationModal({ isOpen, onClose }) {
+  const { openCallbackModal } = useCallbackModal();
   const [step, setStep] = useState(1); // 1 = Configuration, 2 = Contact, 3 = Confirmation
   const [selectedService, setSelectedService] = useState('Software Development');
   const [projectTimeline, setProjectTimeline] = useState('Within 1 month');
@@ -69,6 +71,11 @@ export default function BookConsultationModal({ isOpen, onClose }) {
     onClose();
   };
 
+  const handleRequestCallback = () => {
+    handleResetAndClose();
+    openCallbackModal();
+  };
+
   return (
     <div className="consult-modal-backdrop" onClick={handleResetAndClose}>
       <div className="consult-modal-body shadow-xl" onClick={(e) => e.stopPropagation()}>
@@ -77,7 +84,7 @@ export default function BookConsultationModal({ isOpen, onClose }) {
         <div className="consult-modal-header">
           <div>
             <div className="badge">Direct Consultation</div>
-            <h3 className="consult-modal-title">Get a Free Consultation</h3>
+            <h3 className="consult-modal-title">Get a Paid Consultation</h3>
           </div>
           <button className="consult-close-btn" onClick={handleResetAndClose} aria-label="Close modal">
             <X size={20} />
@@ -125,12 +132,11 @@ export default function BookConsultationModal({ isOpen, onClose }) {
 
             {/* Direct Contact strip */}
             <div className="consult-direct-strip">
-              <div className="direct-strip-title">Prefer to call or email directly?</div>
+              <div className="direct-strip-title">Prefer a callback or email?</div>
               <div className="direct-strip-links">
-                <a href="tel:+918237140776" className="direct-strip-link">
-                  <Phone size={14} />
-                  <span>+91 8237140776</span>
-                </a>
+                <button type="button" className="direct-strip-link" onClick={handleRequestCallback}>
+                  <span>Request a Callback</span>
+                </button>
                 <a href="mailto:omnetatech@gmail.com" className="direct-strip-link">
                   <Mail size={14} />
                   <span>omnetatech@gmail.com</span>
@@ -272,7 +278,7 @@ export default function BookConsultationModal({ isOpen, onClose }) {
               Thank you, <strong>{formData.name}</strong>. Our engineering team has received your request for <strong>{selectedService}</strong>. We will get in touch with you shortly at <strong>{formData.email}</strong>.
             </p>
             <div className="direct-assistance-note">
-              For immediate questions, call us directly at <a href="tel:+918237140776" className="text-link">+91 8237140776</a>.
+              You can also <button type="button" className="text-link" onClick={handleRequestCallback}>request a callback</button> and our team will call you back.
             </div>
             <button className="btn-primary-blue mt-4" onClick={handleResetAndClose}>
               Return to Website
@@ -412,6 +418,11 @@ export default function BookConsultationModal({ isOpen, onClose }) {
         }
 
         .direct-strip-link {
+          background: none;
+          border: none;
+          padding: 0;
+          font: inherit;
+          cursor: pointer;
           display: inline-flex;
           align-items: center;
           gap: 6px;
@@ -523,6 +534,11 @@ export default function BookConsultationModal({ isOpen, onClose }) {
         }
 
         .text-link {
+          background: none;
+          border: none;
+          padding: 0;
+          font: inherit;
+          cursor: pointer;
           color: var(--color-primary-blue);
           font-weight: 600;
           text-decoration: underline;

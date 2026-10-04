@@ -70,6 +70,7 @@
       "createdAt": "2026-09-14T16:26:30.543Z"
     }
   ],
+  "callbackRequests": [],
   "services": [
     {
       "id": "svc-1",
@@ -702,7 +703,7 @@
       "headline": "Building Digital Solutions That Move Your Business Forward",
       "highlight": "Business Forward",
       "subheading": "OmNetaTech delivers practical, scalable and reliable technology solutions that help businesses improve operations, automate processes and build better digital experiences.",
-      "primaryCta": "Get a Free Consultation",
+      "primaryCta": "Get a Paid Consultation",
       "secondaryCta": "Explore Our Services",
       "trustStatement": "Technology solutions designed around your business goals.",
       "badgeText": "Indian Technology Services Company",

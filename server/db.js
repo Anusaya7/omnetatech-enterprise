@@ -38,6 +38,48 @@ export function getDbFilePath() {
   return DB_FILE;
 }
 
+function collectPhoneVariants(values) {
+  const variants = new Set();
+  for (const value of values) {
+    const raw = String(value || '').trim();
+    if (!raw) continue;
+    variants.add(raw);
+    const digits = raw.replace(/\D/g, '');
+    if (digits.length < 8) continue;
+    const local = digits.slice(-10);
+    variants.add(digits);
+    variants.add(`+${digits}`);
+    variants.add(local);
+    variants.add(`+91${local}`);
+    variants.add(`+91 ${local}`);
+    variants.add(`+91-${local}`);
+  }
+  return [...variants].filter((item) => item.replace(/\D/g, '').length >= 8);
+}
+
+function redactPublicValue(value, variants) {
+  if (typeof value === 'string') {
+    let output = value;
+    const sorted = [...variants].sort((a, b) => b.length - a.length);
+    for (const variant of sorted) {
+      output = output.split(variant).join('');
+    }
+    return output.replace(/[ \t]{2,}/g, ' ').trim();
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => redactPublicValue(item, variants));
+  }
+  if (value && typeof value === 'object') {
+    const copy = {};
+    for (const [key, child] of Object.entries(value)) {
+      if (key === 'phone') continue;
+      copy[key] = redactPublicValue(child, variants);
+    }
+    return copy;
+  }
+  return value;
+}
+
 // Password hashing utility using PBKDF2 (secure server-side hashing)
 export function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
   const hash = crypto.pbkdf2Sync(password, salt, 100000, 64, 'sha512').toString('hex');
@@ -64,6 +106,7 @@ const initialSeed = {
   sessions: [], // { token, userId, expiresAt }
   enquiries: [],
   notifications: [],
+  callbackRequests: [],
   services: [
     {
       id: 'svc-1',
@@ -696,7 +739,7 @@ const initialSeed = {
       headline: 'Building Digital Solutions That Move Your Business Forward',
       highlight: 'Business Forward',
       subheading: 'OmNetaTech delivers practical, scalable and reliable technology solutions that help businesses improve operations, automate processes and build better digital experiences.',
-      primaryCta: 'Get a Free Consultation',
+      primaryCta: 'Get a Paid Consultation',
       secondaryCta: 'Explore Our Services',
       trustStatement: 'Technology solutions designed around your business goals.',
       badgeText: 'Indian Technology Services Company'
@@ -834,6 +877,10 @@ class DatabaseManager {
           this.data[key] = Array.isArray(value) ? [] : (typeof value === 'object' ? {} : value);
           modified = true;
         }
+      }
+      if (!Array.isArray(this.data.callbackRequests)) {
+        this.data.callbackRequests = [];
+        modified = true;
       }
       if (modified) {
         this.saveSync();
@@ -999,6 +1046,8 @@ class DatabaseManager {
     const totalEnquiries = this.data.enquiries.length;
     const newEnquiries = this.data.enquiries.filter(e => e.status === 'New').length;
     const unreadNotifications = this.data.notifications.filter(n => !n.isRead).length;
+    const callbackRequests = Array.isArray(this.data.callbackRequests) ? this.data.callbackRequests : [];
+    const newCallbackRequests = callbackRequests.filter(item => item.status === 'New').length;
     const publishedInsights = this.data.insights.filter(i => i.status === 'Published').length;
     const activeServices = this.data.services.filter(s => s.status === 'Published').length;
     const activeCareers = this.data.careers.filter(c => c.status === 'Active').length;
@@ -1007,6 +1056,7 @@ class DatabaseManager {
       totalEnquiries,
       newEnquiries,
       unreadNotifications,
+      newCallbackRequests,
       publishedInsights,
       activeServices,
       activeCareers
@@ -1100,6 +1150,82 @@ class DatabaseManager {
     this.data.notifications = this.data.notifications.filter(n => n.relatedId !== id);
     this.save();
     return this.data.enquiries.length < initialLen;
+  }
+
+  getCallbackRequests(filter = 'All') {
+    const list = Array.isArray(this.data.callbackRequests) ? [...this.data.callbackRequests] : [];
+    const filtered = filter && filter !== 'All'
+      ? list.filter(item => item.status === filter)
+      : list;
+    return filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+
+  getCallbackRequestById(id) {
+    return (this.data.callbackRequests || []).find(item => item.id === id) || null;
+  }
+
+  findRecentCallbackRequest({ mobileNormalized, clientRequestId, windowMs = 2 * 60 * 1000 }) {
+    const now = Date.now();
+    return (this.data.callbackRequests || []).find((item) => {
+      if (clientRequestId && item.clientRequestId && item.clientRequestId === clientRequestId) {
+        return true;
+      }
+      if (!mobileNormalized || item.mobileNormalized !== mobileNormalized) return false;
+      return now - new Date(item.createdAt).getTime() < windowMs;
+    }) || null;
+  }
+
+  createCallbackRequest(payload) {
+    if (!Array.isArray(this.data.callbackRequests)) {
+      this.data.callbackRequests = [];
+    }
+
+    const createdAt = new Date().toISOString();
+    const request = {
+      id: `cb-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      fullName: payload.fullName,
+      mobile: payload.mobile,
+      mobileNormalized: payload.mobileNormalized,
+      email: payload.email || '',
+      companyName: payload.companyName || '',
+      preferredTime: payload.preferredTime,
+      message: payload.message || '',
+      status: 'New',
+      clientRequestId: payload.clientRequestId || '',
+      createdAt,
+      updatedAt: createdAt
+    };
+
+    this.data.callbackRequests.unshift(request);
+    this.data.notifications.unshift({
+      id: `notif-${Date.now()}-${crypto.randomBytes(3).toString('hex')}`,
+      type: 'CALLBACK_REQUEST',
+      title: 'New Callback Request',
+      message: `Callback requested by ${request.fullName}.`,
+      relatedId: request.id,
+      customerName: request.fullName,
+      email: request.email,
+      phone: request.mobile,
+      company: request.companyName,
+      service: `Callback: ${request.preferredTime}`,
+      isRead: false,
+      createdAt
+    });
+    this.save();
+    return request;
+  }
+
+  updateCallbackRequest(id, updates) {
+    const index = (this.data.callbackRequests || []).findIndex(item => item.id === id);
+    if (index === -1) return null;
+    const allowedStatuses = ['New', 'Contacted', 'Completed', 'Cancelled'];
+    if (updates.status) {
+      if (!allowedStatuses.includes(updates.status)) return null;
+      this.data.callbackRequests[index].status = updates.status;
+    }
+    this.data.callbackRequests[index].updatedAt = new Date().toISOString();
+    this.save();
+    return this.data.callbackRequests[index];
   }
 
   // Notifications
@@ -1417,6 +1543,12 @@ class DatabaseManager {
     return this.data.websiteContent;
   }
 
+  getPublicWebsiteContent() {
+    const storedPhone = this.data.websiteContent?.contact?.phone || '';
+    const variants = collectPhoneVariants([storedPhone, '8237140776', '+91 8237140776', '+918237140776']);
+    return redactPublicValue(this.data.websiteContent, variants);
+  }
+
   updateWebsiteContent(section, updates, user = 'Admin') {
     if (!this.data.websiteContent[section]) {
       this.data.websiteContent[section] = {};
@@ -1434,12 +1566,13 @@ class DatabaseManager {
   // Global Admin Search
   globalSearch(query) {
     const q = (query || '').toLowerCase().trim();
-    if (!q) return { enquiries: [], services: [], solutions: [], industries: [], insights: [], careers: [] };
+    if (!q) return { enquiries: [], callbackRequests: [], services: [], solutions: [], industries: [], insights: [], careers: [] };
 
     const match = (text) => (text || '').toLowerCase().includes(q);
 
     return {
       enquiries: this.data.enquiries.filter(e => match(e.fullName) || match(e.companyName) || match(e.email) || match(e.service) || match(e.message)),
+      callbackRequests: (this.data.callbackRequests || []).filter(item => match(item.fullName) || match(item.companyName) || match(item.email) || match(item.mobile) || match(item.message)),
       services: this.data.services.filter(s => match(s.title) || match(s.shortDescription) || match(s.category)),
       solutions: this.data.solutions.filter(s => match(s.title) || match(s.tagline) || match(s.problem) || match(s.solution)),
       industries: this.data.industries.filter(i => match(i.title) || match(i.desc)),
@@ -1451,7 +1584,7 @@ class DatabaseManager {
   // Public Bundle (for instant public website loading)
   getPublicBundle() {
     return {
-      content: this.data.websiteContent,
+      content: this.getPublicWebsiteContent(),
       services: this.getServices(true),
       solutions: this.getSolutions(true),
       industries: this.getIndustries(true),

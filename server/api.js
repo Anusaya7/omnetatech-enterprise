@@ -1,4 +1,5 @@
 import { db } from './db.js';
+import { sendCallbackNotification } from './mail.js';
 
 // Rate limiter map for admin login attempts
 const loginAttempts = new Map(); // ip -> { count: number, lockedUntil: number }
@@ -87,6 +88,39 @@ function isValidPhone(phone) {
   if (!phone || typeof phone !== 'string') return false;
   const clean = phone.trim();
   return clean.length >= 6 && clean.length <= 30 && /^[0-9+()\s-]+$/.test(clean);
+}
+
+const CALLBACK_TIMES = ['Morning', 'Afternoon', 'Evening', 'Any Time'];
+const CALLBACK_STATUSES = ['New', 'Contacted', 'Completed', 'Cancelled'];
+
+function isValidCallbackMobile(phone) {
+  if (!phone || typeof phone !== 'string') return false;
+  const raw = phone.trim();
+  if (!raw || raw.length > 20) return false;
+  if (!/^[0-9+\s()-]+$/.test(raw)) return false;
+  let digits = raw.replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('91') && digits.length === 12) digits = digits.slice(2);
+  if (digits.startsWith('0') && digits.length === 11) digits = digits.slice(1);
+  if (/^[6-9]\d{9}$/.test(digits)) return true;
+  const intl = raw.replace(/\D/g, '');
+  return raw.startsWith('+') && intl.length >= 8 && intl.length <= 15;
+}
+
+function normalizeCallbackMobile(phone) {
+  let digits = String(phone || '').replace(/\D/g, '');
+  if (digits.startsWith('00')) digits = digits.slice(2);
+  if (digits.startsWith('91') && digits.length === 12) return digits.slice(2);
+  if (digits.startsWith('0') && digits.length === 11) return digits.slice(1);
+  return digits;
+}
+
+function publicCallbackResponse(request) {
+  return {
+    success: true,
+    message: 'Thank you for contacting OmNetaTech. Our team will get back to you shortly.',
+    requestId: request.id
+  };
 }
 
 const MAX_BODY_SIZE = 1024 * 1024; // 1 MB payload limit
@@ -247,7 +281,7 @@ export async function apiMiddleware(req, res, next) {
 
     // Public website content
     if (pathname === '/api/public/content' && method === 'GET') {
-      return sendJson(res, 200, db.getWebsiteContent());
+      return sendJson(res, 200, db.getPublicWebsiteContent());
     }
 
     // Public services
@@ -388,6 +422,74 @@ export async function apiMiddleware(req, res, next) {
       });
     }
 
+    if (pathname === '/api/callback-request' && method === 'POST') {
+      const clientIp = getClientIp(req);
+      const rateLimitCheck = checkSubmissionRateLimit(clientIp);
+      if (!rateLimitCheck.allowed) {
+        return sendJson(res, 429, {
+          error: `Too many submissions from your connection. Please wait ${rateLimitCheck.waitMinutes} minute(s) before trying again.`
+        });
+      }
+
+      const body = await parseBody(req);
+      const fullName = sanitizeText(body.fullName, 100);
+      const mobile = typeof body.mobile === 'string' ? body.mobile.trim().slice(0, 20) : '';
+      const email = typeof body.email === 'string' ? body.email.trim().slice(0, 120) : '';
+      const companyName = sanitizeText(body.companyName || '', 120);
+      const preferredTime = typeof body.preferredTime === 'string' && body.preferredTime.trim()
+        ? body.preferredTime.trim()
+        : 'Any Time';
+      const rawMessage = typeof body.message === 'string' ? body.message.trim() : '';
+      const clientRequestId = sanitizeText(body.clientRequestId || '', 80);
+
+      if (!fullName) {
+        return sendJson(res, 400, { error: 'Please enter your name.' });
+      }
+      if (!isValidCallbackMobile(mobile)) {
+        return sendJson(res, 400, { error: 'Please enter a valid mobile number.' });
+      }
+      if (email && !isValidEmail(email)) {
+        return sendJson(res, 400, { error: 'Please enter a valid email address.' });
+      }
+      if (typeof body.companyName === 'string' && body.companyName.trim().length > 120) {
+        return sendJson(res, 400, { error: 'Please keep the company name under 120 characters.' });
+      }
+      if (!CALLBACK_TIMES.includes(preferredTime)) {
+        return sendJson(res, 400, { error: 'Please select a valid callback time.' });
+      }
+      if (rawMessage.length > 2000) {
+        return sendJson(res, 400, { error: 'Please keep your message under 2000 characters.' });
+      }
+
+      const mobileNormalized = normalizeCallbackMobile(mobile);
+      const existing = db.findRecentCallbackRequest({ mobileNormalized, clientRequestId });
+      if (existing) {
+        return sendJson(res, 200, publicCallbackResponse(existing));
+      }
+
+      const request = db.createCallbackRequest({
+        fullName,
+        mobile,
+        mobileNormalized,
+        email: email.toLowerCase(),
+        companyName,
+        preferredTime,
+        message: sanitizeText(rawMessage, 2000),
+        clientRequestId
+      });
+
+      recordSubmission(clientIp);
+
+      const notifyTo = process.env.ADMIN_NOTIFY_EMAIL || db.getWebsiteContent()?.contact?.email || '';
+      try {
+        await sendCallbackNotification(request, notifyTo);
+      } catch (mailError) {
+        console.error('Callback notification email failed:', mailError.message);
+      }
+
+      return sendJson(res, 201, publicCallbackResponse(request));
+    }
+
     // Admin Login with Rate Limiting & Generic Failure Message
     if (pathname === '/api/admin/auth/login' && method === 'POST') {
       const clientIp = getClientIp(req);
@@ -521,6 +623,30 @@ export async function apiMiddleware(req, res, next) {
       if (method === 'DELETE') {
         const deleted = db.deleteEnquiry(enquiryId);
         return sendJson(res, 200, { success: deleted });
+      }
+    }
+
+    if (pathname === '/api/admin/callback-requests' && method === 'GET') {
+      const filter = urlObj.searchParams.get('filter') || 'All';
+      return sendJson(res, 200, db.getCallbackRequests(filter));
+    }
+
+    const callbackMatch = pathname.match(/^\/api\/admin\/callback-requests\/([^/]+)$/);
+    if (callbackMatch) {
+      const callbackId = decodeURIComponent(callbackMatch[1]);
+      if (method === 'GET') {
+        const request = db.getCallbackRequestById(callbackId);
+        if (!request) return sendJson(res, 404, { error: 'Callback request not found' });
+        return sendJson(res, 200, request);
+      }
+      if (method === 'PATCH' || method === 'PUT') {
+        const body = await parseBody(req);
+        if (!CALLBACK_STATUSES.includes(body.status)) {
+          return sendJson(res, 400, { error: 'Please select a valid status.' });
+        }
+        const updated = db.updateCallbackRequest(callbackId, { status: body.status });
+        if (!updated) return sendJson(res, 404, { error: 'Callback request not found' });
+        return sendJson(res, 200, updated);
       }
     }
 

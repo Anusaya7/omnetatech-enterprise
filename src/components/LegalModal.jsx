@@ -59,7 +59,7 @@ export default function LegalModal({ isOpen, type, onClose }) {
 
               <h4>5. Contact Us Regarding Privacy</h4>
               <p>
-                If you have questions regarding this Privacy Policy or wish to update your contact details, please contact us at <strong>omnetatech@gmail.com</strong> or call <strong>+91 8237140776</strong>.
+                If you have questions regarding this Privacy Policy or wish to update your contact details, please contact us at <strong>omnetatech@gmail.com</strong> or request a callback from the website.
               </p>
             </div>
           ) : (

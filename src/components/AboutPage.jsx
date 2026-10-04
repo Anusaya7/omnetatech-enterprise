@@ -1,6 +1,8 @@
 import { Target, Users, ShieldCheck, Heart, CheckCircle2, ArrowRight } from 'lucide-react';
+import { useCallbackModal } from '../context/CallbackModalContext';
 
 export default function AboutPage({ openConsultationModal }) {
+  const { openCallbackModal } = useCallbackModal();
   const whyCards = [
     {
       title: 'Business First',
@@ -138,15 +140,23 @@ export default function AboutPage({ openConsultationModal }) {
             <div className="badge badge-navy">India-Based Technology Company</div>
             <h2 className="banner-title">Ready to Discuss Your Technology Needs?</h2>
             <p className="banner-sub">
-              Contact our team directly at <strong>+91 8237140776</strong> or <strong>omnetatech@gmail.com</strong>.
+              Contact our team at <strong>omnetatech@gmail.com</strong>, or request a callback and we will get in touch.
             </p>
           </div>
-          <button 
-            className="btn-primary-blue banner-btn"
-            onClick={openConsultationModal}
-          >
-            Get a Free Consultation
-          </button>
+          <div className="banner-actions">
+            <button 
+              className="btn-primary-blue banner-btn"
+              onClick={openCallbackModal}
+            >
+              Request a Callback
+            </button>
+            <button 
+              className="btn-primary-blue banner-btn banner-btn-secondary"
+              onClick={openConsultationModal}
+            >
+              Get a Paid Consultation
+            </button>
+          </div>
         </div>
       </section>
 
@@ -348,9 +358,21 @@ export default function AboutPage({ openConsultationModal }) {
           color: #CBD5E1;
         }
 
+        .banner-actions {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+
         .banner-btn {
           padding: 14px 28px;
           font-size: 0.95rem;
+        }
+
+        .banner-btn-secondary {
+          background: transparent;
+          color: #FFFFFF;
+          border: 1px solid rgba(255, 255, 255, 0.45);
         }
 
         @media (max-width: 1024px) {
@@ -374,6 +396,7 @@ export default function AboutPage({ openConsultationModal }) {
             flex-direction: column;
             align-items: flex-start;
           }
+          .banner-actions,
           .banner-btn {
             width: 100%;
           }

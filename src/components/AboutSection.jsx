@@ -70,7 +70,7 @@ export default function AboutSection({ onReadMore, openConsultationModal }) {
             className="btn-primary-blue"
             onClick={openConsultationModal}
           >
-            <span>Get a Free Consultation</span>
+            <span>Get a Paid Consultation</span>
             <ArrowRight size={16} />
           </button>
           {onReadMore && (
